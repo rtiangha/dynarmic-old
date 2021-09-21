@@ -64,8 +64,7 @@ SigHandler sig_handler;
 SigHandler::SigHandler() {
     // Method below from dolphin.
 
-    constexpr std::size_t signal_stack_size =
-        static_cast<std::size_t>(std::max(SIGSTKSZ, 2 * 1024 * 1024));
+    const size_t signal_stack_size = std::max<size_t>(SIGSTKSZ, 2 * 1024 * 1024);
 
     stack_t signal_stack;
     signal_stack.ss_sp = malloc(signal_stack_size);
