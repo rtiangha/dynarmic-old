@@ -11,6 +11,10 @@ endif()
 # Add the module directory to the list of paths
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 12)
+    string(APPEND CMAKE_CXX_FLAGS " -fbracket-depth=1024")
+endif()
+
 # Arch detection
 include(DetectArchitecture)
 if (MSVC)
