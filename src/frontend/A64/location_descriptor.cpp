@@ -3,16 +3,12 @@
  * SPDX-License-Identifier: 0BSD
  */
 
-#include <ostream>
-#include <fmt/format.h>
-
 #include "frontend/A64/location_descriptor.h"
 
 namespace Dynarmic::A64 {
 
-std::ostream& operator<<(std::ostream& o, const LocationDescriptor& descriptor) {
-    o << fmt::format("{{{}, {}{}}}", descriptor.PC(), descriptor.FPCR().Value(), descriptor.SingleStepping() ? ", step" : "");
-    return o;
+std::string ToString(const LocationDescriptor& descriptor) {
+    return fmt::format("{{{}, {}{}}}", descriptor.PC(), descriptor.FPCR().Value(), descriptor.SingleStepping() ? ", step" : "");
 }
 
 } // namespace Dynarmic::A64

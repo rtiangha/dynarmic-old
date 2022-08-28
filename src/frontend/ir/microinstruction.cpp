@@ -5,8 +5,6 @@
 
 #include <algorithm>
 
-#include <fmt/ostream.h>
-
 #include "common/assert.h"
 #include "frontend/ir/microinstruction.h"
 #include "frontend/ir/opcodes.h"

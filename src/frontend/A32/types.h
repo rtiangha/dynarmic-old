@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <iosfwd>
 #include <string>
 #include <utility>
 
+#include <fmt/format.h>
 #include <dynarmic/A32/coprocessor_util.h>
 
 #include "common/assert.h"
@@ -61,11 +61,6 @@ const char* RegToString(Reg reg);
 const char* ExtRegToString(ExtReg reg);
 const char* CoprocRegToString(CoprocReg reg);
 std::string RegListToString(RegList reg_list);
-
-std::ostream& operator<<(std::ostream& o, Reg reg);
-std::ostream& operator<<(std::ostream& o, ExtReg reg);
-std::ostream& operator<<(std::ostream& o, CoprocReg reg);
-std::ostream& operator<<(std::ostream& o, RegList reg_list);
 
 constexpr bool IsSingleExtReg(ExtReg reg) {
     return reg >= ExtReg::S0 && reg <= ExtReg::S31;
@@ -138,3 +133,35 @@ inline ExtReg ToVector(bool Q, size_t base, bool bit) {
 }
 
 } // namespace Dynarmic::A32
+
+template<>
+struct fmt::formatter<Dynarmic::A32::Reg> : fmt::formatter<const char*> {
+    template<typename FormatContext>
+    auto format(Dynarmic::A32::Reg reg, FormatContext& ctx) const {
+        return formatter<const char*>::format(Dynarmic::A32::RegToString(reg), ctx);
+    }
+};
+
+template<>
+struct fmt::formatter<Dynarmic::A32::ExtReg> : fmt::formatter<const char*> {
+    template<typename FormatContext>
+    auto format(Dynarmic::A32::ExtReg reg, FormatContext& ctx) const {
+        return formatter<const char*>::format(Dynarmic::A32::ExtRegToString(reg), ctx);
+    }
+};
+
+template<>
+struct fmt::formatter<Dynarmic::A32::CoprocReg> : fmt::formatter<const char*> {
+    template<typename FormatContext>
+    auto format(Dynarmic::A32::CoprocReg reg, FormatContext& ctx) const {
+        return formatter<const char*>::format(Dynarmic::A32::CoprocRegToString(reg), ctx);
+    }
+};
+
+template<>
+struct fmt::formatter<Dynarmic::A32::RegList> : fmt::formatter<std::string> {
+    template<typename FormatContext>
+    auto format(Dynarmic::A32::RegList reg_list, FormatContext& ctx) const {
+        return formatter<std::string>::format(Dynarmic::A32::RegListToString(reg_list), ctx);
+    }
+};
