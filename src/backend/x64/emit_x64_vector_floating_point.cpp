@@ -1170,6 +1170,8 @@ void EmitX64::EmitFPVectorRecipStepFused64(EmitContext& ctx, IR::Inst* inst) {
 
 template<size_t fsize>
 void EmitFPVectorRoundInt(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
+    using FPT = mp::unsigned_integer_of_size<fsize>;
+
     const auto rounding = static_cast<FP::RoundingMode>(inst->GetArg(1).GetU8());
     const bool exact = inst->GetArg(2).GetU1();
 
@@ -1209,7 +1211,6 @@ void EmitFPVectorRoundInt(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
 
     static const auto lut = Common::GenerateLookupTableFromList(
         [](auto arg) {
-            using FPT = mp::unsigned_integer_of_size<fsize>;
             return std::pair{
                 mp::lower_to_tuple_v<decltype(arg)>,
                 Common::FptrCast(
@@ -1355,6 +1356,8 @@ void EmitX64::EmitFPVectorSub64(EmitContext& ctx, IR::Inst* inst) {
 
 template<size_t fsize, bool unsigned_>
 void EmitFPVectorToFixed(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
+    using FPT = mp::unsigned_integer_of_size<fsize>;
+
     const size_t fbits = inst->GetArg(1).GetU8();
     const auto rounding = static_cast<FP::RoundingMode>(inst->GetArg(2).GetU8());
 
@@ -1443,7 +1446,6 @@ void EmitFPVectorToFixed(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
                 // Saturate to max
                 FCODE(orp)(src, exceed_unsigned);
             } else {
-                using FPT = mp::unsigned_integer_of_size<fsize>;  // WORKAROUND: For issue 678 on MSVC
                 constexpr u64 integer_max = static_cast<FPT>(std::numeric_limits<std::conditional_t<unsigned_, FPT, std::make_signed_t<FPT>>>::max());
 
                 code.movaps(xmm0, GetVectorOf<fsize, float_upper_limit_signed>(code));
@@ -1468,7 +1470,6 @@ void EmitFPVectorToFixed(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
 
     static const auto lut = Common::GenerateLookupTableFromList(
         [](auto arg) {
-            using FPT = mp::unsigned_integer_of_size<fsize>;  // WORKAROUND: For issue 678 on MSVC
             return std::pair{
                 mp::lower_to_tuple_v<decltype(arg)>,
                 Common::FptrCast(

@@ -992,8 +992,8 @@ void ARM64XEmitter::B(CCFlags cond, const void* ptr) {
     distance >>= 2;
 
     ASSERT_MSG(IsInRangeImm19(distance),
-               "%s: Received too large distance: %p->%p %" PRIi64 " %" PRIx64, __func__, m_code,
-               ptr, distance, distance);
+               "%s: Received too large distance: %p->%p %" PRIi64 " %" PRIx64, __func__, fmt::ptr(m_code),
+               fmt::ptr(ptr), distance, distance);
     Write32((0x54 << 24) | (MaskImm19(distance) << 5) | cond);
 }
 
@@ -1959,7 +1959,7 @@ void ARM64FloatEmitter::EmitLoadStoreImmediate(u8 size, u32 opc, IndexType type,
         ASSERT_MSG(!(imm & ((size - 1) >> 3)),
                    "%s(INDEX_UNSIGNED) immediate offset must be aligned to size! "
                    "(%d) (%p)",
-                   __func__, imm, m_emit->GetCodePtr());
+                   __func__, imm, fmt::ptr(m_emit->GetCodePtr()));
         ASSERT_MSG(imm >= 0, "%s(INDEX_UNSIGNED) immediate offset must be positive!", __func__);
         if (size == 16)
             imm >>= 1;
