@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: 0BSD
  */
 
-#include <xbyak.h>
+#include <xbyak/xbyak.h>
 
 #include "backend/x64/hostloc.h"
 

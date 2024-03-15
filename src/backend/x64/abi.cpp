@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <xbyak.h>
+#include <xbyak/xbyak.h>
 
 #include "backend/x64/abi.h"
 #include "backend/x64/block_of_code.h"

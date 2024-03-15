@@ -8,7 +8,7 @@
 #include <utility>
 
 #include <fmt/ostream.h>
-#include <xbyak.h>
+#include <xbyak/xbyak.h>
 
 #include "backend/x64/abi.h"
 #include "backend/x64/reg_alloc.h"

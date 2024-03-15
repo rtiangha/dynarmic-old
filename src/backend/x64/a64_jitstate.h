@@ -7,7 +7,7 @@
 
 #include <array>
 
-#include <xbyak.h>
+#include <xbyak/xbyak.h>
 
 #include "backend/x64/nzcv_util.h"
 #include "common/common_types.h"

@@ -6,7 +6,7 @@
 #include <array>
 #include <cstring>
 
-#include <xbyak.h>
+#include <xbyak/xbyak.h>
 
 #include "backend/x64/a32_jitstate.h"
 #include "backend/x64/abi.h"
