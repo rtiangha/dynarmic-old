@@ -73,11 +73,12 @@ bool ArmTranslatorVisitor::asimd_VCNT(bool D, size_t sz, size_t Vd, bool Q, bool
     return true;
 }
 
-bool ArmTranslatorVisitor::asimd_VNEG(bool D, size_t sz, size_t Vd, bool F, bool Q, bool M, size_t Vm) {
+bool ArmTranslatorVisitor::asimd_VNEG(bool D, size_t sz, size_t Vd, bool F, bool Q, bool M,
+                                      size_t Vm) {
     if (sz == 0b11 || (F && sz != 0b10)) {
         return UndefinedInstruction();
     }
-    
+
     if (Q && (Common::Bit<0>(Vd) || Common::Bit<0>(Vm))) {
         return UndefinedInstruction();
     }

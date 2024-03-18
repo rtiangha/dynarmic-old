@@ -7,7 +7,8 @@
 
 namespace Dynarmic::A64 {
 namespace {
-bool FPCompare(TranslatorVisitor& v, Imm<2> type, Vec Vm, Cond cond, Vec Vn, Imm<4> nzcv, bool exc_on_qnan) {
+bool FPCompare(TranslatorVisitor& v, Imm<2> type, Vec Vm, Cond cond, Vec Vn, Imm<4> nzcv,
+               bool exc_on_qnan) {
     const auto datasize = FPGetDataSize(type);
     if (!datasize || *datasize == 16) {
         return v.UnallocatedEncoding();

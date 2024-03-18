@@ -9,7 +9,8 @@
 
 namespace Dynarmic::Common {
 
-Pool::Pool(size_t object_size, size_t initial_pool_size) : object_size(object_size), slab_size(initial_pool_size) {
+Pool::Pool(size_t object_size, size_t initial_pool_size)
+    : object_size(object_size), slab_size(initial_pool_size) {
     AllocateNewSlab();
 }
 

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "common/common_types.h"
 #include "common/bit_util.h"
+#include "common/common_types.h"
 #include "frontend/ir/cond.h"
 
 namespace Dynarmic::A32 {

@@ -12,8 +12,8 @@
 
 #include "backend/A64/callback.h"
 #include "backend/A64/constant_pool.h"
-#include "backend/A64/jitstate_info.h"
 #include "backend/A64/emitter/a64_emitter.h"
+#include "backend/A64/jitstate_info.h"
 #include "common/common_types.h"
 
 namespace Dynarmic::BackendA64 {
@@ -32,7 +32,6 @@ public:
     BlockOfCode(RunCodeCallbacks cb, JitStateInfo jsi);
     BlockOfCode(const BlockOfCode&) = delete;
 
-
     /// Call when external emitters have finished emitting their preludes.
     void PreludeComplete();
 
@@ -43,7 +42,8 @@ public:
 
     /// Clears this block of code and resets code pointer to beginning.
     void ClearCache();
-    /// Calculates how much space is remaining to use. This is the minimum of near code and far code.
+    /// Calculates how much space is remaining to use. This is the minimum of near code and far
+    /// code.
     size_t SpaceRemaining() const;
 
     /// Runs emulated code from code_ptr.
@@ -72,7 +72,8 @@ public:
     void PatchConstPool();
 
     /// Far code sits far away from the near code. Execution remains primarily in near code.
-    /// "Cold" / Rarely executed instructions sit in far code, so the CPU doesn't fetch them unless necessary.
+    /// "Cold" / Rarely executed instructions sit in far code, so the CPU doesn't fetch them unless
+    /// necessary.
     void SwitchToFarCode();
     void SwitchToNearCode();
 
@@ -117,7 +118,9 @@ public:
 
     // bool DoesCpuSupport(Xbyak::util::Cpu::Type type) const;
 
-    JitStateInfo GetJitStateInfo() const { return jsi; }
+    JitStateInfo GetJitStateInfo() const {
+        return jsi;
+    }
 
 private:
     RunCodeCallbacks cb;
@@ -133,7 +136,7 @@ private:
     CodePtr near_code_ptr;
     CodePtr far_code_ptr;
 
-    using RunCodeFuncType = void(*)(void*, CodePtr);
+    using RunCodeFuncType = void (*)(void*, CodePtr);
     RunCodeFuncType run_code = nullptr;
     RunCodeFuncType step_code = nullptr;
     static constexpr size_t FPSCR_ALREADY_EXITED = 1 << 0;
@@ -141,7 +144,7 @@ private:
     std::array<const void*, 4> return_from_run_code;
     void GenRunCode();
 
-    //Xbyak::util::Cpu cpu_info;
+    // Xbyak::util::Cpu cpu_info;
 };
 
 } // namespace Dynarmic::BackendA64

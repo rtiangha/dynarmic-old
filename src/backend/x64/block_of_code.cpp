@@ -15,9 +15,9 @@
 #include "common/assert.h"
 
 #ifdef _WIN32
-    #include <windows.h>
+#include <windows.h>
 #else
-    #include <sys/mman.h>
+#include <sys/mman.h>
 #endif
 
 namespace Dynarmic::Backend::X64 {
@@ -28,7 +28,9 @@ const Xbyak::Reg64 BlockOfCode::ABI_PARAM1 = Xbyak::util::rcx;
 const Xbyak::Reg64 BlockOfCode::ABI_PARAM2 = Xbyak::util::rdx;
 const Xbyak::Reg64 BlockOfCode::ABI_PARAM3 = Xbyak::util::r8;
 const Xbyak::Reg64 BlockOfCode::ABI_PARAM4 = Xbyak::util::r9;
-const std::array<Xbyak::Reg64, 4> BlockOfCode::ABI_PARAMS = {BlockOfCode::ABI_PARAM1, BlockOfCode::ABI_PARAM2, BlockOfCode::ABI_PARAM3, BlockOfCode::ABI_PARAM4};
+const std::array<Xbyak::Reg64, 4> BlockOfCode::ABI_PARAMS = {
+    BlockOfCode::ABI_PARAM1, BlockOfCode::ABI_PARAM2, BlockOfCode::ABI_PARAM3,
+    BlockOfCode::ABI_PARAM4};
 #else
 const Xbyak::Reg64 BlockOfCode::ABI_RETURN = Xbyak::util::rax;
 const Xbyak::Reg64 BlockOfCode::ABI_RETURN2 = Xbyak::util::rdx;
@@ -38,7 +40,9 @@ const Xbyak::Reg64 BlockOfCode::ABI_PARAM3 = Xbyak::util::rdx;
 const Xbyak::Reg64 BlockOfCode::ABI_PARAM4 = Xbyak::util::rcx;
 const Xbyak::Reg64 BlockOfCode::ABI_PARAM5 = Xbyak::util::r8;
 const Xbyak::Reg64 BlockOfCode::ABI_PARAM6 = Xbyak::util::r9;
-const std::array<Xbyak::Reg64, 6> BlockOfCode::ABI_PARAMS = {BlockOfCode::ABI_PARAM1, BlockOfCode::ABI_PARAM2, BlockOfCode::ABI_PARAM3, BlockOfCode::ABI_PARAM4, BlockOfCode::ABI_PARAM5, BlockOfCode::ABI_PARAM6};
+const std::array<Xbyak::Reg64, 6> BlockOfCode::ABI_PARAMS = {
+    BlockOfCode::ABI_PARAM1, BlockOfCode::ABI_PARAM2, BlockOfCode::ABI_PARAM3,
+    BlockOfCode::ABI_PARAM4, BlockOfCode::ABI_PARAM5, BlockOfCode::ABI_PARAM6};
 #endif
 
 namespace {
@@ -50,7 +54,9 @@ constexpr size_t CONSTANT_POOL_SIZE = 2 * 1024 * 1024;
 class CustomXbyakAllocator : public Xbyak::Allocator {
 public:
 #ifdef DYNARMIC_ENABLE_NO_EXECUTE_SUPPORT
-    bool useProtect() const override { return false; }
+    bool useProtect() const override {
+        return false;
+    }
 #endif
 };
 
@@ -61,7 +67,8 @@ CustomXbyakAllocator s_allocator;
 void ProtectMemory(const void* base, size_t size, bool is_executable) {
 #ifdef _WIN32
     DWORD oldProtect = 0;
-    VirtualProtect(const_cast<void*>(base), size, is_executable ? PAGE_EXECUTE_READ : PAGE_READWRITE, &oldProtect);
+    VirtualProtect(const_cast<void*>(base), size,
+                   is_executable ? PAGE_EXECUTE_READ : PAGE_READWRITE, &oldProtect);
 #else
     static const size_t pageSize = sysconf(_SC_PAGESIZE);
     const size_t iaddr = reinterpret_cast<size_t>(base);
@@ -74,12 +81,10 @@ void ProtectMemory(const void* base, size_t size, bool is_executable) {
 
 } // anonymous namespace
 
-BlockOfCode::BlockOfCode(RunCodeCallbacks cb, JitStateInfo jsi, std::function<void(BlockOfCode&)> rcp)
-        : Xbyak::CodeGenerator(TOTAL_CODE_SIZE, nullptr, &s_allocator)
-        , cb(std::move(cb))
-        , jsi(jsi)
-        , constant_pool(*this, CONSTANT_POOL_SIZE)
-{
+BlockOfCode::BlockOfCode(RunCodeCallbacks cb, JitStateInfo jsi,
+                         std::function<void(BlockOfCode&)> rcp)
+    : Xbyak::CodeGenerator(TOTAL_CODE_SIZE, nullptr, &s_allocator), cb(std::move(cb)), jsi(jsi),
+      constant_pool(*this, CONSTANT_POOL_SIZE) {
     EnableWriting();
     GenRunCode(rcp);
 }
@@ -369,11 +374,11 @@ bool BlockOfCode::HasAVX2() const {
 
 bool BlockOfCode::HasAVX512_Skylake() const {
     // The feature set formerly known as AVX3.2. (Introduced with Skylake.)
-    return DoesCpuSupport(Xbyak::util::Cpu::tAVX512F)
-        && DoesCpuSupport(Xbyak::util::Cpu::tAVX512CD)
-        && DoesCpuSupport(Xbyak::util::Cpu::tAVX512BW)
-        && DoesCpuSupport(Xbyak::util::Cpu::tAVX512DQ)
-        && DoesCpuSupport(Xbyak::util::Cpu::tAVX512VL);
+    return DoesCpuSupport(Xbyak::util::Cpu::tAVX512F) &&
+           DoesCpuSupport(Xbyak::util::Cpu::tAVX512CD) &&
+           DoesCpuSupport(Xbyak::util::Cpu::tAVX512BW) &&
+           DoesCpuSupport(Xbyak::util::Cpu::tAVX512DQ) &&
+           DoesCpuSupport(Xbyak::util::Cpu::tAVX512VL);
 }
 
 bool BlockOfCode::HasAVX512_BITALG() const {

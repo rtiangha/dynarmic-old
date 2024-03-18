@@ -16,13 +16,13 @@
 
 namespace Dynarmic::Backend::X64 {
 
-#define MAYBE_AVX(OPCODE, ...)                                          \
-    [&] {                                                               \
-        if (code.HasAVX()) {                                            \
-            code.v##OPCODE(__VA_ARGS__);                                \
-        } else {                                                        \
-            code.OPCODE(__VA_ARGS__);                                   \
-        }                                                               \
+#define MAYBE_AVX(OPCODE, ...)                                                                     \
+    [&] {                                                                                          \
+        if (code.HasAVX()) {                                                                       \
+            code.v##OPCODE(__VA_ARGS__);                                                           \
+        } else {                                                                                   \
+            code.OPCODE(__VA_ARGS__);                                                              \
+        }                                                                                          \
     }()
 
 static bool CanExchange(HostLoc a, HostLoc b) {
@@ -79,7 +79,8 @@ bool HostLocInfo::IsEmpty() const {
 }
 
 bool HostLocInfo::IsLastUse() const {
-    return is_being_used_count == 0 && current_references == 1 && accumulated_uses + 1 == total_uses;
+    return is_being_used_count == 0 && current_references == 1 &&
+           accumulated_uses + 1 == total_uses;
 }
 
 void HostLocInfo::ReadLock() {
@@ -116,7 +117,9 @@ void HostLocInfo::ReleaseAll() {
     accumulated_uses += current_references;
     current_references = 0;
 
-    ASSERT(total_uses == std::accumulate(values.begin(), values.end(), size_t(0), [](size_t sum, IR::Inst* inst) { return sum + inst->UseCount(); }));
+    ASSERT(total_uses ==
+           std::accumulate(values.begin(), values.end(), size_t(0),
+                           [](size_t sum, IR::Inst* inst) { return sum + inst->UseCount(); }));
 
     if (total_uses == accumulated_uses) {
         values.clear();
@@ -223,13 +226,11 @@ bool Argument::IsInMemory() const {
     return HostLocIsSpill(*reg_alloc.ValueLocation(value.GetInst()));
 }
 
-RegAlloc::RegAlloc(BlockOfCode& code, size_t num_spills, std::function<Xbyak::Address(HostLoc)> spill_to_addr, std::vector<HostLoc> gpr_order, std::vector<HostLoc> xmm_order)
-    : gpr_order(gpr_order)
-    , xmm_order(xmm_order)
-    , hostloc_info(NonSpillHostLocCount + num_spills)
-    , code(code)
-    , spill_to_addr(std::move(spill_to_addr))
-{}
+RegAlloc::RegAlloc(BlockOfCode& code, size_t num_spills,
+                   std::function<Xbyak::Address(HostLoc)> spill_to_addr,
+                   std::vector<HostLoc> gpr_order, std::vector<HostLoc> xmm_order)
+    : gpr_order(gpr_order), xmm_order(xmm_order), hostloc_info(NonSpillHostLocCount + num_spills),
+      code(code), spill_to_addr(std::move(spill_to_addr)) {}
 
 RegAlloc::ArgumentInfo RegAlloc::GetArgumentInfo(IR::Inst* inst) {
     ArgumentInfo ret = {Argument{*this}, Argument{*this}, Argument{*this}, Argument{*this}};
@@ -286,7 +287,9 @@ void RegAlloc::UseScratch(Argument& arg, HostLoc host_loc) {
 
 void RegAlloc::DefineValue(IR::Inst* inst, const Xbyak::Reg& reg) {
     ASSERT(reg.getKind() == Xbyak::Operand::XMM || reg.getKind() == Xbyak::Operand::REG);
-    const auto hostloc = static_cast<HostLoc>(reg.getIdx() + static_cast<size_t>(reg.getKind() == Xbyak::Operand::XMM ? HostLoc::XMM0 : HostLoc::RAX));
+    const auto hostloc = static_cast<HostLoc>(
+        reg.getIdx() +
+        static_cast<size_t>(reg.getKind() == Xbyak::Operand::XMM ? HostLoc::XMM0 : HostLoc::RAX));
     DefineValueImpl(inst, hostloc);
 }
 
@@ -298,7 +301,9 @@ void RegAlloc::DefineValue(IR::Inst* inst, Argument& arg) {
 
 void RegAlloc::Release(const Xbyak::Reg& reg) {
     ASSERT(reg.getKind() == Xbyak::Operand::XMM || reg.getKind() == Xbyak::Operand::REG);
-    const auto hostloc = static_cast<HostLoc>(reg.getIdx() + static_cast<size_t>(reg.getKind() == Xbyak::Operand::XMM ? HostLoc::XMM0 : HostLoc::RAX));
+    const auto hostloc = static_cast<HostLoc>(
+        reg.getIdx() +
+        static_cast<size_t>(reg.getKind() == Xbyak::Operand::XMM ? HostLoc::XMM0 : HostLoc::RAX));
     LocInfo(hostloc).ReleaseOne();
 }
 
@@ -327,7 +332,9 @@ HostLoc RegAlloc::UseImpl(IR::Value use_value, const std::vector<HostLoc>& desir
     const HostLoc current_location = *ValueLocation(use_inst);
     const size_t max_bit_width = LocInfo(current_location).GetMaxBitWidth();
 
-    const bool can_use_current_location = std::find(desired_locations.begin(), desired_locations.end(), current_location) != desired_locations.end();
+    const bool can_use_current_location =
+        std::find(desired_locations.begin(), desired_locations.end(), current_location) !=
+        desired_locations.end();
     if (can_use_current_location) {
         LocInfo(current_location).ReadLock();
         return current_location;
@@ -350,7 +357,8 @@ HostLoc RegAlloc::UseImpl(IR::Value use_value, const std::vector<HostLoc>& desir
     return destination_location;
 }
 
-HostLoc RegAlloc::UseScratchImpl(IR::Value use_value, const std::vector<HostLoc>& desired_locations) {
+HostLoc RegAlloc::UseScratchImpl(IR::Value use_value,
+                                 const std::vector<HostLoc>& desired_locations) {
     if (use_value.IsImmediate()) {
         return LoadImmediate(use_value, ScratchImpl(desired_locations));
     }
@@ -359,7 +367,9 @@ HostLoc RegAlloc::UseScratchImpl(IR::Value use_value, const std::vector<HostLoc>
     const HostLoc current_location = *ValueLocation(use_inst);
     const size_t bit_width = GetBitWidth(use_inst->GetType());
 
-    const bool can_use_current_location = std::find(desired_locations.begin(), desired_locations.end(), current_location) != desired_locations.end();
+    const bool can_use_current_location =
+        std::find(desired_locations.begin(), desired_locations.end(), current_location) !=
+        desired_locations.end();
     if (can_use_current_location && !LocInfo(current_location).IsLocked()) {
         if (!LocInfo(current_location).IsLastUse()) {
             MoveOutOfTheWay(current_location);
@@ -387,8 +397,10 @@ void RegAlloc::HostCall(IR::Inst* result_def, std::optional<Argument::copyable_r
                         std::optional<Argument::copyable_reference> arg2,
                         std::optional<Argument::copyable_reference> arg3) {
     constexpr size_t args_count = 4;
-    constexpr std::array<HostLoc, args_count> args_hostloc = { ABI_PARAM1, ABI_PARAM2, ABI_PARAM3, ABI_PARAM4 };
-    const std::array<std::optional<Argument::copyable_reference>, args_count> args = { arg0, arg1, arg2, arg3 };
+    constexpr std::array<HostLoc, args_count> args_hostloc = {ABI_PARAM1, ABI_PARAM2, ABI_PARAM3,
+                                                              ABI_PARAM4};
+    const std::array<std::optional<Argument::copyable_reference>, args_count> args = {arg0, arg1,
+                                                                                      arg2, arg3};
 
     static const std::vector<HostLoc> other_caller_save = [args_hostloc]() {
         std::vector<HostLoc> ret(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end());
@@ -410,7 +422,8 @@ void RegAlloc::HostCall(IR::Inst* result_def, std::optional<Argument::copyable_r
         if (args[i]) {
             UseScratch(*args[i], args_hostloc[i]);
 #if defined(__llvm__) && !defined(_WIN32)
-            // LLVM puts the burden of zero-extension of 8 and 16 bit values on the caller instead of the callee
+            // LLVM puts the burden of zero-extension of 8 and 16 bit values on the caller instead
+            // of the callee
             const Xbyak::Reg64 reg = HostLocToReg64(args_hostloc[i]);
             switch (args[i]->get().GetType()) {
             case IR::Type::U8:
@@ -445,25 +458,26 @@ void RegAlloc::EndOfAllocScope() {
 }
 
 void RegAlloc::AssertNoMoreUses() {
-    ASSERT(std::all_of(hostloc_info.begin(), hostloc_info.end(), [](const auto& i) { return i.IsEmpty(); }));
+    ASSERT(std::all_of(hostloc_info.begin(), hostloc_info.end(),
+                       [](const auto& i) { return i.IsEmpty(); }));
 }
 
 HostLoc RegAlloc::SelectARegister(const std::vector<HostLoc>& desired_locations) const {
     std::vector<HostLoc> candidates = desired_locations;
 
     // Find all locations that have not been allocated..
-    const auto allocated_locs = std::partition(candidates.begin(), candidates.end(), [this](auto loc) {
-        return !this->LocInfo(loc).IsLocked();
-    });
+    const auto allocated_locs =
+        std::partition(candidates.begin(), candidates.end(),
+                       [this](auto loc) { return !this->LocInfo(loc).IsLocked(); });
     candidates.erase(allocated_locs, candidates.end());
     ASSERT_MSG(!candidates.empty(), "All candidate registers have already been allocated");
 
     // Selects the best location out of the available locations.
-    // TODO: Actually do LRU or something. Currently we just try to pick something without a value if possible.
+    // TODO: Actually do LRU or something. Currently we just try to pick something without a value
+    // if possible.
 
-    std::partition(candidates.begin(), candidates.end(), [this](auto loc) {
-        return this->LocInfo(loc).IsEmpty();
-    });
+    std::partition(candidates.begin(), candidates.end(),
+                   [this](auto loc) { return this->LocInfo(loc).IsEmpty(); });
 
     return candidates.front();
 }

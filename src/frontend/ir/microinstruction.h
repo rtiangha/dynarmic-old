@@ -83,7 +83,8 @@ public:
     bool ReadsFromFPSRCumulativeExceptionBits() const;
     /// Determines whether or not this instruction writes to the FPSR cumulative exception bits.
     bool WritesToFPSRCumulativeExceptionBits() const;
-    /// Determines whether or not this instruction both reads from and writes to the FPSR cumulative exception bits.
+    /// Determines whether or not this instruction both reads from and writes to the FPSR cumulative
+    /// exception bits.
     bool ReadsFromAndWritesToFPSRCumulativeExceptionBits() const;
 
     /// Determines whether or not this instruction reads from the FPSR cumulative saturation bit.
@@ -116,8 +117,12 @@ public:
     /// Determines if all arguments of this instruction are immediates.
     bool AreAllArgsImmediates() const;
 
-    size_t UseCount() const { return use_count; }
-    bool HasUses() const { return use_count > 0; }
+    size_t UseCount() const {
+        return use_count;
+    }
+    bool HasUses() const {
+        return use_count > 0;
+    }
 
     /// Determines if there is a pseudo-operation associated with this instruction.
     bool HasAssociatedPseudoOperation() const;
@@ -125,7 +130,9 @@ public:
     Inst* GetAssociatedPseudoOperation(Opcode opcode);
 
     /// Get the microop this microinstruction represents.
-    Opcode GetOpcode() const { return op; }
+    Opcode GetOpcode() const {
+        return op;
+    }
     /// Get the type this instruction returns.
     Type GetType() const;
     /// Get the number of arguments this instruction has.

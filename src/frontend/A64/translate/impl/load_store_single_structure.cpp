@@ -9,8 +9,8 @@
 
 namespace Dynarmic::A64 {
 
-static bool SharedDecodeAndOperation(TranslatorVisitor& v, bool wback, IR::MemOp memop,
-                                     bool Q, bool S, bool R, bool replicate, std::optional<Reg> Rm,
+static bool SharedDecodeAndOperation(TranslatorVisitor& v, bool wback, IR::MemOp memop, bool Q,
+                                     bool S, bool R, bool replicate, std::optional<Reg> Rm,
                                      Imm<3> opcode, Imm<2> size, Reg Rn, Vec Vt) {
     const size_t selem = (opcode.Bit<0>() << 1 | u32{R}) + 1;
     size_t scale = opcode.Bits<1, 2>();
@@ -24,7 +24,7 @@ static bool SharedDecodeAndOperation(TranslatorVisitor& v, bool wback, IR::MemOp
         if (size.Bit<0>()) {
             return v.UnallocatedEncoding();
         }
-        index  = Q << 2 | S << 1 | u32{size.Bit<1>()};
+        index = Q << 2 | S << 1 | u32{size.Bit<1>()};
         break;
     case 2:
         if (size.Bit<1>()) {
@@ -103,122 +103,138 @@ static bool SharedDecodeAndOperation(TranslatorVisitor& v, bool wback, IR::MemOp
     return true;
 }
 
-bool TranslatorVisitor::LD1_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD1_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, S, false, false, {},
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::LD1_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD1_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, S, false, false, Rm,
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD1R_1(bool Q, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, false, true,
-                                    {}, Imm<3>{0b110}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, false, true, {},
+                                    Imm<3>{0b110}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD1R_2(bool Q, Reg Rm, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, false, true,
-                                    Rm, Imm<3>{0b110}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, false, true, Rm,
+                                    Imm<3>{0b110}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::LD2_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD2_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, S, true, false, {},
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::LD2_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD2_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, S, true, false, Rm,
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD2R_1(bool Q, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, true, true,
-                                    {}, Imm<3>{0b110}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, true, true, {},
+                                    Imm<3>{0b110}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD2R_2(bool Q, Reg Rm, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, true, true,
-                                    Rm, Imm<3>{0b110}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, true, true, Rm,
+                                    Imm<3>{0b110}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::LD3_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD3_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, S, false, false, {},
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::LD3_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD3_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, S, false, false, Rm,
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD3R_1(bool Q, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, false, true,
-                                    {}, Imm<3>{0b111}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, false, true, {},
+                                    Imm<3>{0b111}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD3R_2(bool Q, Reg Rm, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, false, true,
-                                    Rm, Imm<3>{0b111}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, false, true, Rm,
+                                    Imm<3>{0b111}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::LD4_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD4_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, S, true, false, {},
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::LD4_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LD4_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, S, true, false, Rm,
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD4R_1(bool Q, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, true, true,
-                                    {}, Imm<3>{0b111}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, false, IR::MemOp::LOAD, Q, false, true, true, {},
+                                    Imm<3>{0b111}, size, Rn, Vt);
 }
 
 bool TranslatorVisitor::LD4R_2(bool Q, Reg Rm, Imm<2> size, Reg Rn, Vec Vt) {
-    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, true, true,
-                                    Rm, Imm<3>{0b111}, size, Rn, Vt);
+    return SharedDecodeAndOperation(*this, true, IR::MemOp::LOAD, Q, false, true, true, Rm,
+                                    Imm<3>{0b111}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST1_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST1_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::STORE, Q, S, false, false, {},
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST1_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST1_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::STORE, Q, S, false, false, Rm,
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST2_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST2_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::STORE, Q, S, true, false, {},
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST2_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST2_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::STORE, Q, S, true, false, Rm,
                                     Imm<3>{upper_opcode.ZeroExtend() << 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST3_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST3_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::STORE, Q, S, false, false, {},
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST3_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST3_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::STORE, Q, S, false, false, Rm,
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST4_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST4_sngl_1(bool Q, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, false, IR::MemOp::STORE, Q, S, true, false, {},
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }
 
-bool TranslatorVisitor::ST4_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::ST4_sngl_2(bool Q, Reg Rm, Imm<2> upper_opcode, bool S, Imm<2> size, Reg Rn,
+                                   Vec Vt) {
     return SharedDecodeAndOperation(*this, true, IR::MemOp::STORE, Q, S, true, false, Rm,
                                     Imm<3>{(upper_opcode.ZeroExtend() << 1) | 1}, size, Rn, Vt);
 }

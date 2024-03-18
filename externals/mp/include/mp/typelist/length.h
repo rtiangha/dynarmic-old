@@ -11,11 +11,11 @@
 namespace mp {
 
 /// Length of list L
-template<class L>
+template <class L>
 using length = apply<argument_count, L>;
 
 /// Length of list L
-template<class L>
+template <class L>
 constexpr auto length_v = length<L>::value;
 
 } // namespace mp

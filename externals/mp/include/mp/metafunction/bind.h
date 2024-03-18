@@ -8,9 +8,9 @@
 namespace mp {
 
 /// Binds the first sizeof...(A) arguments of metafunction F with arguments A
-template<template<class...> class F, class... As>
+template <template <class...> class F, class... As>
 struct bind {
-    template<class... Rs>
+    template <class... Rs>
     using type = F<As..., Rs...>;
 };
 

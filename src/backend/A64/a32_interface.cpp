@@ -31,22 +31,24 @@ namespace Dynarmic::A32 {
 
 using namespace BackendA64;
 
-static RunCodeCallbacks GenRunCodeCallbacks(const A32::UserConfig& config, CodePtr (*LookupBlock)(void* lookup_block_arg), void* arg) {
+static RunCodeCallbacks GenRunCodeCallbacks(const A32::UserConfig& config,
+                                            CodePtr (*LookupBlock)(void* lookup_block_arg),
+                                            void* arg) {
     return RunCodeCallbacks{
         std::make_unique<ArgCallback>(LookupBlock, reinterpret_cast<u64>(arg)),
-        std::make_unique<ArgCallback>(Devirtualize<&A32::UserCallbacks::AddTicks>(config.callbacks)),
-        std::make_unique<ArgCallback>(Devirtualize<&A32::UserCallbacks::GetTicksRemaining>(config.callbacks)),
+        std::make_unique<ArgCallback>(
+            Devirtualize<&A32::UserCallbacks::AddTicks>(config.callbacks)),
+        std::make_unique<ArgCallback>(
+            Devirtualize<&A32::UserCallbacks::GetTicksRemaining>(config.callbacks)),
         reinterpret_cast<u64>(config.fastmem_pointer),
     };
 }
 
 struct Jit::Impl {
     Impl(Jit* jit, A32::UserConfig config)
-            : block_of_code(GenRunCodeCallbacks(config, &GetCurrentBlockThunk, this), JitStateInfo{jit_state})
-            , emitter(block_of_code, config, jit)
-            , config(std::move(config))
-            , jit_interface(jit)
-    {}
+        : block_of_code(GenRunCodeCallbacks(config, &GetCurrentBlockThunk, this),
+                        JitStateInfo{jit_state}),
+          emitter(block_of_code, config, jit), config(std::move(config)), jit_interface(jit) {}
 
     A32JitState jit_state;
     BlockOfCode block_of_code;
@@ -60,7 +62,7 @@ struct Jit::Impl {
     bool invalidate_entire_cache = false;
 
     void Execute() {
-        const CodePtr current_codeptr = [this]{
+        const CodePtr current_codeptr = [this] {
             // RSB optimization
             const u32 new_rsb_ptr = (jit_state.rsb_ptr - 1) & A32JitState::RSBPtrMask;
             if (jit_state.GetUniqueHash() == jit_state.rsb_location_descriptors[new_rsb_ptr]) {
@@ -80,13 +82,16 @@ struct Jit::Impl {
 
     std::string Disassemble(const IR::LocationDescriptor& descriptor) {
         auto block = GetBasicBlock(descriptor);
-        std::string result = fmt::format("address: {}\nsize: {} bytes\n", block.entrypoint, block.size);
+        std::string result =
+            fmt::format("address: {}\nsize: {} bytes\n", block.entrypoint, block.size);
 #ifdef DYNARMIC_USE_LLVM
         for (const u32* pos = reinterpret_cast<const u32*>(block.entrypoint);
-             reinterpret_cast<const u8*>(pos) < reinterpret_cast<const u8*>(block.entrypoint) + block.size; pos += 1) {
+             reinterpret_cast<const u8*>(pos) <
+             reinterpret_cast<const u8*>(block.entrypoint) + block.size;
+             pos += 1) {
             fmt::print("0x{:02x} 0x{:02x} ", reinterpret_cast<u64>(pos), *pos);
             fmt::print("{}", Common::DisassembleAArch64(*pos, reinterpret_cast<u64>(pos)));
-            result += Common::DisassembleAArch64(*pos, reinterpret_cast<u64>(pos));        
+            result += Common::DisassembleAArch64(*pos, reinterpret_cast<u64>(pos));
         }
 #endif
         return result;
@@ -140,7 +145,8 @@ private:
     }
 
     CodePtr GetCurrentSingleStep() {
-        return GetBasicBlock(A32::LocationDescriptor{GetCurrentLocation()}.SetSingleStepping(true)).entrypoint;
+        return GetBasicBlock(A32::LocationDescriptor{GetCurrentLocation()}.SetSingleStepping(true))
+            .entrypoint;
     }
 
     A32EmitA64::BlockDescriptor GetBasicBlock(IR::LocationDescriptor descriptor) {
@@ -154,7 +160,10 @@ private:
             PerformCacheInvalidation();
         }
 
-        IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, [this](u32 vaddr) { return config.callbacks->MemoryReadCode(vaddr); }, {config.define_unpredictable_behaviour, config.hook_hint_instructions});
+        IR::Block ir_block =
+            A32::Translate(A32::LocationDescriptor{descriptor},
+                           [this](u32 vaddr) { return config.callbacks->MemoryReadCode(vaddr); },
+                           {config.define_unpredictable_behaviour, config.hook_hint_instructions});
         if (config.enable_optimizations) {
             Optimization::A32GetSetElimination(ir_block);
             Optimization::DeadCodeElimination(ir_block);
@@ -175,7 +184,9 @@ Jit::~Jit() = default;
 void Jit::Run() {
     ASSERT(!is_executing);
     is_executing = true;
-    SCOPE_EXIT { this->is_executing = false; };
+    SCOPE_EXIT {
+        this->is_executing = false;
+    };
 
     impl->jit_state.halt_requested = false;
 
@@ -187,7 +198,9 @@ void Jit::Run() {
 void Jit::Step() {
     ASSERT(!is_executing);
     is_executing = true;
-    SCOPE_EXIT { this->is_executing = false; };
+    SCOPE_EXIT {
+        this->is_executing = false;
+    };
 
     impl->jit_state.halt_requested = true;
 
@@ -202,7 +215,8 @@ void Jit::ClearCache() {
 }
 
 void Jit::InvalidateCacheRange(std::uint32_t start_address, std::size_t length) {
-    impl->invalid_cache_ranges.add(boost::icl::discrete_interval<u32>::closed(start_address, static_cast<u32>(start_address + length - 1)));
+    impl->invalid_cache_ranges.add(boost::icl::discrete_interval<u32>::closed(
+        start_address, static_cast<u32>(start_address + length - 1)));
     impl->RequestCacheInvalidation();
 }
 
@@ -257,7 +271,9 @@ struct Context::Impl {
     size_t invalid_cache_generation;
 };
 
-Context::Context() : impl(std::make_unique<Context::Impl>()) { impl->jit_state.ResetRSB(); }
+Context::Context() : impl(std::make_unique<Context::Impl>()) {
+    impl->jit_state.ResetRSB();
+}
 Context::~Context() = default;
 Context::Context(const Context& ctx) : impl(std::make_unique<Context::Impl>(*ctx.impl)) {}
 Context::Context(Context&& ctx) noexcept : impl(std::move(ctx.impl)) {}
@@ -311,7 +327,9 @@ std::string Jit::Disassemble() const {
     std::string result;
 #ifdef DYNARMIC_USE_LLVM
     for (const u32* pos = reinterpret_cast<const u32*>(impl->block_of_code.GetCodeBegin());
-         reinterpret_cast<const u8*>(pos) < reinterpret_cast<const u8*>(impl->block_of_code.GetCodePtr()); pos += 1) {
+         reinterpret_cast<const u8*>(pos) <
+         reinterpret_cast<const u8*>(impl->block_of_code.GetCodePtr());
+         pos += 1) {
         fmt::print("0x{:02x} 0x{:02x} ", reinterpret_cast<u64>(pos), *pos);
         fmt::print("{}", Common::DisassembleAArch64(*pos, reinterpret_cast<u64>(pos)));
         result += Common::DisassembleAArch64(*pos, reinterpret_cast<u64>(pos));

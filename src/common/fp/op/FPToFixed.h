@@ -13,7 +13,8 @@ class FPCR;
 class FPSR;
 enum class RoundingMode;
 
-template<typename FPT>
-u64 FPToFixed(size_t ibits, FPT op, size_t fbits, bool unsigned_, FPCR fpcr, RoundingMode rounding, FPSR& fpsr);
+template <typename FPT>
+u64 FPToFixed(size_t ibits, FPT op, size_t fbits, bool unsigned_, FPCR fpcr, RoundingMode rounding,
+              FPSR& fpsr);
 
 } // namespace Dynarmic::FP

@@ -39,11 +39,14 @@ public:
     void AddCodeBlock(CodeBlockInfo info);
     void RemoveCodeBlock(u64 rip);
 
-    bool SupportsFastmem() const { return supports_fast_mem; }
+    bool SupportsFastmem() const {
+        return supports_fast_mem;
+    }
 
 private:
     auto FindCodeBlockInfo(u64 rip) {
-        return std::find_if(code_block_infos.begin(), code_block_infos.end(), [&](const auto& x) { return x.code_begin <= rip && x.code_end > rip; });
+        return std::find_if(code_block_infos.begin(), code_block_infos.end(),
+                            [&](const auto& x) { return x.code_begin <= rip && x.code_end > rip; });
     }
 
     bool supports_fast_mem = true;
@@ -112,16 +115,16 @@ void SigHandler::SigAction(int sig, siginfo_t* info, void* raw_context) {
     ASSERT(sig == SIGSEGV || sig == SIGBUS);
 
 #if defined(__APPLE__)
-    #define CTX_RIP (((ucontext_t*)raw_context)->uc_mcontext->__ss.__rip)
-    #define CTX_RSP (((ucontext_t*)raw_context)->uc_mcontext->__ss.__rsp)
+#define CTX_RIP (((ucontext_t*)raw_context)->uc_mcontext->__ss.__rip)
+#define CTX_RSP (((ucontext_t*)raw_context)->uc_mcontext->__ss.__rsp)
 #elif defined(__linux__)
-    #define CTX_RIP (((ucontext_t*)raw_context)->uc_mcontext.gregs[REG_RIP])
-    #define CTX_RSP (((ucontext_t*)raw_context)->uc_mcontext.gregs[REG_RSP])
+#define CTX_RIP (((ucontext_t*)raw_context)->uc_mcontext.gregs[REG_RIP])
+#define CTX_RSP (((ucontext_t*)raw_context)->uc_mcontext.gregs[REG_RSP])
 #elif defined(__FreeBSD__)
-    #define CTX_RIP (((ucontext_t*)raw_context)->uc_mcontext.mc_rip)
-    #define CTX_RSP (((ucontext_t*)raw_context)->uc_mcontext.mc_rsp)
+#define CTX_RIP (((ucontext_t*)raw_context)->uc_mcontext.mc_rip)
+#define CTX_RSP (((ucontext_t*)raw_context)->uc_mcontext.mc_rsp)
 #else
-    #error "Unknown platform"
+#error "Unknown platform"
 #endif
 
     {
@@ -139,19 +142,23 @@ void SigHandler::SigAction(int sig, siginfo_t* info, void* raw_context) {
         }
     }
 
-    fmt::print(stderr, "dynarmic: POSIX SigHandler: Exception was not in registered code blocks (rip {:#016x})\n", CTX_RIP);
+    fmt::print(
+        stderr,
+        "dynarmic: POSIX SigHandler: Exception was not in registered code blocks (rip {:#016x})\n",
+        CTX_RIP);
 
-    struct sigaction* retry_sa = sig == SIGSEGV ? &sig_handler.old_sa_segv : &sig_handler.old_sa_bus;
+    struct sigaction* retry_sa =
+        sig == SIGSEGV ? &sig_handler.old_sa_segv : &sig_handler.old_sa_bus;
     if (retry_sa->sa_flags & SA_SIGINFO) {
-      retry_sa->sa_sigaction(sig, info, raw_context);
-      return;
+        retry_sa->sa_sigaction(sig, info, raw_context);
+        return;
     }
     if (retry_sa->sa_handler == SIG_DFL) {
-      signal(sig, SIG_DFL);
-      return;
+        signal(sig, SIG_DFL);
+        return;
     }
     if (retry_sa->sa_handler == SIG_IGN) {
-      return;
+        return;
     }
     retry_sa->sa_handler(sig);
 }
@@ -160,9 +167,8 @@ void SigHandler::SigAction(int sig, siginfo_t* info, void* raw_context) {
 
 struct ExceptionHandler::Impl final {
     Impl(BlockOfCode& code)
-        : code_begin(Common::BitCast<u64>(code.getCode()))
-        , code_end(code_begin + code.GetTotalCodeSize())
-    {}
+        : code_begin(Common::BitCast<u64>(code.getCode())),
+          code_end(code_begin + code.GetTotalCodeSize()) {}
 
     void SetCallback(std::function<FakeCall(u64)> cb) {
         CodeBlockInfo cbi;

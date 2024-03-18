@@ -133,7 +133,8 @@ public:
     }
 
     void InterpreterFallback(u32 pc, size_t num_instructions) override {
-        fmt::print("> InterpreterFallback({:08x}, {}) code = {:08x}\n", pc, num_instructions, MemoryReadCode(pc));
+        fmt::print("> InterpreterFallback({:08x}, {}) code = {:08x}\n", pc, num_instructions,
+                   MemoryReadCode(pc));
     }
     void CallSVC(std::uint32_t swi) override {
         fmt::print("> CallSVC({})\n", swi);
@@ -164,7 +165,7 @@ void ExecuteA32Instruction(u32 instruction) {
     u32 cpsr = 0;
     u32 fpscr = 0;
 
-    const std::map<std::string, u32*> name_map = [&regs, &ext_regs, &cpsr, &fpscr]{
+    const std::map<std::string, u32*> name_map = [&regs, &ext_regs, &cpsr, &fpscr] {
         std::map<std::string, u32*> name_map;
         for (size_t i = 0; i < regs.size(); i++) {
             name_map[fmt::format("r{}", i)] = &regs[i];
@@ -180,21 +181,25 @@ void ExecuteA32Instruction(u32 instruction) {
         return name_map;
     }();
 
-    const auto get_line = [](){
+    const auto get_line = []() {
         std::string line;
         std::getline(std::cin, line);
-        std::transform(line.begin(), line.end(), line.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        std::transform(line.begin(), line.end(), line.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return line;
     };
 
     const auto get_value = [&get_line]() -> std::optional<u32> {
         std::string line = get_line();
-        if (line.length() > 2 && line[0] == '0' && line[1] == 'x') line = line.substr(2);
-        if (line.length() > 8) return {};
+        if (line.length() > 2 && line[0] == '0' && line[1] == 'x')
+            line = line.substr(2);
+        if (line.length() > 8)
+            return {};
 
         char* endptr;
         const u32 value = strtol(line.c_str(), &endptr, 16);
-        if (line.c_str() + line.length() != endptr) return {};
+        if (line.c_str() + line.length() != endptr)
+            return {};
 
         return value;
     };
@@ -263,7 +268,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    const char* const hex_instruction = [argv]{
+    const char* const hex_instruction = [argv] {
         if (strlen(argv[2]) > 2 && argv[2][0] == '0' && argv[2][1] == 'x') {
             return argv[2] + 2;
         }

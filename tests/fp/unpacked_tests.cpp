@@ -18,7 +18,7 @@ using namespace Dynarmic;
 using namespace Dynarmic::FP;
 
 TEST_CASE("FPUnpack Tests", "[fp]") {
-    const static std::vector<std::tuple<u32, std::tuple<FPType, bool, FPUnpacked>, u32>> test_cases {
+    const static std::vector<std::tuple<u32, std::tuple<FPType, bool, FPUnpacked>, u32>> test_cases{
         {0x00000000, {FPType::Zero, false, ToNormalized(false, 0, 0)}, 0},
         {0x7F800000, {FPType::Infinity, false, ToNormalized(false, 1000000, 1)}, 0},
         {0xFF800000, {FPType::Infinity, true, ToNormalized(true, 1000000, 1)}, 0},
@@ -26,8 +26,12 @@ TEST_CASE("FPUnpack Tests", "[fp]") {
         {0xFF800001, {FPType::SNaN, true, ToNormalized(true, 0, 0)}, 0},
         {0x7FC00001, {FPType::QNaN, false, ToNormalized(false, 0, 0)}, 0},
         {0xFFC00001, {FPType::QNaN, true, ToNormalized(true, 0, 0)}, 0},
-        {0x00000001, {FPType::Nonzero, false, ToNormalized(false, -149, 1)}, 0}, // Smallest single precision denormal is 2^-149.
-        {0x3F7FFFFF, {FPType::Nonzero, false, ToNormalized(false, -24, 0xFFFFFF)}, 0}, // 1.0 - epsilon
+        {0x00000001,
+         {FPType::Nonzero, false, ToNormalized(false, -149, 1)},
+         0}, // Smallest single precision denormal is 2^-149.
+        {0x3F7FFFFF,
+         {FPType::Nonzero, false, ToNormalized(false, -24, 0xFFFFFF)},
+         0}, // 1.0 - epsilon
     };
 
     const FPCR fpcr;
@@ -49,12 +53,18 @@ TEST_CASE("FPUnpack Tests", "[fp]") {
 }
 
 TEST_CASE("FPRound Tests", "[fp]") {
-    const static std::vector<std::tuple<u32, std::tuple<FPType, bool, FPUnpacked>, u32>> test_cases {
+    const static std::vector<std::tuple<u32, std::tuple<FPType, bool, FPUnpacked>, u32>> test_cases{
         {0x7F800000, {FPType::Infinity, false, ToNormalized(false, 1000000, 1)}, 0x14},
         {0xFF800000, {FPType::Infinity, true, ToNormalized(true, 1000000, 1)}, 0x14},
-        {0x00000001, {FPType::Nonzero, false, ToNormalized(false, -149, 1)}, 0}, // Smallest single precision denormal is 2^-149.
-        {0x3F7FFFFF, {FPType::Nonzero, false, ToNormalized(false, -24, 0xFFFFFF)}, 0}, // 1.0 - epsilon
-        {0x3F800000, {FPType::Nonzero, false, ToNormalized(false, -28, 0xFFFFFFF)}, 0x10}, // rounds to 1.0
+        {0x00000001,
+         {FPType::Nonzero, false, ToNormalized(false, -149, 1)},
+         0}, // Smallest single precision denormal is 2^-149.
+        {0x3F7FFFFF,
+         {FPType::Nonzero, false, ToNormalized(false, -24, 0xFFFFFF)},
+         0}, // 1.0 - epsilon
+        {0x3F800000,
+         {FPType::Nonzero, false, ToNormalized(false, -28, 0xFFFFFFF)},
+         0x10}, // rounds to 1.0
     };
 
     const FPCR fpcr;
@@ -72,12 +82,14 @@ TEST_CASE("FPUnpack<->FPRound Round-trip Tests", "[fp]") {
     const FPCR fpcr;
     for (size_t count = 0; count < 100000; count++) {
         FPSR fpsr;
-        const u32 input = RandInt(0, 1) == 0 ? RandInt<u32>(0x00000001, 0x7F800000) : RandInt<u32>(0x80000001, 0xFF800000);
+        const u32 input = RandInt(0, 1) == 0 ? RandInt<u32>(0x00000001, 0x7F800000)
+                                             : RandInt<u32>(0x80000001, 0xFF800000);
         const auto intermediate = std::get<2>(FPUnpack<u32>(input, fpcr, fpsr));
         const u32 output = FPRound<u32>(intermediate, fpcr, fpsr);
 
         INFO("Count: " << count);
-        INFO("Intermediate Values: " << std::hex << intermediate.sign << ';' << intermediate.exponent << ';' << intermediate.mantissa);
+        INFO("Intermediate Values: " << std::hex << intermediate.sign << ';'
+                                     << intermediate.exponent << ';' << intermediate.mantissa);
         REQUIRE(input == output);
     }
 }

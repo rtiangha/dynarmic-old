@@ -45,14 +45,17 @@ public:
      * Callback: a call to the Callback will be compiled
      * std::array<std::uint32_t*, 2>: a write/read to those memory addresses will be compiled
      */
-    using CallbackOrAccessTwoWords = std::variant<std::monostate, Callback, std::array<std::uint32_t*, 2>>;
+    using CallbackOrAccessTwoWords =
+        std::variant<std::monostate, Callback, std::array<std::uint32_t*, 2>>;
 
     /**
      * Called when compiling CDP or CDP2 for this coprocessor.
      * A return value of std::nullopt will cause a coprocessor exception to be compiled.
      * arg0, arg1 and return value of callback are ignored.
      */
-    virtual std::optional<Callback> CompileInternalOperation(bool two, unsigned opc1, CoprocReg CRd, CoprocReg CRn, CoprocReg CRm, unsigned opc2) = 0;
+    virtual std::optional<Callback> CompileInternalOperation(bool two, unsigned opc1, CoprocReg CRd,
+                                                             CoprocReg CRn, CoprocReg CRm,
+                                                             unsigned opc2) = 0;
 
     /**
      * Called when compiling MCR or MCR2 for this coprocessor.
@@ -60,7 +63,8 @@ public:
      * arg0 of the callback will contain the word sent to the coprocessor.
      * arg1 and return value of the callback are ignored.
      */
-    virtual CallbackOrAccessOneWord CompileSendOneWord(bool two, unsigned opc1, CoprocReg CRn, CoprocReg CRm, unsigned opc2) = 0;
+    virtual CallbackOrAccessOneWord CompileSendOneWord(bool two, unsigned opc1, CoprocReg CRn,
+                                                       CoprocReg CRm, unsigned opc2) = 0;
 
     /**
      * Called when compiling MCRR or MCRR2 for this coprocessor.
@@ -77,7 +81,8 @@ public:
      * The low word of the return value will be stored in Rt.
      * arg0 and arg1 of the callback are ignored.
      */
-    virtual CallbackOrAccessOneWord CompileGetOneWord(bool two, unsigned opc1, CoprocReg CRn, CoprocReg CRm, unsigned opc2) = 0;
+    virtual CallbackOrAccessOneWord CompileGetOneWord(bool two, unsigned opc1, CoprocReg CRn,
+                                                      CoprocReg CRm, unsigned opc2) = 0;
 
     /**
      * Called when compiling MRRC or MRRC2 for this coprocessor.
@@ -95,7 +100,8 @@ public:
      * arg0 of the callback will contain the start address.
      * arg1 and return value of the callback are ignored.
      */
-    virtual std::optional<Callback> CompileLoadWords(bool two, bool long_transfer, CoprocReg CRd, std::optional<std::uint8_t> option) = 0;
+    virtual std::optional<Callback> CompileLoadWords(bool two, bool long_transfer, CoprocReg CRd,
+                                                     std::optional<std::uint8_t> option) = 0;
 
     /**
      * Called when compiling STC or STC2 for this coprocessor.
@@ -103,7 +109,8 @@ public:
      * arg0 of the callback will contain the start address.
      * arg1 and return value of the callback are ignored.
      */
-    virtual std::optional<Callback> CompileStoreWords(bool two, bool long_transfer, CoprocReg CRd, std::optional<std::uint8_t> option) = 0;
+    virtual std::optional<Callback> CompileStoreWords(bool two, bool long_transfer, CoprocReg CRd,
+                                                      std::optional<std::uint8_t> option) = 0;
 };
 
 } // namespace A32

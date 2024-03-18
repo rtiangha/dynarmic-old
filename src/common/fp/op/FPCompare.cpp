@@ -20,8 +20,8 @@ bool FPCompareEQ(FPT lhs, FPT rhs, FPCR fpcr, FPSR& fpsr) {
     const auto& value1 = std::get<FPUnpacked>(unpacked1);
     const auto& value2 = std::get<FPUnpacked>(unpacked2);
 
-    if (type1 == FPType::QNaN || type1 == FPType::SNaN ||
-        type2 == FPType::QNaN || type2 == FPType::SNaN) {
+    if (type1 == FPType::QNaN || type1 == FPType::SNaN || type2 == FPType::QNaN ||
+        type2 == FPType::SNaN) {
         if (type1 == FPType::SNaN || type2 == FPType::SNaN) {
             FPProcessException(FPExc::InvalidOp, fpcr, fpsr);
         }

@@ -37,7 +37,8 @@ enum class CRCType {
     ISO,
 };
 
-bool CRC32Variant(ArmTranslatorVisitor& v, Cond cond, Imm<2> sz, Reg n, Reg d, Reg m, CRCType type) {
+bool CRC32Variant(ArmTranslatorVisitor& v, Cond cond, Imm<2> sz, Reg n, Reg d, Reg m,
+                  CRCType type) {
     if (d == Reg::PC || n == Reg::PC || m == Reg::PC) {
         return v.UnpredictableInstruction();
     }

@@ -57,7 +57,7 @@ enum ARM64Reg {
     W29,
     W30,
 
-    WSP,  // 32bit stack pointer
+    WSP, // 32bit stack pointer
 
     // 64bit registers
     X0 = 0x20,
@@ -92,7 +92,7 @@ enum ARM64Reg {
     X29,
     X30,
 
-    SP,  // 64bit stack pointer
+    SP, // 64bit stack pointer
 
     // VFP single precision registers
     S0 = 0x40,
@@ -277,7 +277,7 @@ enum IndexType {
     INDEX_UNSIGNED,
     INDEX_POST,
     INDEX_PRE,
-    INDEX_SIGNED,  // used in LDP/STP
+    INDEX_SIGNED, // used in LDP/STP
 };
 
 enum ShiftAmount {
@@ -288,19 +288,19 @@ enum ShiftAmount {
 };
 
 enum RoundingMode {
-    ROUND_A,  // round to nearest, ties to away
-    ROUND_M,  // round towards -inf
-    ROUND_N,  // round to nearest, ties to even
-    ROUND_P,  // round towards +inf
-    ROUND_Z,  // round towards zero
+    ROUND_A, // round to nearest, ties to away
+    ROUND_M, // round towards -inf
+    ROUND_N, // round to nearest, ties to even
+    ROUND_P, // round towards +inf
+    ROUND_Z, // round towards zero
 };
 
 // Size of each element in the Vector
 enum ESize {
-    B,  // Byte
-    H,  // Half Word
-    S,  // Single Word
-    D,  // Double Word
+    B, // Byte
+    H, // Half Word
+    S, // Single Word
+    D, // Double Word
 };
 
 struct FixupBranch {
@@ -502,16 +502,14 @@ protected:
     void Write32(u32 value);
 
 public:
-    ARM64XEmitter() : m_code(nullptr), m_lastCacheFlushEnd(nullptr) {
-    }
+    ARM64XEmitter() : m_code(nullptr), m_lastCacheFlushEnd(nullptr) {}
 
     ARM64XEmitter(u8* code_ptr) {
         m_code = code_ptr;
         m_lastCacheFlushEnd = code_ptr;
     }
 
-    virtual ~ARM64XEmitter() {
-    }
+    virtual ~ARM64XEmitter() {}
 
     void SetCodePtr(u8* ptr);
     void SetCodePtrUnsafe(u8* ptr);
@@ -896,8 +894,7 @@ public:
 
 class ARM64FloatEmitter {
 public:
-    ARM64FloatEmitter(ARM64XEmitter* emit) : m_emit(emit) {
-    }
+    ARM64FloatEmitter(ARM64XEmitter* emit) : m_emit(emit) {}
 
     void LDR(u8 size, IndexType type, ARM64Reg Rt, ARM64Reg Rn, s32 imm);
     void STR(u8 size, IndexType type, ARM64Reg Rt, ARM64Reg Rn, s32 imm);
@@ -958,7 +955,7 @@ public:
     void UQADD(u8 size, ARM64Reg Rd, ARM64Reg Rn, ARM64Reg Rm);
     void SQSUB(u8 size, ARM64Reg Rd, ARM64Reg Rn, ARM64Reg Rm);
     void UQSUB(u8 size, ARM64Reg Rd, ARM64Reg Rn, ARM64Reg Rm);
-    
+
     // Scalar floating point immediate
     void FMOV(ARM64Reg Rd, uint8_t imm8);
 

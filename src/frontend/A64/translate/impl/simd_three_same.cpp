@@ -12,10 +12,7 @@ enum class Operation {
     Subtract,
 };
 
-enum class ExtraBehavior {
-    None,
-    Round
-};
+enum class ExtraBehavior { None, Round };
 
 bool HighNarrowingOperation(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd,
                             Operation op, ExtraBehavior behavior) {
@@ -38,23 +35,22 @@ bool HighNarrowingOperation(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, V
 
     if (behavior == ExtraBehavior::Round) {
         const u64 round_const = 1ULL << (esize - 1);
-        const IR::U128 round_operand = v.ir.VectorBroadcast(doubled_esize, v.I(doubled_esize, round_const));
+        const IR::U128 round_operand =
+            v.ir.VectorBroadcast(doubled_esize, v.I(doubled_esize, round_const));
         wide = v.ir.VectorAdd(doubled_esize, wide, round_operand);
     }
 
-    const IR::U128 result = v.ir.VectorNarrow(doubled_esize,
-                                              v.ir.VectorLogicalShiftRight(doubled_esize, wide, static_cast<u8>(esize)));
+    const IR::U128 result = v.ir.VectorNarrow(
+        doubled_esize, v.ir.VectorLogicalShiftRight(doubled_esize, wide, static_cast<u8>(esize)));
 
     v.Vpart(64, Vd, part, result);
     return true;
 }
 
-enum class AbsDiffExtraBehavior {
-    None,
-    Accumulate
-};
+enum class AbsDiffExtraBehavior { None, Accumulate };
 
-bool SignedAbsoluteDifference(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd, AbsDiffExtraBehavior behavior) {
+bool SignedAbsoluteDifference(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd,
+                              AbsDiffExtraBehavior behavior) {
     if (size == 0b11) {
         return v.ReservedValue();
     }
@@ -79,12 +75,10 @@ bool SignedAbsoluteDifference(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm,
     return true;
 }
 
-enum class Signedness {
-    Signed,
-    Unsigned
-};
+enum class Signedness { Signed, Unsigned };
 
-bool RoundingHalvingAdd(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd, Signedness sign) {
+bool RoundingHalvingAdd(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd,
+                        Signedness sign) {
     if (size == 0b11) {
         return v.ReservedValue();
     }
@@ -94,14 +88,16 @@ bool RoundingHalvingAdd(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec V
 
     const IR::U128 operand1 = v.V(datasize, Vm);
     const IR::U128 operand2 = v.V(datasize, Vn);
-    const IR::U128 result = sign == Signedness::Signed ? v.ir.VectorRoundingHalvingAddSigned(esize, operand1, operand2)
-                                                       : v.ir.VectorRoundingHalvingAddUnsigned(esize, operand1, operand2);
+    const IR::U128 result = sign == Signedness::Signed
+                                ? v.ir.VectorRoundingHalvingAddSigned(esize, operand1, operand2)
+                                : v.ir.VectorRoundingHalvingAddUnsigned(esize, operand1, operand2);
 
     v.V(datasize, Vd, result);
     return true;
 }
 
-bool RoundingShiftLeft(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd, Signedness sign) {
+bool RoundingShiftLeft(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd,
+                       Signedness sign) {
     if (size == 0b11 && !Q) {
         return v.ReservedValue();
     }
@@ -123,15 +119,10 @@ bool RoundingShiftLeft(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn
     return true;
 }
 
-enum class ComparisonType {
-    EQ,
-    GE,
-    AbsoluteGE,
-    GT,
-    AbsoluteGT
-};
+enum class ComparisonType { EQ, GE, AbsoluteGE, GT, AbsoluteGT };
 
-bool FPCompareRegister(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd, ComparisonType type) {
+bool FPCompareRegister(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd,
+                       ComparisonType type) {
     if (sz && !Q) {
         return v.ReservedValue();
     }
@@ -148,14 +139,12 @@ bool FPCompareRegister(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Ve
         case ComparisonType::GE:
             return v.ir.FPVectorGreaterEqual(esize, operand1, operand2);
         case ComparisonType::AbsoluteGE:
-            return v.ir.FPVectorGreaterEqual(esize,
-                                             v.ir.FPVectorAbs(esize, operand1),
+            return v.ir.FPVectorGreaterEqual(esize, v.ir.FPVectorAbs(esize, operand1),
                                              v.ir.FPVectorAbs(esize, operand2));
         case ComparisonType::GT:
             return v.ir.FPVectorGreater(esize, operand1, operand2);
         case ComparisonType::AbsoluteGT:
-            return v.ir.FPVectorGreater(esize,
-                                        v.ir.FPVectorAbs(esize, operand1),
+            return v.ir.FPVectorGreater(esize, v.ir.FPVectorAbs(esize, operand1),
                                         v.ir.FPVectorAbs(esize, operand2));
         }
 
@@ -205,7 +194,8 @@ bool VectorMinMaxOperation(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Ve
     return true;
 }
 
-bool FPMinMaxOperation(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd, MinMaxOperation operation) {
+bool FPMinMaxOperation(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd,
+                       MinMaxOperation operation) {
     if (sz && !Q) {
         return v.ReservedValue();
     }
@@ -228,7 +218,8 @@ bool FPMinMaxOperation(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Ve
 }
 
 bool FPMinMaxNumericOperation(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd,
-                              IR::U32U64 (IREmitter::* fn)(const IR::U32U64&, const IR::U32U64&, bool)) {
+                              IR::U32U64 (IREmitter::*fn)(const IR::U32U64&, const IR::U32U64&,
+                                                          bool)) {
     if (sz && !Q) {
         return v.ReservedValue();
     }
@@ -292,7 +283,7 @@ bool PairedMinMaxOperation(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Ve
 }
 
 bool FPPairedMinMax(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd,
-                    IR::U32U64 (IREmitter::* fn)(const IR::U32U64&, const IR::U32U64&, bool)) {
+                    IR::U32U64 (IREmitter::*fn)(const IR::U32U64&, const IR::U32U64&, bool)) {
     if (sz && !Q) {
         return v.ReservedValue();
     }
@@ -323,8 +314,8 @@ bool FPPairedMinMax(TranslatorVisitor& v, bool Q, bool sz, Vec Vm, Vec Vn, Vec V
     return true;
 }
 
-bool SaturatingArithmeticOperation(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd,
-                                   Operation op, Signedness sign) {
+bool SaturatingArithmeticOperation(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn,
+                                   Vec Vd, Operation op, Signedness sign) {
     if (size == 0b11 && !Q) {
         return v.ReservedValue();
     }
@@ -355,7 +346,8 @@ bool SaturatingArithmeticOperation(TranslatorVisitor& v, bool Q, Imm<2> size, Ve
     return true;
 }
 
-bool SaturatingShiftLeft(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd, Signedness sign) {
+bool SaturatingShiftLeft(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd,
+                         Signedness sign) {
     if (size == 0b11 && !Q) {
         return v.ReservedValue();
     }
@@ -422,19 +414,23 @@ bool TranslatorVisitor::SABD(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::SMAX(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max, Signedness::Signed);
+    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max,
+                                 Signedness::Signed);
 }
 
 bool TranslatorVisitor::SMAXP(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max, Signedness::Signed);
+    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max,
+                                 Signedness::Signed);
 }
 
 bool TranslatorVisitor::SMIN(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min, Signedness::Signed);
+    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min,
+                                 Signedness::Signed);
 }
 
 bool TranslatorVisitor::SMINP(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min, Signedness::Signed);
+    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min,
+                                 Signedness::Signed);
 }
 
 bool TranslatorVisitor::SQDMULH_vec_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
@@ -447,7 +443,8 @@ bool TranslatorVisitor::SQDMULH_vec_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec V
 
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
-    const IR::U128 result = ir.VectorSignedSaturatedDoublingMultiply(esize, operand1, operand2).upper;
+    const IR::U128 result =
+        ir.VectorSignedSaturatedDoublingMultiply(esize, operand1, operand2).upper;
 
     V(datasize, Vd, result);
     return true;
@@ -463,8 +460,11 @@ bool TranslatorVisitor::SQRDMULH_vec_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec 
 
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
-    const IR::UpperAndLower multiply = ir.VectorSignedSaturatedDoublingMultiply(esize, operand1, operand2);
-    const IR::U128 result = ir.VectorAdd(esize, multiply.upper, ir.VectorLogicalShiftRight(esize, multiply.lower, static_cast<u8>(esize - 1)));
+    const IR::UpperAndLower multiply =
+        ir.VectorSignedSaturatedDoublingMultiply(esize, operand1, operand2);
+    const IR::U128 result =
+        ir.VectorAdd(esize, multiply.upper,
+                     ir.VectorLogicalShiftRight(esize, multiply.lower, static_cast<u8>(esize - 1)));
 
     V(datasize, Vd, result);
     return true;
@@ -497,7 +497,8 @@ bool TranslatorVisitor::MLA_vec(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
     const IR::U128 operand3 = V(datasize, Vd);
-    const IR::U128 result = ir.VectorAdd(esize, ir.VectorMultiply(esize, operand1, operand2), operand3);
+    const IR::U128 result =
+        ir.VectorAdd(esize, ir.VectorMultiply(esize, operand1, operand2), operand3);
 
     V(datasize, Vd, result);
     return true;
@@ -528,11 +529,13 @@ bool TranslatorVisitor::RADDHN(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::SUBHN(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return HighNarrowingOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract, ExtraBehavior::None);
+    return HighNarrowingOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract,
+                                  ExtraBehavior::None);
 }
 
 bool TranslatorVisitor::RSUBHN(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return HighNarrowingOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract, ExtraBehavior::Round);
+    return HighNarrowingOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract,
+                                  ExtraBehavior::Round);
 }
 
 bool TranslatorVisitor::SHADD(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
@@ -568,11 +571,13 @@ bool TranslatorVisitor::SHSUB(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::SQADD_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Add, Signedness::Signed);
+    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Add,
+                                         Signedness::Signed);
 }
 
 bool TranslatorVisitor::SQSUB_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract, Signedness::Signed);
+    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract,
+                                         Signedness::Signed);
 }
 
 bool TranslatorVisitor::SRHADD(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
@@ -612,11 +617,13 @@ bool TranslatorVisitor::UHSUB(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::UQADD_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Add, Signedness::Unsigned);
+    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Add,
+                                         Signedness::Unsigned);
 }
 
 bool TranslatorVisitor::UQSUB_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract, Signedness::Unsigned);
+    return SaturatingArithmeticOperation(*this, Q, size, Vm, Vn, Vd, Operation::Subtract,
+                                         Signedness::Unsigned);
 }
 
 bool TranslatorVisitor::URHADD(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
@@ -633,7 +640,8 @@ bool TranslatorVisitor::ADDP_vec(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
-    const IR::U128 result = Q ? ir.VectorPairedAdd(esize, operand1, operand2) : ir.VectorPairedAddLower(esize, operand1, operand2);
+    const IR::U128 result = Q ? ir.VectorPairedAdd(esize, operand1, operand2)
+                              : ir.VectorPairedAddLower(esize, operand1, operand2);
 
     V(datasize, Vd, result);
     return true;
@@ -716,7 +724,8 @@ bool TranslatorVisitor::FMLS_vec_1(bool Q, Vec Vm, Vec Vn, Vec Vd) {
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
     const IR::U128 operand3 = V(datasize, Vd);
-    const IR::U128 result = ir.FPVectorMulAdd(esize, operand3, ir.FPVectorNeg(esize, operand1), operand2);
+    const IR::U128 result =
+        ir.FPVectorMulAdd(esize, operand3, ir.FPVectorNeg(esize, operand1), operand2);
 
     V(datasize, Vd, result);
     return true;
@@ -733,7 +742,8 @@ bool TranslatorVisitor::FMLS_vec_2(bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd) {
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
     const IR::U128 operand3 = V(datasize, Vd);
-    const IR::U128 result = ir.FPVectorMulAdd(esize, operand3, ir.FPVectorNeg(esize, operand1), operand2);
+    const IR::U128 result =
+        ir.FPVectorMulAdd(esize, operand3, ir.FPVectorNeg(esize, operand1), operand2);
 
     V(datasize, Vd, result);
     return true;
@@ -889,11 +899,13 @@ bool TranslatorVisitor::USHL_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::UMAX(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max, Signedness::Unsigned);
+    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max,
+                                 Signedness::Unsigned);
 }
 
 bool TranslatorVisitor::UMAXP(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max, Signedness::Unsigned);
+    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Max,
+                                 Signedness::Unsigned);
 }
 
 bool TranslatorVisitor::UABA(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
@@ -908,8 +920,8 @@ bool TranslatorVisitor::UABA(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
     const IR::U128 operand2 = V(datasize, Vm);
     const IR::U128 initial_dest = V(datasize, Vd);
 
-    const IR::U128 result = ir.VectorAdd(esize, initial_dest,
-                                         ir.VectorUnsignedAbsoluteDifference(esize, operand1, operand2));
+    const IR::U128 result = ir.VectorAdd(
+        esize, initial_dest, ir.VectorUnsignedAbsoluteDifference(esize, operand1, operand2));
 
     V(datasize, Vd, result);
     return true;
@@ -932,11 +944,13 @@ bool TranslatorVisitor::UABD(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::UMIN(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min, Signedness::Unsigned);
+    return VectorMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min,
+                                 Signedness::Unsigned);
 }
 
 bool TranslatorVisitor::UMINP(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
-    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min, Signedness::Unsigned);
+    return PairedMinMaxOperation(*this, Q, size, Vm, Vn, Vd, MinMaxOperation::Min,
+                                 Signedness::Unsigned);
 }
 
 bool TranslatorVisitor::FSUB_2(bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd) {
@@ -1100,7 +1114,8 @@ bool TranslatorVisitor::MLS_vec(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
     const IR::U128 operand2 = V(datasize, Vm);
     const IR::U128 operand3 = V(datasize, Vd);
 
-    const IR::U128 result = ir.VectorSub(esize, operand3, ir.VectorMultiply(esize, operand1, operand2));
+    const IR::U128 result =
+        ir.VectorSub(esize, operand3, ir.VectorMultiply(esize, operand1, operand2));
 
     V(datasize, Vd, result);
     return true;
@@ -1159,7 +1174,8 @@ bool TranslatorVisitor::FADDP_vec_2(bool Q, bool sz, Vec Vm, Vec Vn, Vec Vd) {
 
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
-    const IR::U128 result = Q ? ir.FPVectorPairedAdd(esize, operand1, operand2) : ir.FPVectorPairedAddLower(esize, operand1, operand2);
+    const IR::U128 result = Q ? ir.FPVectorPairedAdd(esize, operand1, operand2)
+                              : ir.FPVectorPairedAddLower(esize, operand1, operand2);
     V(datasize, Vd, result);
     return true;
 }
@@ -1221,7 +1237,8 @@ bool TranslatorVisitor::BIF(bool Q, Vec Vm, Vec Vn, Vec Vd) {
     const auto operand1 = V(datasize, Vd);
     const auto operand4 = V(datasize, Vn);
     const auto operand3 = ir.VectorNot(V(datasize, Vm));
-    const auto result = ir.VectorEor(operand1, ir.VectorAnd(ir.VectorEor(operand1, operand4), operand3));
+    const auto result =
+        ir.VectorEor(operand1, ir.VectorAnd(ir.VectorEor(operand1, operand4), operand3));
 
     V(datasize, Vd, result);
     return true;
@@ -1233,7 +1250,8 @@ bool TranslatorVisitor::BIT(bool Q, Vec Vm, Vec Vn, Vec Vd) {
     const auto operand1 = V(datasize, Vd);
     const auto operand4 = V(datasize, Vn);
     const auto operand3 = V(datasize, Vm);
-    const auto result = ir.VectorEor(operand1, ir.VectorAnd(ir.VectorEor(operand1, operand4), operand3));
+    const auto result =
+        ir.VectorEor(operand1, ir.VectorAnd(ir.VectorEor(operand1, operand4), operand3));
 
     V(datasize, Vd, result);
     return true;
@@ -1245,7 +1263,8 @@ bool TranslatorVisitor::BSL(bool Q, Vec Vm, Vec Vn, Vec Vd) {
     const auto operand4 = V(datasize, Vn);
     const auto operand1 = V(datasize, Vm);
     const auto operand3 = V(datasize, Vd);
-    const auto result = ir.VectorEor(operand1, ir.VectorAnd(ir.VectorEor(operand1, operand4), operand3));
+    const auto result =
+        ir.VectorEor(operand1, ir.VectorAnd(ir.VectorEor(operand1, operand4), operand3));
 
     V(datasize, Vd, result);
     return true;

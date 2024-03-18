@@ -8,7 +8,8 @@
 namespace Dynarmic::A32 {
 
 static IR::U32 Pack2x16To1x32(A32::IREmitter& ir, IR::U32 lo, IR::U32 hi) {
-    return ir.Or(ir.And(lo, ir.Imm32(0xFFFF)), ir.LogicalShiftLeft(hi, ir.Imm8(16), ir.Imm1(0)).result);
+    return ir.Or(ir.And(lo, ir.Imm32(0xFFFF)),
+                 ir.LogicalShiftLeft(hi, ir.Imm8(16), ir.Imm1(0)).result);
 }
 
 static IR::U16 MostSignificantHalf(A32::IREmitter& ir, IR::U32 value) {

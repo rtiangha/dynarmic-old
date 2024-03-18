@@ -44,10 +44,12 @@ bool VectorTranspose(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, 
             const IR::U128 anded_n = v.ir.VectorAnd(n, mask);
 
             if (type == Transposition::TRN1) {
-                return v.ir.VectorOr(v.ir.VectorLogicalShiftLeft(doubled_esize, anded_m, esize), anded_n);
+                return v.ir.VectorOr(v.ir.VectorLogicalShiftLeft(doubled_esize, anded_m, esize),
+                                     anded_n);
             }
 
-            return v.ir.VectorOr(v.ir.VectorLogicalShiftRight(doubled_esize, anded_n, esize), anded_m);
+            return v.ir.VectorOr(v.ir.VectorLogicalShiftRight(doubled_esize, anded_n, esize),
+                                 anded_m);
         }
         case 64: {
         default:
@@ -58,7 +60,8 @@ bool VectorTranspose(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, 
                 return std::make_tuple(n, 1, m, 0);
             }();
 
-            return v.ir.VectorSetElement(esize, dst, dst_idx, v.ir.VectorGetElement(esize, src, src_idx));
+            return v.ir.VectorSetElement(esize, dst, dst_idx,
+                                         v.ir.VectorGetElement(esize, src, src_idx));
         }
         }
     }();
@@ -72,7 +75,8 @@ enum class UnzipType {
     Odd,
 };
 
-bool VectorUnzip(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd, UnzipType type) {
+bool VectorUnzip(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd,
+                 UnzipType type) {
     if (size == 0b11 && !Q) {
         return v.ReservedValue();
     }
@@ -140,7 +144,7 @@ bool TranslatorVisitor::ZIP2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd) {
 
     const IR::U128 operand1 = V(datasize, Vn);
     const IR::U128 operand2 = V(datasize, Vm);
-    const IR::U128 result = [&]{
+    const IR::U128 result = [&] {
         if (Q) {
             return ir.VectorInterleaveUpper(esize, operand1, operand2);
         }

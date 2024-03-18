@@ -9,7 +9,9 @@
 
 namespace Dynarmic::A64 {
 
-static bool SharedDecodeAndOperation(TranslatorVisitor& v, bool wback, IR::MemOp memop, bool Q, std::optional<Reg> Rm, Imm<4> opcode, Imm<2> size, Reg Rn, Vec Vt) {
+static bool SharedDecodeAndOperation(TranslatorVisitor& v, bool wback, IR::MemOp memop, bool Q,
+                                     std::optional<Reg> Rm, Imm<4> opcode, Imm<2> size, Reg Rn,
+                                     Vec Vt) {
     const size_t datasize = Q ? 128 : 64;
     const size_t esize = 8 << size.ZeroExtend<size_t>();
     const size_t elements = datasize / esize;
@@ -67,7 +69,8 @@ static bool SharedDecodeAndOperation(TranslatorVisitor& v, bool wback, IR::MemOp
         for (size_t r = 0; r < rpt; r++) {
             const Vec tt = static_cast<Vec>((VecNumber(Vt) + r) % 32);
             if (memop == IR::MemOp::LOAD) {
-                const IR::UAnyU128 vec = v.Mem(v.ir.Add(address, offs), ebytes * elements, IR::AccType::VEC);
+                const IR::UAnyU128 vec =
+                    v.Mem(v.ir.Add(address, offs), ebytes * elements, IR::AccType::VEC);
                 v.V_scalar(datasize, tt, vec);
             } else {
                 const IR::UAnyU128 vec = v.V_scalar(datasize, tt);

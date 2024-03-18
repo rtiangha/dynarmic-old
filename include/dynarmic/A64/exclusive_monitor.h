@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <atomic>
 #include <array>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>

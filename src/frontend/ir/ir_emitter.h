@@ -57,13 +57,27 @@ struct UpperAndLower {
 };
 
 enum class AccType {
-    NORMAL, VEC, STREAM, VECSTREAM,
-    ATOMIC, ORDERED, ORDEREDRW, LIMITEDORDERED,
-    UNPRIV, IFETCH, PTW, DC, IC, DCZVA, AT,
+    NORMAL,
+    VEC,
+    STREAM,
+    VECSTREAM,
+    ATOMIC,
+    ORDERED,
+    ORDEREDRW,
+    LIMITEDORDERED,
+    UNPRIV,
+    IFETCH,
+    PTW,
+    DC,
+    IC,
+    DCZVA,
+    AT,
 };
 
 enum class MemOp {
-    LOAD, STORE, PREFETCH,
+    LOAD,
+    STORE,
+    PREFETCH,
 };
 
 /**
@@ -106,10 +120,14 @@ public:
     // This pseudo-instruction may only be added to instructions that support it.
     NZCV NZCVFrom(const Value& value);
 
-    ResultAndCarry<U32> LogicalShiftLeft(const U32& value_in, const U8& shift_amount, const U1& carry_in);
-    ResultAndCarry<U32> LogicalShiftRight(const U32& value_in, const U8& shift_amount, const U1& carry_in);
-    ResultAndCarry<U32> ArithmeticShiftRight(const U32& value_in, const U8& shift_amount, const U1& carry_in);
-    ResultAndCarry<U32> RotateRight(const U32& value_in, const U8& shift_amount, const U1& carry_in);
+    ResultAndCarry<U32> LogicalShiftLeft(const U32& value_in, const U8& shift_amount,
+                                         const U1& carry_in);
+    ResultAndCarry<U32> LogicalShiftRight(const U32& value_in, const U8& shift_amount,
+                                          const U1& carry_in);
+    ResultAndCarry<U32> ArithmeticShiftRight(const U32& value_in, const U8& shift_amount,
+                                             const U1& carry_in);
+    ResultAndCarry<U32> RotateRight(const U32& value_in, const U8& shift_amount,
+                                    const U1& carry_in);
     U32U64 LogicalShiftLeft(const U32U64& value_in, const U8& shift_amount);
     U32U64 LogicalShiftRight(const U32U64& value_in, const U8& shift_amount);
     U32U64 ArithmeticShiftRight(const U32U64& value_in, const U8& shift_amount);
@@ -318,7 +336,8 @@ public:
     U32U64 FPMin(const U32U64& a, const U32U64& b, bool fpcr_controlled);
     U32U64 FPMinNumeric(const U32U64& a, const U32U64& b, bool fpcr_controlled);
     U32U64 FPMul(const U32U64& a, const U32U64& b, bool fpcr_controlled);
-    U16U32U64 FPMulAdd(const U16U32U64& addend, const U16U32U64& op1, const U16U32U64& op2, bool fpcr_controlled);
+    U16U32U64 FPMulAdd(const U16U32U64& addend, const U16U32U64& op1, const U16U32U64& op2,
+                       bool fpcr_controlled);
     U32U64 FPMulX(const U32U64& a, const U32U64& b);
     U16U32U64 FPNeg(const U16U32U64& a);
     U16U32U64 FPRecipEstimate(const U16U32U64& a);
@@ -348,8 +367,10 @@ public:
     U128 FPVectorAdd(size_t esize, const U128& a, const U128& b);
     U128 FPVectorDiv(size_t esize, const U128& a, const U128& b);
     U128 FPVectorEqual(size_t esize, const U128& a, const U128& b);
-    U128 FPVectorFromSignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding);
-    U128 FPVectorFromUnsignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding);
+    U128 FPVectorFromSignedFixed(size_t esize, const U128& a, size_t fbits,
+                                 FP::RoundingMode rounding);
+    U128 FPVectorFromUnsignedFixed(size_t esize, const U128& a, size_t fbits,
+                                   FP::RoundingMode rounding);
     U128 FPVectorGreater(size_t esize, const U128& a, const U128& b);
     U128 FPVectorGreaterEqual(size_t esize, const U128& a, const U128& b);
     U128 FPVectorMax(size_t esize, const U128& a, const U128& b);
@@ -367,8 +388,10 @@ public:
     U128 FPVectorRSqrtStepFused(size_t esize, const U128& a, const U128& b);
     U128 FPVectorSqrt(size_t esize, const U128& a);
     U128 FPVectorSub(size_t esize, const U128& a, const U128& b);
-    U128 FPVectorToSignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding);
-    U128 FPVectorToUnsignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding);
+    U128 FPVectorToSignedFixed(size_t esize, const U128& a, size_t fbits,
+                               FP::RoundingMode rounding);
+    U128 FPVectorToUnsignedFixed(size_t esize, const U128& a, size_t fbits,
+                                 FP::RoundingMode rounding);
 
     void Breakpoint();
 
@@ -385,8 +408,8 @@ public:
 protected:
     IR::Block::iterator insertion_point;
 
-    template<typename T = Value, typename ...Args>
-    T Inst(Opcode op, Args ...args) {
+    template <typename T = Value, typename... Args>
+    T Inst(Opcode op, Args... args) {
         auto iter = block.PrependNewInst(insertion_point, op, {Value(args)...});
         return T(Value(&*iter));
     }

@@ -7,7 +7,9 @@
 
 namespace Dynarmic::A64 {
 
-static bool LoadStoreRegisterImmediate(TranslatorVisitor& v, bool wback, bool postindex, size_t scale, u64 offset, Imm<2> size, Imm<2> opc, Reg Rn, Reg Rt) {
+static bool LoadStoreRegisterImmediate(TranslatorVisitor& v, bool wback, bool postindex,
+                                       size_t scale, u64 offset, Imm<2> size, Imm<2> opc, Reg Rn,
+                                       Reg Rt) {
     IR::MemOp memop;
     bool signed_ = false;
     size_t regsize = 0;
@@ -75,7 +77,8 @@ static bool LoadStoreRegisterImmediate(TranslatorVisitor& v, bool wback, bool po
     return true;
 }
 
-bool TranslatorVisitor::STRx_LDRx_imm_1(Imm<2> size, Imm<2> opc, Imm<9> imm9, bool not_postindex, Reg Rn, Reg Rt) {
+bool TranslatorVisitor::STRx_LDRx_imm_1(Imm<2> size, Imm<2> opc, Imm<9> imm9, bool not_postindex,
+                                        Reg Rn, Reg Rt) {
     const bool wback = true;
     const bool postindex = !not_postindex;
     const size_t scale = size.ZeroExtend<size_t>();
@@ -102,19 +105,22 @@ bool TranslatorVisitor::STURx_LDURx(Imm<2> size, Imm<2> opc, Imm<9> imm9, Reg Rn
     return LoadStoreRegisterImmediate(*this, wback, postindex, scale, offset, size, opc, Rn, Rt);
 }
 
-bool TranslatorVisitor::PRFM_imm([[maybe_unused]] Imm<12> imm12, [[maybe_unused]] Reg Rn, [[maybe_unused]] Reg Rt) {
+bool TranslatorVisitor::PRFM_imm([[maybe_unused]] Imm<12> imm12, [[maybe_unused]] Reg Rn,
+                                 [[maybe_unused]] Reg Rt) {
     // Currently a NOP (which is valid behavior, as indicated by
     // the ARMv8 architecture reference manual)
     return true;
 }
 
-bool TranslatorVisitor::PRFM_unscaled_imm([[maybe_unused]] Imm<9> imm9, [[maybe_unused]] Reg Rn, [[maybe_unused]] Reg Rt) {
+bool TranslatorVisitor::PRFM_unscaled_imm([[maybe_unused]] Imm<9> imm9, [[maybe_unused]] Reg Rn,
+                                          [[maybe_unused]] Reg Rt) {
     // Currently a NOP (which is valid behavior, as indicated by
     // the ARMv8 architecture reference manual)
     return true;
 }
 
-static bool LoadStoreSIMD(TranslatorVisitor& v, bool wback, bool postindex, size_t scale, u64 offset, IR::MemOp memop, Reg Rn, Vec Vt) {
+static bool LoadStoreSIMD(TranslatorVisitor& v, bool wback, bool postindex, size_t scale,
+                          u64 offset, IR::MemOp memop, Reg Rn, Vec Vt) {
     const auto acctype = IR::AccType::VEC;
     const size_t datasize = 8 << scale;
 
@@ -168,7 +174,8 @@ static bool LoadStoreSIMD(TranslatorVisitor& v, bool wback, bool postindex, size
     return true;
 }
 
-bool TranslatorVisitor::STR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::STR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex,
+                                         Reg Rn, Vec Vt) {
     const size_t scale = concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         return UnallocatedEncoding();
@@ -194,7 +201,8 @@ bool TranslatorVisitor::STR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm1
     return LoadStoreSIMD(*this, wback, postindex, scale, offset, IR::MemOp::STORE, Rn, Vt);
 }
 
-bool TranslatorVisitor::LDR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LDR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex,
+                                         Reg Rn, Vec Vt) {
     const size_t scale = concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
         return UnallocatedEncoding();

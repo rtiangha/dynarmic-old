@@ -14,8 +14,10 @@
 
 namespace Dynarmic::Common {
 
-template <typename T> class IntrusiveList;
-template <typename T> class IntrusiveListIterator;
+template <typename T>
+class IntrusiveList;
+template <typename T>
+class IntrusiveListIterator;
 
 template <typename T>
 class IntrusiveListNode {
@@ -35,8 +37,7 @@ protected:
 };
 
 template <typename T>
-class IntrusiveListSentinel final : public IntrusiveListNode<T>
-{
+class IntrusiveListSentinel final : public IntrusiveListNode<T> {
     using IntrusiveListNode<T>::next;
     using IntrusiveListNode<T>::prev;
     using IntrusiveListNode<T>::is_sentinel;
@@ -53,30 +54,28 @@ template <typename T>
 class IntrusiveListIterator {
 public:
     using iterator_category = std::bidirectional_iterator_tag;
-    using difference_type   = std::ptrdiff_t;
-    using value_type        = T;
-    using pointer           = value_type*;
-    using const_pointer     = const value_type*;
-    using reference         = value_type&;
-    using const_reference   = const value_type&;
+    using difference_type = std::ptrdiff_t;
+    using value_type = T;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using reference = value_type&;
+    using const_reference = const value_type&;
 
-    // If value_type is const, we want "const IntrusiveListNode<value_type>", not "const IntrusiveListNode<const value_type>"
-    using node_type         = std::conditional_t<std::is_const<value_type>::value,
-                                                 const IntrusiveListNode<std::remove_const_t<value_type>>,
-                                                 IntrusiveListNode<value_type>>;
-    using node_pointer      = node_type*;
-    using node_reference    = node_type&;
+    // If value_type is const, we want "const IntrusiveListNode<value_type>", not "const
+    // IntrusiveListNode<const value_type>"
+    using node_type = std::conditional_t<std::is_const<value_type>::value,
+                                         const IntrusiveListNode<std::remove_const_t<value_type>>,
+                                         IntrusiveListNode<value_type>>;
+    using node_pointer = node_type*;
+    using node_reference = node_type&;
 
     IntrusiveListIterator() = default;
     IntrusiveListIterator(const IntrusiveListIterator& other) = default;
     IntrusiveListIterator& operator=(const IntrusiveListIterator& other) = default;
 
-    explicit IntrusiveListIterator(node_pointer list_node) : node(list_node) {
-    }
-    explicit IntrusiveListIterator(pointer data) : node(data) {
-    }
-    explicit IntrusiveListIterator(reference data) : node(&data) {
-    }
+    explicit IntrusiveListIterator(node_pointer list_node) : node(list_node) {}
+    explicit IntrusiveListIterator(pointer data) : node(data) {}
+    explicit IntrusiveListIterator(reference data) : node(&data) {}
 
     IntrusiveListIterator& operator++() {
         node = node->next;
@@ -124,16 +123,16 @@ private:
 template <typename T>
 class IntrusiveList {
 public:
-    using difference_type        = std::ptrdiff_t;
-    using size_type              = std::size_t;
-    using value_type             = T;
-    using pointer                = value_type*;
-    using const_pointer          = const value_type*;
-    using reference              = value_type&;
-    using const_reference        = const value_type&;
-    using iterator               = IntrusiveListIterator<value_type>;
-    using const_iterator         = IntrusiveListIterator<const value_type>;
-    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using difference_type = std::ptrdiff_t;
+    using size_type = std::size_t;
+    using value_type = T;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using iterator = IntrusiveListIterator<value_type>;
+    using const_iterator = IntrusiveListIterator<const value_type>;
+    using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     /**
@@ -222,10 +221,10 @@ public:
 
         node->prev->next = node->next;
         node->next->prev = node->prev;
-    #if !defined(NDEBUG)
+#if !defined(NDEBUG)
         node->next = nullptr;
         node->prev = nullptr;
-    #endif
+#endif
 
         return node;
     }
@@ -308,21 +307,45 @@ public:
     }
 
     // Iterator interface
-    iterator               begin()         { return iterator(root->next);            }
-    const_iterator         begin()   const { return const_iterator(root->next);      }
-    const_iterator         cbegin()  const { return begin();                         }
+    iterator begin() {
+        return iterator(root->next);
+    }
+    const_iterator begin() const {
+        return const_iterator(root->next);
+    }
+    const_iterator cbegin() const {
+        return begin();
+    }
 
-    iterator               end()           { return iterator(root.get());            }
-    const_iterator         end()     const { return const_iterator(root.get());      }
-    const_iterator         cend()    const { return end();                           }
+    iterator end() {
+        return iterator(root.get());
+    }
+    const_iterator end() const {
+        return const_iterator(root.get());
+    }
+    const_iterator cend() const {
+        return end();
+    }
 
-    reverse_iterator       rbegin()        { return reverse_iterator(end());         }
-    const_reverse_iterator rbegin()  const { return const_reverse_iterator(end());   }
-    const_reverse_iterator crbegin() const { return rbegin();                        }
+    reverse_iterator rbegin() {
+        return reverse_iterator(end());
+    }
+    const_reverse_iterator rbegin() const {
+        return const_reverse_iterator(end());
+    }
+    const_reverse_iterator crbegin() const {
+        return rbegin();
+    }
 
-    reverse_iterator       rend()          { return reverse_iterator(begin());       }
-    const_reverse_iterator rend()    const { return const_reverse_iterator(begin()); }
-    const_reverse_iterator crend()   const { return rend();                          }
+    reverse_iterator rend() {
+        return reverse_iterator(begin());
+    }
+    const_reverse_iterator rend() const {
+        return const_reverse_iterator(begin());
+    }
+    const_reverse_iterator crend() const {
+        return rend();
+    }
 
     /**
      * Erases a node from the list, indicated by an iterator.

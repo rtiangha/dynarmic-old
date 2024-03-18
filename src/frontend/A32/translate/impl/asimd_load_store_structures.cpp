@@ -13,7 +13,8 @@ namespace Dynarmic::A32 {
 
 namespace {
 
-std::optional<std::tuple<size_t, size_t, size_t>> DecodeType(Imm<4> type, size_t size, size_t align) {
+std::optional<std::tuple<size_t, size_t, size_t>> DecodeType(Imm<4> type, size_t size,
+                                                             size_t align) {
     switch (type.ZeroExtend()) {
     case 0b0111: // VST1 A1 / VLD1 A1
         if (Common::Bit<1>(align)) {
@@ -70,9 +71,10 @@ std::optional<std::tuple<size_t, size_t, size_t>> DecodeType(Imm<4> type, size_t
     }
     ASSERT_FALSE("Decode error");
 }
-} // anoynmous namespace
+} // namespace
 
-bool ArmTranslatorVisitor::v8_VST_multiple(bool D, Reg n, size_t Vd, Imm<4> type, size_t size, size_t align, Reg m) {
+bool ArmTranslatorVisitor::v8_VST_multiple(bool D, Reg n, size_t Vd, Imm<4> type, size_t size,
+                                           size_t align, Reg m) {
     const auto decoded_type = DecodeType(type, size, align);
     if (!decoded_type) {
         return UndefinedInstruction();
@@ -97,7 +99,8 @@ bool ArmTranslatorVisitor::v8_VST_multiple(bool D, Reg n, size_t Vd, Imm<4> type
         for (size_t e = 0; e < elements; e++) {
             for (size_t i = 0; i < nelem; i++) {
                 const ExtReg ext_reg = d + i * inc + r;
-                const IR::U64 shifted_element = ir.LogicalShiftRight(ir.GetExtendedRegister(ext_reg), ir.Imm8(static_cast<u8>(e * ebytes * 8)));
+                const IR::U64 shifted_element = ir.LogicalShiftRight(
+                    ir.GetExtendedRegister(ext_reg), ir.Imm8(static_cast<u8>(e * ebytes * 8)));
                 const IR::UAny element = ir.LeastSignificant(8 * ebytes, shifted_element);
                 ir.WriteMemory(8 * ebytes, address, element);
 
@@ -110,14 +113,16 @@ bool ArmTranslatorVisitor::v8_VST_multiple(bool D, Reg n, size_t Vd, Imm<4> type
         if (register_index) {
             ir.SetRegister(n, ir.Add(ir.GetRegister(n), ir.GetRegister(m)));
         } else {
-            ir.SetRegister(n, ir.Add(ir.GetRegister(n), ir.Imm32(static_cast<u32>(8 * nelem * regs))));
+            ir.SetRegister(n,
+                           ir.Add(ir.GetRegister(n), ir.Imm32(static_cast<u32>(8 * nelem * regs))));
         }
     }
 
     return true;
 }
 
-bool ArmTranslatorVisitor::v8_VLD_multiple(bool D, Reg n, size_t Vd, Imm<4> type, size_t size, size_t align, Reg m) {
+bool ArmTranslatorVisitor::v8_VLD_multiple(bool D, Reg n, size_t Vd, Imm<4> type, size_t size,
+                                           size_t align, Reg m) {
     const auto decoded_type = DecodeType(type, size, align);
     if (!decoded_type) {
         return UndefinedInstruction();
@@ -150,8 +155,10 @@ bool ArmTranslatorVisitor::v8_VLD_multiple(bool D, Reg n, size_t Vd, Imm<4> type
             for (size_t i = 0; i < nelem; i++) {
                 const ExtReg ext_reg = d + i * inc + r;
                 const IR::U64 element = ir.ZeroExtendToLong(ir.ReadMemory(ebytes * 8, address));
-                const IR::U64 shifted_element = ir.LogicalShiftLeft(element, ir.Imm8(static_cast<u8>(e * ebytes * 8)));
-                ir.SetExtendedRegister(ext_reg, ir.Or(ir.GetExtendedRegister(ext_reg), shifted_element));
+                const IR::U64 shifted_element =
+                    ir.LogicalShiftLeft(element, ir.Imm8(static_cast<u8>(e * ebytes * 8)));
+                ir.SetExtendedRegister(ext_reg,
+                                       ir.Or(ir.GetExtendedRegister(ext_reg), shifted_element));
 
                 address = ir.Add(address, ir.Imm32(static_cast<u32>(ebytes)));
             }
@@ -162,7 +169,8 @@ bool ArmTranslatorVisitor::v8_VLD_multiple(bool D, Reg n, size_t Vd, Imm<4> type
         if (register_index) {
             ir.SetRegister(n, ir.Add(ir.GetRegister(n), ir.GetRegister(m)));
         } else {
-            ir.SetRegister(n, ir.Add(ir.GetRegister(n), ir.Imm32(static_cast<u32>(8 * nelem * regs))));
+            ir.SetRegister(n,
+                           ir.Add(ir.GetRegister(n), ir.Imm32(static_cast<u32>(8 * nelem * regs))));
         }
     }
 

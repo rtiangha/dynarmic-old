@@ -90,7 +90,8 @@ bool HostLocInfo::IsEmpty() const {
 }
 
 bool HostLocInfo::IsLastUse() const {
-    return is_being_used_count == 0 && current_references == 1 && accumulated_uses + 1 == total_uses;
+    return is_being_used_count == 0 && current_references == 1 &&
+           accumulated_uses + 1 == total_uses;
 }
 
 void HostLocInfo::ReadLock() {
@@ -127,7 +128,9 @@ void HostLocInfo::ReleaseAll() {
     accumulated_uses += current_references;
     current_references = 0;
 
-    ASSERT(total_uses == std::accumulate(values.begin(), values.end(), size_t(0), [](size_t sum, IR::Inst* inst) { return sum + inst->UseCount(); }));
+    ASSERT(total_uses ==
+           std::accumulate(values.begin(), values.end(), size_t(0),
+                           [](size_t sum, IR::Inst* inst) { return sum + inst->UseCount(); }));
 
     if (total_uses == accumulated_uses) {
         values.clear();
@@ -260,9 +263,9 @@ Arm64Gen::ARM64Reg RegAlloc::UseFpr(Argument& arg) {
     return HostLocToFpr(UseImpl(arg.value, any_fpr));
 }
 
-//OpArg RegAlloc::UseOpArg(Argument& arg) {
-//    return UseGpr(arg);
-//}
+// OpArg RegAlloc::UseOpArg(Argument& arg) {
+//     return UseGpr(arg);
+// }
 
 void RegAlloc::Use(Argument& arg, HostLoc host_loc) {
     ASSERT(!arg.allocated);
@@ -290,7 +293,8 @@ void RegAlloc::UseScratch(Argument& arg, HostLoc host_loc) {
 
 void RegAlloc::DefineValue(IR::Inst* inst, const Arm64Gen::ARM64Reg& reg) {
     ASSERT(IsVector(reg) || IsGPR(reg));
-    HostLoc hostloc = static_cast<HostLoc>(DecodeReg(reg) + static_cast<size_t>(IsVector(reg) ? HostLoc::Q0 : HostLoc::X0));
+    HostLoc hostloc = static_cast<HostLoc>(
+        DecodeReg(reg) + static_cast<size_t>(IsVector(reg) ? HostLoc::Q0 : HostLoc::X0));
     DefineValueImpl(inst, hostloc);
 }
 
@@ -302,7 +306,8 @@ void RegAlloc::DefineValue(IR::Inst* inst, Argument& arg) {
 
 void RegAlloc::Release(const Arm64Gen::ARM64Reg& reg) {
     ASSERT(IsVector(reg) || IsGPR(reg));
-    const HostLoc hostloc = static_cast<HostLoc>(DecodeReg(reg) + static_cast<size_t>(IsVector(reg) ? HostLoc::Q0 : HostLoc::X0));
+    const HostLoc hostloc = static_cast<HostLoc>(
+        DecodeReg(reg) + static_cast<size_t>(IsVector(reg) ? HostLoc::Q0 : HostLoc::X0));
     LocInfo(hostloc).ReleaseOne();
 }
 
@@ -323,7 +328,9 @@ HostLoc RegAlloc::UseImpl(IR::Value use_value, HostLocList desired_locations) {
     const HostLoc current_location = *ValueLocation(use_inst);
     const size_t max_bit_width = LocInfo(current_location).GetMaxBitWidth();
 
-    const bool can_use_current_location = std::find(desired_locations.begin(), desired_locations.end(), current_location) != desired_locations.end();
+    const bool can_use_current_location =
+        std::find(desired_locations.begin(), desired_locations.end(), current_location) !=
+        desired_locations.end();
     if (can_use_current_location) {
         LocInfo(current_location).ReadLock();
         return current_location;
@@ -355,7 +362,9 @@ HostLoc RegAlloc::UseScratchImpl(IR::Value use_value, HostLocList desired_locati
     const HostLoc current_location = *ValueLocation(use_inst);
     const size_t bit_width = GetBitWidth(use_inst->GetType());
 
-    const bool can_use_current_location = std::find(desired_locations.begin(), desired_locations.end(), current_location) != desired_locations.end();
+    const bool can_use_current_location =
+        std::find(desired_locations.begin(), desired_locations.end(), current_location) !=
+        desired_locations.end();
     if (can_use_current_location && !LocInfo(current_location).IsLocked()) {
         if (!LocInfo(current_location).IsLastUse()) {
             MoveOutOfTheWay(current_location);
@@ -378,17 +387,20 @@ HostLoc RegAlloc::ScratchImpl(HostLocList desired_locations) {
     return location;
 }
 
-void RegAlloc::HostCall(IR::Inst* result_def, std::optional<Argument::copyable_reference> arg0, 
+void RegAlloc::HostCall(IR::Inst* result_def, std::optional<Argument::copyable_reference> arg0,
                         std::optional<Argument::copyable_reference> arg1,
-                        std::optional<Argument::copyable_reference> arg2, 
-                        std::optional<Argument::copyable_reference> arg3, 
-                        std::optional<Argument::copyable_reference> arg4, 
-                        std::optional<Argument::copyable_reference> arg5, 
-                        std::optional<Argument::copyable_reference> arg6, 
+                        std::optional<Argument::copyable_reference> arg2,
+                        std::optional<Argument::copyable_reference> arg3,
+                        std::optional<Argument::copyable_reference> arg4,
+                        std::optional<Argument::copyable_reference> arg5,
+                        std::optional<Argument::copyable_reference> arg6,
                         std::optional<Argument::copyable_reference> arg7) {
     constexpr size_t args_count = 8;
-    constexpr std::array<HostLoc, args_count> args_hostloc = { ABI_PARAM1, ABI_PARAM2, ABI_PARAM3, ABI_PARAM4, ABI_PARAM5, ABI_PARAM6, ABI_PARAM7, ABI_PARAM8 };
-    const std::array<std::optional<Argument::copyable_reference>, args_count> args = {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7};
+    constexpr std::array<HostLoc, args_count> args_hostloc = {ABI_PARAM1, ABI_PARAM2, ABI_PARAM3,
+                                                              ABI_PARAM4, ABI_PARAM5, ABI_PARAM6,
+                                                              ABI_PARAM7, ABI_PARAM8};
+    const std::array<std::optional<Argument::copyable_reference>, args_count> args = {
+        arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7};
 
     static const std::vector<HostLoc> other_caller_save = [args_hostloc]() {
         std::vector<HostLoc> ret(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end());
@@ -416,7 +428,7 @@ void RegAlloc::HostCall(IR::Inst* result_def, std::optional<Argument::copyable_r
         ScratchImpl({caller_saved});
     }
 
-     if (result_def) {
+    if (result_def) {
         DefineValueImpl(result_def, ABI_RETURN);
     }
 }
@@ -428,25 +440,26 @@ void RegAlloc::EndOfAllocScope() {
 }
 
 void RegAlloc::AssertNoMoreUses() {
-    ASSERT(std::all_of(hostloc_info.begin(), hostloc_info.end(), [](const auto& i) { return i.IsEmpty(); }));
+    ASSERT(std::all_of(hostloc_info.begin(), hostloc_info.end(),
+                       [](const auto& i) { return i.IsEmpty(); }));
 }
 
 HostLoc RegAlloc::SelectARegister(HostLocList desired_locations) const {
-     std::vector<HostLoc> candidates = desired_locations;
+    std::vector<HostLoc> candidates = desired_locations;
 
     // Find all locations that have not been allocated..
-    const auto allocated_locs = std::partition(candidates.begin(), candidates.end(), [this](auto loc){
-        return !this->LocInfo(loc).IsLocked();
-    });
+    const auto allocated_locs =
+        std::partition(candidates.begin(), candidates.end(),
+                       [this](auto loc) { return !this->LocInfo(loc).IsLocked(); });
     candidates.erase(allocated_locs, candidates.end());
     ASSERT_MSG(!candidates.empty(), "All candidate registers have already been allocated");
 
     // Selects the best location out of the available locations.
-    // TODO: Actually do LRU or something. Currently we just try to pick something without a value if possible.
+    // TODO: Actually do LRU or something. Currently we just try to pick something without a value
+    // if possible.
 
-    std::partition(candidates.begin(), candidates.end(), [this](auto loc){
-        return this->LocInfo(loc).IsEmpty();
-    });
+    std::partition(candidates.begin(), candidates.end(),
+                   [this](auto loc) { return this->LocInfo(loc).IsEmpty(); });
 
     return candidates.front();
 }
@@ -583,7 +596,7 @@ const HostLocInfo& RegAlloc::LocInfo(HostLoc loc) const {
 void RegAlloc::EmitMove(size_t bit_width, HostLoc to, HostLoc from) {
     if (HostLocIsFPR(to) && HostLocIsFPR(from)) {
         // bit_width == 128
-        //mov(HostLocToFpr(to), HostLocToFpr(from));
+        // mov(HostLocToFpr(to), HostLocToFpr(from));
 
         ASSERT_FALSE("Unimplemented");
     } else if (HostLocIsGPR(to) && HostLocIsGPR(from)) {
@@ -598,36 +611,44 @@ void RegAlloc::EmitMove(size_t bit_width, HostLoc to, HostLoc from) {
         if (bit_width == 64) {
             code.fp_emitter.FMOV(EncodeRegToDouble(HostLocToFpr(to)), HostLocToReg64(from));
         } else {
-            code.fp_emitter.FMOV(EncodeRegToSingle(HostLocToFpr(to)), DecodeReg(HostLocToReg64(from)));
+            code.fp_emitter.FMOV(EncodeRegToSingle(HostLocToFpr(to)),
+                                 DecodeReg(HostLocToReg64(from)));
         }
     } else if (HostLocIsGPR(to) && HostLocIsFPR(from)) {
         ASSERT(bit_width != 128);
         if (bit_width == 64) {
             code.fp_emitter.FMOV(HostLocToReg64(to), EncodeRegToDouble(HostLocToFpr(from)));
         } else {
-            code.fp_emitter.FMOV(DecodeReg(HostLocToReg64(to)), EncodeRegToSingle(HostLocToFpr(from)));
+            code.fp_emitter.FMOV(DecodeReg(HostLocToReg64(to)),
+                                 EncodeRegToSingle(HostLocToFpr(from)));
         }
     } else if (HostLocIsFPR(to) && HostLocIsSpill(from)) {
         s32 spill_addr = spill_to_addr(from);
         // ASSERT(spill_addr.getBit() >= bit_width);
-        code.fp_emitter.LDR(bit_width, Arm64Gen::INDEX_UNSIGNED, HostLocToFpr(to), Arm64Gen::X28, spill_addr);
+        code.fp_emitter.LDR(bit_width, Arm64Gen::INDEX_UNSIGNED, HostLocToFpr(to), Arm64Gen::X28,
+                            spill_addr);
     } else if (HostLocIsSpill(to) && HostLocIsFPR(from)) {
         s32 spill_addr = spill_to_addr(to);
         // ASSERT(spill_addr.getBit() >= bit_width);
-        code.fp_emitter.STR(bit_width, Arm64Gen::INDEX_UNSIGNED, HostLocToFpr(from), Arm64Gen::X28, spill_addr);
+        code.fp_emitter.STR(bit_width, Arm64Gen::INDEX_UNSIGNED, HostLocToFpr(from), Arm64Gen::X28,
+                            spill_addr);
     } else if (HostLocIsGPR(to) && HostLocIsSpill(from)) {
         ASSERT(bit_width != 128);
         if (bit_width == 64) {
-            code.LDR(Arm64Gen::INDEX_UNSIGNED, HostLocToReg64(to), Arm64Gen::X28, spill_to_addr(from));
+            code.LDR(Arm64Gen::INDEX_UNSIGNED, HostLocToReg64(to), Arm64Gen::X28,
+                     spill_to_addr(from));
         } else {
-            code.LDR(Arm64Gen::INDEX_UNSIGNED, DecodeReg(HostLocToReg64(to)), Arm64Gen::X28, spill_to_addr(from));
+            code.LDR(Arm64Gen::INDEX_UNSIGNED, DecodeReg(HostLocToReg64(to)), Arm64Gen::X28,
+                     spill_to_addr(from));
         }
     } else if (HostLocIsSpill(to) && HostLocIsGPR(from)) {
         ASSERT(bit_width != 128);
         if (bit_width == 64) {
-            code.STR(Arm64Gen::INDEX_UNSIGNED, HostLocToReg64(from), Arm64Gen::X28, spill_to_addr(to));
+            code.STR(Arm64Gen::INDEX_UNSIGNED, HostLocToReg64(from), Arm64Gen::X28,
+                     spill_to_addr(to));
         } else {
-            code.STR(Arm64Gen::INDEX_UNSIGNED, DecodeReg(HostLocToReg64(from)), Arm64Gen::X28, spill_to_addr(to));
+            code.STR(Arm64Gen::INDEX_UNSIGNED, DecodeReg(HostLocToReg64(from)), Arm64Gen::X28,
+                     spill_to_addr(to));
         }
     } else {
         ASSERT_FALSE("Invalid RegAlloc::EmitMove");

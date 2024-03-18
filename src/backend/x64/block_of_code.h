@@ -44,7 +44,8 @@ public:
 
     /// Clears this block of code and resets code pointer to beginning.
     void ClearCache();
-    /// Calculates how much space is remaining to use. This is the minimum of near code and far code.
+    /// Calculates how much space is remaining to use. This is the minimum of near code and far
+    /// code.
     size_t SpaceRemaining() const;
 
     /// Runs emulated code from code_ptr.
@@ -69,10 +70,11 @@ public:
     /// Code emitter: Calls the function
     template <typename FunctionPointer>
     void CallFunction(FunctionPointer fn) {
-        static_assert(std::is_pointer_v<FunctionPointer> && std::is_function_v<std::remove_pointer_t<FunctionPointer>>,
+        static_assert(std::is_pointer_v<FunctionPointer> &&
+                          std::is_function_v<std::remove_pointer_t<FunctionPointer>>,
                       "Supplied type must be a pointer to a function");
 
-        const u64 address  = reinterpret_cast<u64>(fn);
+        const u64 address = reinterpret_cast<u64>(fn);
         const u64 distance = address - (getCurr<u64>() + 5);
 
         if (distance >= 0x0000000080000000ULL && distance < 0xFFFFFFFF80000000ULL) {
@@ -93,7 +95,8 @@ public:
     Xbyak::Address MConst(const Xbyak::AddressFrame& frame, u64 lower, u64 upper = 0);
 
     /// Far code sits far away from the near code. Execution remains primarily in near code.
-    /// "Cold" / Rarely executed instructions sit in far code, so the CPU doesn't fetch them unless necessary.
+    /// "Cold" / Rarely executed instructions sit in far code, so the CPU doesn't fetch them unless
+    /// necessary.
     void SwitchToFarCode();
     void SwitchToNearCode();
 
@@ -108,7 +111,9 @@ public:
         return return_from_run_code[FORCE_RETURN];
     }
 
-    void int3() { db(0xCC); }
+    void int3() {
+        db(0xCC);
+    }
 
     /// Allocate memory of `size` bytes from the same block of memory the code is in.
     /// This is useful for objects that need to be placed close to or within code.
@@ -138,7 +143,9 @@ public:
     static const std::array<Xbyak::Reg64, 6> ABI_PARAMS;
 #endif
 
-    JitStateInfo GetJitStateInfo() const { return jsi; }
+    JitStateInfo GetJitStateInfo() const {
+        return jsi;
+    }
 
     bool HasSSSE3() const;
     bool HasSSE41() const;
@@ -170,7 +177,7 @@ private:
     CodePtr near_code_ptr;
     CodePtr far_code_ptr;
 
-    using RunCodeFuncType = void(*)(void*, CodePtr);
+    using RunCodeFuncType = void (*)(void*, CodePtr);
     RunCodeFuncType run_code = nullptr;
     RunCodeFuncType step_code = nullptr;
     static constexpr size_t MXCSR_ALREADY_EXITED = 1 << 0;

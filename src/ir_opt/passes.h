@@ -12,7 +12,7 @@ struct UserCallbacks;
 namespace Dynarmic::A64 {
 struct UserCallbacks;
 struct UserConfig;
-}
+} // namespace Dynarmic::A64
 
 namespace Dynarmic::IR {
 class Block;

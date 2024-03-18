@@ -97,7 +97,8 @@ void IREmitter::CallSupervisor(const IR::U32& value) {
 }
 
 void IREmitter::ExceptionRaised(const Exception exception) {
-    Inst(Opcode::A32ExceptionRaised, Imm32(current_location.PC()), Imm64(static_cast<u64>(exception)));
+    Inst(Opcode::A32ExceptionRaised, Imm32(current_location.PC()),
+         Imm64(static_cast<u64>(exception)));
 }
 
 IR::U32 IREmitter::GetCpsr() {
@@ -297,69 +298,65 @@ IR::U32 IREmitter::ExclusiveWriteMemory32(const IR::U32& vaddr, const IR::U32& v
     }
 }
 
-IR::U32 IREmitter::ExclusiveWriteMemory64(const IR::U32& vaddr, const IR::U32& value_lo, const IR::U32& value_hi) {
+IR::U32 IREmitter::ExclusiveWriteMemory64(const IR::U32& vaddr, const IR::U32& value_lo,
+                                          const IR::U32& value_hi) {
     if (current_location.EFlag()) {
         const auto vlo = ByteReverseWord(value_lo);
         const auto vhi = ByteReverseWord(value_hi);
         return Inst<IR::U32>(Opcode::A32ExclusiveWriteMemory64, vaddr, Pack2x32To1x64(vlo, vhi));
     } else {
-        return Inst<IR::U32>(Opcode::A32ExclusiveWriteMemory64, vaddr, Pack2x32To1x64(value_lo, value_hi));
+        return Inst<IR::U32>(Opcode::A32ExclusiveWriteMemory64, vaddr,
+                             Pack2x32To1x64(value_lo, value_hi));
     }
 }
 
-void IREmitter::CoprocInternalOperation(size_t coproc_no, bool two, size_t opc1, CoprocReg CRd, CoprocReg CRn, CoprocReg CRm, size_t opc2) {
+void IREmitter::CoprocInternalOperation(size_t coproc_no, bool two, size_t opc1, CoprocReg CRd,
+                                        CoprocReg CRn, CoprocReg CRm, size_t opc2) {
     ASSERT(coproc_no <= 15);
-    const IR::Value::CoprocessorInfo coproc_info{static_cast<u8>(coproc_no),
-                                                 static_cast<u8>(two ? 1 : 0),
-                                                 static_cast<u8>(opc1),
-                                                 static_cast<u8>(CRd),
-                                                 static_cast<u8>(CRn),
-                                                 static_cast<u8>(CRm),
-                                                 static_cast<u8>(opc2)};
+    const IR::Value::CoprocessorInfo coproc_info{
+        static_cast<u8>(coproc_no), static_cast<u8>(two ? 1 : 0), static_cast<u8>(opc1),
+        static_cast<u8>(CRd),       static_cast<u8>(CRn),         static_cast<u8>(CRm),
+        static_cast<u8>(opc2)};
     Inst(Opcode::A32CoprocInternalOperation, IR::Value(coproc_info));
 }
 
-void IREmitter::CoprocSendOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn, CoprocReg CRm, size_t opc2, const IR::U32& word) {
+void IREmitter::CoprocSendOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn,
+                                  CoprocReg CRm, size_t opc2, const IR::U32& word) {
     ASSERT(coproc_no <= 15);
-    const IR::Value::CoprocessorInfo coproc_info{static_cast<u8>(coproc_no),
-                                                 static_cast<u8>(two ? 1 : 0),
-                                                 static_cast<u8>(opc1),
-                                                 static_cast<u8>(CRn),
-                                                 static_cast<u8>(CRm),
-                                                 static_cast<u8>(opc2)};
+    const IR::Value::CoprocessorInfo coproc_info{
+        static_cast<u8>(coproc_no), static_cast<u8>(two ? 1 : 0), static_cast<u8>(opc1),
+        static_cast<u8>(CRn),       static_cast<u8>(CRm),         static_cast<u8>(opc2)};
     Inst(Opcode::A32CoprocSendOneWord, IR::Value(coproc_info), word);
 }
 
-void IREmitter::CoprocSendTwoWords(size_t coproc_no, bool two, size_t opc, CoprocReg CRm, const IR::U32& word1, const IR::U32& word2) {
+void IREmitter::CoprocSendTwoWords(size_t coproc_no, bool two, size_t opc, CoprocReg CRm,
+                                   const IR::U32& word1, const IR::U32& word2) {
     ASSERT(coproc_no <= 15);
     const IR::Value::CoprocessorInfo coproc_info{static_cast<u8>(coproc_no),
-                                                 static_cast<u8>(two ? 1 : 0),
-                                                 static_cast<u8>(opc),
+                                                 static_cast<u8>(two ? 1 : 0), static_cast<u8>(opc),
                                                  static_cast<u8>(CRm)};
     Inst(Opcode::A32CoprocSendTwoWords, IR::Value(coproc_info), word1, word2);
 }
 
-IR::U32 IREmitter::CoprocGetOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn, CoprocReg CRm, size_t opc2) {
+IR::U32 IREmitter::CoprocGetOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn,
+                                    CoprocReg CRm, size_t opc2) {
     ASSERT(coproc_no <= 15);
-    const IR::Value::CoprocessorInfo coproc_info{static_cast<u8>(coproc_no),
-                                                 static_cast<u8>(two ? 1 : 0),
-                                                 static_cast<u8>(opc1),
-                                                 static_cast<u8>(CRn),
-                                                 static_cast<u8>(CRm),
-                                                 static_cast<u8>(opc2)};
+    const IR::Value::CoprocessorInfo coproc_info{
+        static_cast<u8>(coproc_no), static_cast<u8>(two ? 1 : 0), static_cast<u8>(opc1),
+        static_cast<u8>(CRn),       static_cast<u8>(CRm),         static_cast<u8>(opc2)};
     return Inst<IR::U32>(Opcode::A32CoprocGetOneWord, IR::Value(coproc_info));
 }
 
 IR::U64 IREmitter::CoprocGetTwoWords(size_t coproc_no, bool two, size_t opc, CoprocReg CRm) {
     ASSERT(coproc_no <= 15);
     const IR::Value::CoprocessorInfo coproc_info{static_cast<u8>(coproc_no),
-                                                 static_cast<u8>(two ? 1 : 0),
-                                                 static_cast<u8>(opc),
+                                                 static_cast<u8>(two ? 1 : 0), static_cast<u8>(opc),
                                                  static_cast<u8>(CRm)};
     return Inst<IR::U64>(Opcode::A32CoprocGetTwoWords, IR::Value(coproc_info));
 }
 
-void IREmitter::CoprocLoadWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd, const IR::U32& address, bool has_option, u8 option) {
+void IREmitter::CoprocLoadWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd,
+                                const IR::U32& address, bool has_option, u8 option) {
     ASSERT(coproc_no <= 15);
     const IR::Value::CoprocessorInfo coproc_info{static_cast<u8>(coproc_no),
                                                  static_cast<u8>(two ? 1 : 0),
@@ -370,7 +367,8 @@ void IREmitter::CoprocLoadWords(size_t coproc_no, bool two, bool long_transfer, 
     Inst(Opcode::A32CoprocLoadWords, IR::Value(coproc_info), address);
 }
 
-void IREmitter::CoprocStoreWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd, const IR::U32& address, bool has_option, u8 option) {
+void IREmitter::CoprocStoreWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd,
+                                 const IR::U32& address, bool has_option, u8 option) {
     ASSERT(coproc_no <= 15);
     const IR::Value::CoprocessorInfo coproc_info{static_cast<u8>(coproc_no),
                                                  static_cast<u8>(two ? 1 : 0),

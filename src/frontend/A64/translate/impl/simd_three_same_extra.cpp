@@ -166,10 +166,10 @@ bool TranslatorVisitor::FCADD_vec(bool Q, Imm<2> size, Vec Vm, Imm<1> rot, Vec V
         const IR::U32U64 operand1_elem1 = ir.VectorGetElement(esize, operand1, first);
         const IR::U32U64 operand1_elem3 = ir.VectorGetElement(esize, operand1, second);
 
-        result = ir.VectorSetElement(esize, result, first,
-                                     ir.FPAdd(operand1_elem1, element1, true));
-        result = ir.VectorSetElement(esize, result, second,
-                                     ir.FPAdd(operand1_elem3, element3, true));
+        result =
+            ir.VectorSetElement(esize, result, first, ir.FPAdd(operand1_elem1, element1, true));
+        result =
+            ir.VectorSetElement(esize, result, second, ir.FPAdd(operand1_elem3, element3, true));
     }
 
     ir.SetQ(Vd, result);

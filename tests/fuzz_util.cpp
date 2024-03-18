@@ -34,7 +34,7 @@ u32 RandomFpcr() {
     return fpcr.Value();
 }
 
-InstructionGenerator::InstructionGenerator(const char* format){
+InstructionGenerator::InstructionGenerator(const char* format) {
     ASSERT(std::strlen(format) == 32);
 
     for (int i = 0; i < 32; i++) {

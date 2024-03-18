@@ -7,10 +7,11 @@
 
 namespace Dynarmic::A64 {
 
-static bool TableLookup(TranslatorVisitor& v, bool Q, Vec Vm, Imm<2> len, bool is_tbl, size_t Vn, Vec Vd) {
+static bool TableLookup(TranslatorVisitor& v, bool Q, Vec Vm, Imm<2> len, bool is_tbl, size_t Vn,
+                        Vec Vd) {
     const size_t datasize = Q ? 128 : 64;
 
-    const IR::Table table = v.ir.VectorTable([&]{
+    const IR::Table table = v.ir.VectorTable([&] {
         std::vector<IR::U128> result;
         for (size_t i = 0; i < len.ZeroExtend<size_t>() + 1; ++i) {
             result.emplace_back(v.ir.GetQ(static_cast<Vec>((Vn + i) % 32)));

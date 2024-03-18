@@ -7,11 +7,11 @@
 
 #include "common/assert.h"
 #include "common/bit_util.h"
-#include "frontend/imm.h"
 #include "frontend/A32/ir_emitter.h"
 #include "frontend/A32/location_descriptor.h"
 #include "frontend/A32/translate/translate.h"
 #include "frontend/A32/types.h"
+#include "frontend/imm.h"
 
 namespace Dynarmic::A32 {
 
@@ -24,14 +24,17 @@ enum class ConditionalState {
     Break,
     /// This basic block is made up solely of conditional instructions.
     Translating,
-    /// This basic block is made up of conditional instructions followed by unconditional instructions.
+    /// This basic block is made up of conditional instructions followed by unconditional
+    /// instructions.
     Trailing,
 };
 
 struct ArmTranslatorVisitor final {
     using instruction_return_type = bool;
 
-    explicit ArmTranslatorVisitor(IR::Block& block, LocationDescriptor descriptor, const TranslationOptions& options) : ir(block, descriptor), options(options) {
+    explicit ArmTranslatorVisitor(IR::Block& block, LocationDescriptor descriptor,
+                                  const TranslationOptions& options)
+        : ir(block, descriptor), options(options) {
         ASSERT_MSG(!descriptor.TFlag(), "The processor must be in Arm mode");
     }
 
@@ -67,10 +70,14 @@ struct ArmTranslatorVisitor final {
     // Creates an immediate of the given value
     IR::UAny I(size_t bitsize, u64 value);
 
-    IR::ResultAndCarry<IR::U32> EmitImmShift(IR::U32 value, ShiftType type, Imm<5> imm5, IR::U1 carry_in);
-    IR::ResultAndCarry<IR::U32> EmitRegShift(IR::U32 value, ShiftType type, IR::U8 amount, IR::U1 carry_in);
-    template <typename FnT> bool EmitVfpVectorOperation(bool sz, ExtReg d, ExtReg n, ExtReg m, const FnT& fn);
-    template <typename FnT> bool EmitVfpVectorOperation(bool sz, ExtReg d, ExtReg m, const FnT& fn);
+    IR::ResultAndCarry<IR::U32> EmitImmShift(IR::U32 value, ShiftType type, Imm<5> imm5,
+                                             IR::U1 carry_in);
+    IR::ResultAndCarry<IR::U32> EmitRegShift(IR::U32 value, ShiftType type, IR::U8 amount,
+                                             IR::U1 carry_in);
+    template <typename FnT>
+    bool EmitVfpVectorOperation(bool sz, ExtReg d, ExtReg n, ExtReg m, const FnT& fn);
+    template <typename FnT>
+    bool EmitVfpVectorOperation(bool sz, ExtReg d, ExtReg m, const FnT& fn);
 
     // Barrier instructions
     bool arm_DMB(Imm<4> option);
@@ -86,13 +93,18 @@ struct ArmTranslatorVisitor final {
     bool arm_BXJ(Cond cond, Reg m);
 
     // Coprocessor instructions
-    bool arm_CDP(Cond cond, size_t opc1, CoprocReg CRn, CoprocReg CRd, size_t coproc_no, size_t opc2, CoprocReg CRm);
-    bool arm_LDC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd, size_t coproc_no, Imm<8> imm8);
-    bool arm_MCR(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no, size_t opc2, CoprocReg CRm);
+    bool arm_CDP(Cond cond, size_t opc1, CoprocReg CRn, CoprocReg CRd, size_t coproc_no,
+                 size_t opc2, CoprocReg CRm);
+    bool arm_LDC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd, size_t coproc_no,
+                 Imm<8> imm8);
+    bool arm_MCR(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no, size_t opc2,
+                 CoprocReg CRm);
     bool arm_MCRR(Cond cond, Reg t2, Reg t, size_t coproc_no, size_t opc, CoprocReg CRm);
-    bool arm_MRC(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no, size_t opc2, CoprocReg CRm);
+    bool arm_MRC(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no, size_t opc2,
+                 CoprocReg CRm);
     bool arm_MRRC(Cond cond, Reg t2, Reg t, size_t coproc_no, size_t opc, CoprocReg CRm);
-    bool arm_STC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd, size_t coproc_no, Imm<8> imm8);
+    bool arm_STC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd, size_t coproc_no,
+                 Imm<8> imm8);
 
     // CRC32 instructions
     bool arm_CRC32(Cond cond, Imm<2> sz, Reg n, Reg d, Reg m);
@@ -187,10 +199,12 @@ struct ArmTranslatorVisitor final {
     bool arm_STRT();
     bool arm_LDR_lit(Cond cond, bool U, Reg t, Imm<12> imm12);
     bool arm_LDR_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg d, Imm<12> imm12);
-    bool arm_LDR_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg d, Imm<5> imm5, ShiftType shift, Reg m);
+    bool arm_LDR_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg d, Imm<5> imm5, ShiftType shift,
+                     Reg m);
     bool arm_LDRB_lit(Cond cond, bool U, Reg t, Imm<12> imm12);
     bool arm_LDRB_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<12> imm12);
-    bool arm_LDRB_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<5> imm5, ShiftType shift, Reg m);
+    bool arm_LDRB_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<5> imm5, ShiftType shift,
+                      Reg m);
     bool arm_LDRD_lit(Cond cond, bool U, Reg t, Imm<4> imm8a, Imm<4> imm8b);
     bool arm_LDRD_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<4> imm8a, Imm<4> imm8b);
     bool arm_LDRD_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg d, Reg m);
@@ -204,9 +218,11 @@ struct ArmTranslatorVisitor final {
     bool arm_LDRSH_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<4> imm8a, Imm<4> imm8b);
     bool arm_LDRSH_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Reg m);
     bool arm_STR_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<12> imm12);
-    bool arm_STR_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<5> imm5, ShiftType shift, Reg m);
+    bool arm_STR_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<5> imm5, ShiftType shift,
+                     Reg m);
     bool arm_STRB_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<12> imm12);
-    bool arm_STRB_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<5> imm5, ShiftType shift, Reg m);
+    bool arm_STRB_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<5> imm5, ShiftType shift,
+                      Reg m);
     bool arm_STRD_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<4> imm8a, Imm<4> imm8b);
     bool arm_STRD_reg(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Reg m);
     bool arm_STRH_imm(Cond cond, bool P, bool U, bool W, Reg n, Reg t, Imm<4> imm8a, Imm<4> imm8b);
@@ -231,7 +247,9 @@ struct ArmTranslatorVisitor final {
     bool arm_CLZ(Cond cond, Reg d, Reg m);
     bool arm_MOVT(Cond cond, Imm<4> imm4, Reg d, Imm<12> imm12);
     bool arm_MOVW(Cond cond, Imm<4> imm4, Reg d, Imm<12> imm12);
-    bool arm_NOP() { return true; }
+    bool arm_NOP() {
+        return true;
+    }
     bool arm_RBIT(Cond cond, Reg d, Reg m);
     bool arm_SBFX(Cond cond, Imm<5> widthm1, Reg d, Imm<5> lsb, Reg n);
     bool arm_SEL(Cond cond, Reg n, Reg d, Reg m);
@@ -412,9 +430,12 @@ struct ArmTranslatorVisitor final {
     bool vfp_VCVTB(Cond cond, bool D, bool op, size_t Vd, bool sz, bool M, size_t Vm);
     bool vfp_VCVTT(Cond cond, bool D, bool op, size_t Vd, bool sz, bool M, size_t Vm);
     bool vfp_VCVT_f_to_f(Cond cond, bool D, size_t Vd, bool sz, bool M, size_t Vm);
-    bool vfp_VCVT_from_int(Cond cond, bool D, size_t Vd, bool sz, bool is_signed, bool M, size_t Vm);
-    bool vfp_VCVT_to_u32(Cond cond, bool D, size_t Vd, bool sz, bool round_towards_zero, bool M, size_t Vm);
-    bool vfp_VCVT_to_s32(Cond cond, bool D, size_t Vd, bool sz, bool round_towards_zero, bool M, size_t Vm);
+    bool vfp_VCVT_from_int(Cond cond, bool D, size_t Vd, bool sz, bool is_signed, bool M,
+                           size_t Vm);
+    bool vfp_VCVT_to_u32(Cond cond, bool D, size_t Vd, bool sz, bool round_towards_zero, bool M,
+                         size_t Vm);
+    bool vfp_VCVT_to_s32(Cond cond, bool D, size_t Vd, bool sz, bool round_towards_zero, bool M,
+                         size_t Vm);
     bool vfp_VCMP(Cond cond, bool D, size_t Vd, bool sz, bool E, bool M, size_t Vm);
     bool vfp_VCMP_zero(Cond cond, bool D, size_t Vd, bool sz, bool E);
 
@@ -433,13 +454,16 @@ struct ArmTranslatorVisitor final {
     bool vfp_VLDM_a2(Cond cond, bool p, bool u, bool D, bool w, Reg n, size_t Vd, Imm<8> imm8);
 
     // Advanced SIMD one register, modified immediate
-    bool asimd_VMOV_imm(Imm<1> a, bool D, Imm<1> b, Imm<1> c, Imm<1> d, size_t Vd,
-                        Imm<4> cmode, bool Q, bool op, Imm<1> e, Imm<1> f, Imm<1> g, Imm<1> h);
+    bool asimd_VMOV_imm(Imm<1> a, bool D, Imm<1> b, Imm<1> c, Imm<1> d, size_t Vd, Imm<4> cmode,
+                        bool Q, bool op, Imm<1> e, Imm<1> f, Imm<1> g, Imm<1> h);
 
     // Advanced SIMD three register variants
-    bool asimd_VHADD(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
-    bool asimd_VQADD(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
-    bool asimd_VRHADD(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
+    bool asimd_VHADD(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M,
+                     size_t Vm);
+    bool asimd_VQADD(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M,
+                     size_t Vm);
+    bool asimd_VRHADD(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M,
+                      size_t Vm);
     bool asimd_VAND_reg(bool D, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
     bool asimd_VBIC_reg(bool D, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
     bool asimd_VORR_reg(bool D, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
@@ -448,8 +472,10 @@ struct ArmTranslatorVisitor final {
     bool asimd_VBSL(bool D, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
     bool asimd_VBIT(bool D, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
     bool asimd_VBIF(bool D, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
-    bool asimd_VHSUB(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
-    bool asimd_VQSUB(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M, size_t Vm);
+    bool asimd_VHSUB(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M,
+                     size_t Vm);
+    bool asimd_VQSUB(bool U, bool D, size_t sz, size_t Vn, size_t Vd, bool N, bool Q, bool M,
+                     size_t Vm);
 
     // Advanced SIMD two register, miscellaneous
     bool asimd_VCLS(bool D, size_t sz, size_t Vd, bool Q, bool M, size_t Vm);

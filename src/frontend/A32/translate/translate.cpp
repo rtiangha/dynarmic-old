@@ -9,18 +9,25 @@
 
 namespace Dynarmic::A32 {
 
-IR::Block TranslateArm(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code, const TranslationOptions& options);
-IR::Block TranslateThumb(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code, const TranslationOptions& options);
+IR::Block TranslateArm(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code,
+                       const TranslationOptions& options);
+IR::Block TranslateThumb(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code,
+                         const TranslationOptions& options);
 
-IR::Block Translate(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code, const TranslationOptions& options) {
-    return (descriptor.TFlag() ? TranslateThumb : TranslateArm)(descriptor, memory_read_code, options);
+IR::Block Translate(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code,
+                    const TranslationOptions& options) {
+    return (descriptor.TFlag() ? TranslateThumb : TranslateArm)(descriptor, memory_read_code,
+                                                                options);
 }
 
-bool TranslateSingleArmInstruction(IR::Block& block, LocationDescriptor descriptor, u32 instruction);
-bool TranslateSingleThumbInstruction(IR::Block& block, LocationDescriptor descriptor, u32 instruction);
+bool TranslateSingleArmInstruction(IR::Block& block, LocationDescriptor descriptor,
+                                   u32 instruction);
+bool TranslateSingleThumbInstruction(IR::Block& block, LocationDescriptor descriptor,
+                                     u32 instruction);
 
 bool TranslateSingleInstruction(IR::Block& block, LocationDescriptor descriptor, u32 instruction) {
-    return (descriptor.TFlag() ? TranslateSingleThumbInstruction : TranslateSingleArmInstruction)(block, descriptor, instruction);
+    return (descriptor.TFlag() ? TranslateSingleThumbInstruction
+                               : TranslateSingleArmInstruction)(block, descriptor, instruction);
 }
 
 } // namespace Dynarmic::A32

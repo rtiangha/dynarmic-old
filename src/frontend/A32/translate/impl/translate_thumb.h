@@ -6,11 +6,11 @@
 #pragma once
 
 #include "common/assert.h"
-#include "frontend/imm.h"
 #include "frontend/A32/ir_emitter.h"
 #include "frontend/A32/location_descriptor.h"
 #include "frontend/A32/translate/translate.h"
 #include "frontend/A32/types.h"
+#include "frontend/imm.h"
 
 namespace Dynarmic::A32 {
 
@@ -19,7 +19,9 @@ enum class Exception;
 struct ThumbTranslatorVisitor final {
     using instruction_return_type = bool;
 
-    explicit ThumbTranslatorVisitor(IR::Block& block, LocationDescriptor descriptor, const TranslationOptions& options) : ir(block, descriptor), options(options) {
+    explicit ThumbTranslatorVisitor(IR::Block& block, LocationDescriptor descriptor,
+                                    const TranslationOptions& options)
+        : ir(block, descriptor), options(options) {
         ASSERT_MSG(descriptor.TFlag(), "The processor must be in Thumb mode");
     }
 

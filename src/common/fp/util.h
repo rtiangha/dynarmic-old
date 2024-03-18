@@ -13,7 +13,7 @@
 namespace Dynarmic::FP {
 
 /// Is floating point value a zero?
-template<typename FPT>
+template <typename FPT>
 inline bool IsZero(FPT value, FPCR fpcr) {
     if (fpcr.FZ()) {
         return (value & FPInfo<FPT>::exponent_mask) == 0;
@@ -22,20 +22,20 @@ inline bool IsZero(FPT value, FPCR fpcr) {
 }
 
 /// Is floating point value an infinity?
-template<typename FPT>
+template <typename FPT>
 constexpr bool IsInf(FPT value) {
     return (value & ~FPInfo<FPT>::sign_mask) == FPInfo<FPT>::Infinity(false);
 }
 
 /// Is floating point value a QNaN?
-template<typename FPT>
+template <typename FPT>
 constexpr bool IsQNaN(FPT value) {
     constexpr FPT qnan_bits = FPInfo<FPT>::exponent_mask | FPInfo<FPT>::mantissa_msb;
     return (value & qnan_bits) == qnan_bits;
 }
 
 /// Is floating point value a SNaN?
-template<typename FPT>
+template <typename FPT>
 constexpr bool IsSNaN(FPT value) {
     constexpr FPT qnan_bits = FPInfo<FPT>::exponent_mask | FPInfo<FPT>::mantissa_msb;
     constexpr FPT snan_bits = FPInfo<FPT>::exponent_mask;
@@ -43,14 +43,14 @@ constexpr bool IsSNaN(FPT value) {
 }
 
 /// Is floating point value a NaN?
-template<typename FPT>
+template <typename FPT>
 constexpr bool IsNaN(FPT value) {
     return IsQNaN(value) || IsSNaN(value);
 }
 
 /// Given a single argument, return the NaN value which would be returned by an ARM processor.
 /// If the argument isn't a NaN, returns std::nullopt.
-template<typename FPT>
+template <typename FPT>
 constexpr std::optional<FPT> ProcessNaNs(FPT a) {
     if (IsSNaN(a)) {
         return a | FPInfo<FPT>::mantissa_msb;
@@ -62,7 +62,7 @@ constexpr std::optional<FPT> ProcessNaNs(FPT a) {
 
 /// Given a pair of arguments, return the NaN value which would be returned by an ARM processor.
 /// If neither argument is a NaN, returns std::nullopt.
-template<typename FPT>
+template <typename FPT>
 constexpr std::optional<FPT> ProcessNaNs(FPT a, FPT b) {
     if (IsSNaN(a)) {
         return a | FPInfo<FPT>::mantissa_msb;
@@ -78,7 +78,7 @@ constexpr std::optional<FPT> ProcessNaNs(FPT a, FPT b) {
 
 /// Given three arguments, return the NaN value which would be returned by an ARM processor.
 /// If none of the arguments is a NaN, returns std::nullopt.
-template<typename FPT>
+template <typename FPT>
 constexpr std::optional<FPT> ProcessNaNs(FPT a, FPT b, FPT c) {
     if (IsSNaN(a)) {
         return a | FPInfo<FPT>::mantissa_msb;

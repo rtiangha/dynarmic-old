@@ -54,7 +54,8 @@ bool TranslatorVisitor::UCVTF_float_int(bool sf, Imm<2> type, Reg Rn, Vec Vd) {
     return true;
 }
 
-bool TranslatorVisitor::FMOV_float_gen(bool sf, Imm<2> type, Imm<1> rmode_0, Imm<1> opc_0, size_t n, size_t d) {
+bool TranslatorVisitor::FMOV_float_gen(bool sf, Imm<2> type, Imm<1> rmode_0, Imm<1> opc_0, size_t n,
+                                       size_t d) {
     // NOTE:
     // opcode<2:1> == 0b11
     // rmode<1> == 0b0
@@ -112,7 +113,8 @@ bool TranslatorVisitor::FMOV_float_gen(bool sf, Imm<2> type, Imm<1> rmode_0, Imm
     return true;
 }
 
-static bool FloaingPointConvertSignedInteger(TranslatorVisitor& v, bool sf, Imm<2> type, Vec Vn, Reg Rd, FP::RoundingMode rounding_mode) {
+static bool FloaingPointConvertSignedInteger(TranslatorVisitor& v, bool sf, Imm<2> type, Vec Vn,
+                                             Reg Rd, FP::RoundingMode rounding_mode) {
     const size_t intsize = sf ? 64 : 32;
     const auto fltsize = FPGetDataSize(type);
     if (!fltsize) {
@@ -134,7 +136,8 @@ static bool FloaingPointConvertSignedInteger(TranslatorVisitor& v, bool sf, Imm<
     return true;
 }
 
-static bool FloaingPointConvertUnsignedInteger(TranslatorVisitor& v, bool sf, Imm<2> type, Vec Vn, Reg Rd, FP::RoundingMode rounding_mode) {
+static bool FloaingPointConvertUnsignedInteger(TranslatorVisitor& v, bool sf, Imm<2> type, Vec Vn,
+                                               Reg Rd, FP::RoundingMode rounding_mode) {
     const size_t intsize = sf ? 64 : 32;
     const auto fltsize = FPGetDataSize(type);
     if (!fltsize) {
@@ -157,11 +160,13 @@ static bool FloaingPointConvertUnsignedInteger(TranslatorVisitor& v, bool sf, Im
 }
 
 bool TranslatorVisitor::FCVTNS_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::ToNearest_TieEven);
+    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd,
+                                            FP::RoundingMode::ToNearest_TieEven);
 }
 
 bool TranslatorVisitor::FCVTNU_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::ToNearest_TieEven);
+    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd,
+                                              FP::RoundingMode::ToNearest_TieEven);
 }
 
 bool TranslatorVisitor::FCVTZS_float_int(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
@@ -169,31 +174,38 @@ bool TranslatorVisitor::FCVTZS_float_int(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
 }
 
 bool TranslatorVisitor::FCVTZU_float_int(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::TowardsZero);
+    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd,
+                                              FP::RoundingMode::TowardsZero);
 }
 
 bool TranslatorVisitor::FCVTAS_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::ToNearest_TieAwayFromZero);
+    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd,
+                                            FP::RoundingMode::ToNearest_TieAwayFromZero);
 }
 
 bool TranslatorVisitor::FCVTAU_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::ToNearest_TieAwayFromZero);
+    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd,
+                                              FP::RoundingMode::ToNearest_TieAwayFromZero);
 }
 
 bool TranslatorVisitor::FCVTPS_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::TowardsPlusInfinity);
+    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd,
+                                            FP::RoundingMode::TowardsPlusInfinity);
 }
 
 bool TranslatorVisitor::FCVTPU_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::TowardsPlusInfinity);
+    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd,
+                                              FP::RoundingMode::TowardsPlusInfinity);
 }
 
 bool TranslatorVisitor::FCVTMS_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::TowardsMinusInfinity);
+    return FloaingPointConvertSignedInteger(*this, sf, type, Vn, Rd,
+                                            FP::RoundingMode::TowardsMinusInfinity);
 }
 
 bool TranslatorVisitor::FCVTMU_float(bool sf, Imm<2> type, Vec Vn, Reg Rd) {
-    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd, FP::RoundingMode::TowardsMinusInfinity);
+    return FloaingPointConvertUnsignedInteger(*this, sf, type, Vn, Rd,
+                                              FP::RoundingMode::TowardsMinusInfinity);
 }
 
 } // namespace Dynarmic::A64

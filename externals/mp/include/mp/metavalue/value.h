@@ -11,15 +11,15 @@
 namespace mp {
 
 /// A metavalue (of type VT and value v).
-template<class VT, VT v>
+template <class VT, VT v>
 using value = std::integral_constant<VT, v>;
 
 /// A metavalue of type std::size_t (and value v).
-template<std::size_t v>
+template <std::size_t v>
 using size_value = value<std::size_t, v>;
 
 /// A metavalue of type bool (and value v). (Aliases to std::bool_constant.)
-template<bool v>
+template <bool v>
 using bool_value = value<bool, v>;
 
 /// true metavalue (Aliases to std::true_type).

@@ -17,7 +17,7 @@ template <template <class...> class C, class... As>
 struct is_instance_of_template<C, C<As...>> : true_type {};
 
 /// Is type T an instance of template class C?
-template<template <class...> class C, class T>
+template <template <class...> class C, class T>
 constexpr bool is_instance_of_template_v = is_instance_of_template<C, T>::value;
 
 } // namespace mp

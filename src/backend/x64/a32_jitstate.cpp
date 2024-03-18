@@ -89,7 +89,7 @@ void A32JitState::SetCpsr(u32 cpsr) {
     upper_location_descriptor |= Common::Bit<9>(cpsr) ? 2 : 0;
     upper_location_descriptor |= Common::Bit<5>(cpsr) ? 1 : 0;
     // IT state
-    upper_location_descriptor |= (cpsr >>  0) & 0b11111100'00000000;
+    upper_location_descriptor |= (cpsr >> 0) & 0b11111100'00000000;
     upper_location_descriptor |= (cpsr >> 17) & 0b00000011'00000000;
 
     // Other flags
@@ -111,8 +111,8 @@ void A32JitState::ResetRSB() {
  * UE   bit 4   Underflow Flag
  * OE   bit 3   Overflow Flag
  * ZE   bit 2   Divide By Zero Flag
- * DE   bit 1   Denormal Flag                                 // Appears to only be set when MXCSR.DAZ = 0
- * IE   bit 0   Invalid Operation Flag
+ * DE   bit 1   Denormal Flag                                 // Appears to only be set when
+ * MXCSR.DAZ = 0 IE   bit 0   Invalid Operation Flag
  *
  * VFP FPSCR cumulative exception bits
  * -----------------------------------
@@ -167,8 +167,8 @@ u32 A32JitState::Fpscr() const {
     const u32 fpcr_mode = static_cast<u32>(upper_location_descriptor) & FPSCR_MODE_MASK;
 
     u32 FPSCR = fpcr_mode | fpsr_nzcv;
-    FPSCR |= (guest_MXCSR & 0b0000000000001);       // IOC = IE
-    FPSCR |= (guest_MXCSR & 0b0000000111100) >> 1;  // IXC, UFC, OFC, DZC = PE, UE, OE, ZE
+    FPSCR |= (guest_MXCSR & 0b0000000000001);      // IOC = IE
+    FPSCR |= (guest_MXCSR & 0b0000000111100) >> 1; // IXC, UFC, OFC, DZC = PE, UE, OE, ZE
     FPSCR |= fpsr_exc;
 
     return FPSCR;
@@ -188,7 +188,7 @@ void A32JitState::SetFpscr(u32 FPSCR) {
     guest_MXCSR |= 0x00001f80; // mask all
 
     // RMode
-    const std::array<u32, 4> MXCSR_RMode {0x0, 0x4000, 0x2000, 0x6000};
+    const std::array<u32, 4> MXCSR_RMode{0x0, 0x4000, 0x2000, 0x6000};
     guest_MXCSR |= MXCSR_RMode[(FPSCR >> 22) & 0x3];
 
     // Cumulative flags IDC, IOC, IXC, UFC, OFC, DZC

@@ -25,7 +25,8 @@ namespace Dynarmic::A64 {
 class IREmitter : public IR::IREmitter {
 public:
     explicit IREmitter(IR::Block& block) : IR::IREmitter(block) {}
-    explicit IREmitter(IR::Block& block, LocationDescriptor descriptor) : IR::IREmitter(block), current_location(descriptor) {}
+    explicit IREmitter(IR::Block& block, LocationDescriptor descriptor)
+        : IR::IREmitter(block), current_location(descriptor) {}
 
     std::optional<LocationDescriptor> current_location;
 

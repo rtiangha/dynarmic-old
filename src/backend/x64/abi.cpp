@@ -24,7 +24,8 @@ struct FrameInfo {
 };
 
 static FrameInfo CalculateFrameInfo(size_t num_gprs, size_t num_xmms, size_t frame_size) {
-    // We are initially 8 byte aligned because the return value is pushed onto an aligned stack after a call.
+    // We are initially 8 byte aligned because the return value is pushed onto an aligned stack
+    // after a call.
     const size_t rsp_alignment = (num_gprs % 2 == 0) ? 8 : 0;
     const size_t total_xmm_size = num_xmms * XMM_SIZE;
 
@@ -39,8 +40,9 @@ static FrameInfo CalculateFrameInfo(size_t num_gprs, size_t num_xmms, size_t fra
     };
 }
 
-template<typename RegisterArrayT>
-void ABI_PushRegistersAndAdjustStack(BlockOfCode& code, size_t frame_size, const RegisterArrayT& regs) {
+template <typename RegisterArrayT>
+void ABI_PushRegistersAndAdjustStack(BlockOfCode& code, size_t frame_size,
+                                     const RegisterArrayT& regs) {
     using namespace Xbyak::util;
 
     const size_t num_gprs = std::count_if(regs.begin(), regs.end(), HostLocIsGPR);
@@ -71,8 +73,9 @@ void ABI_PushRegistersAndAdjustStack(BlockOfCode& code, size_t frame_size, const
     }
 }
 
-template<typename RegisterArrayT>
-void ABI_PopRegistersAndAdjustStack(BlockOfCode& code, size_t frame_size, const RegisterArrayT& regs) {
+template <typename RegisterArrayT>
+void ABI_PopRegistersAndAdjustStack(BlockOfCode& code, size_t frame_size,
+                                    const RegisterArrayT& regs) {
     using namespace Xbyak::util;
 
     const size_t num_gprs = std::count_if(regs.begin(), regs.end(), HostLocIsGPR);
@@ -121,13 +124,15 @@ void ABI_PopCallerSaveRegistersAndAdjustStack(BlockOfCode& code, size_t frame_si
 
 void ABI_PushCallerSaveRegistersAndAdjustStackExcept(BlockOfCode& code, HostLoc exception) {
     std::vector<HostLoc> regs;
-    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(), std::back_inserter(regs), exception);
+    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(),
+                     std::back_inserter(regs), exception);
     ABI_PushRegistersAndAdjustStack(code, 0, regs);
 }
 
 void ABI_PopCallerSaveRegistersAndAdjustStackExcept(BlockOfCode& code, HostLoc exception) {
     std::vector<HostLoc> regs;
-    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(), std::back_inserter(regs), exception);
+    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(),
+                     std::back_inserter(regs), exception);
     ABI_PopRegistersAndAdjustStack(code, 0, regs);
 }
 

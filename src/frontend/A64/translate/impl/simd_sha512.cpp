@@ -7,7 +7,8 @@
 
 namespace Dynarmic::A64 {
 namespace {
-IR::U64 MakeSig(IREmitter& ir, IR::U64 data, u8 first_rot_amount, u8 second_rot_amount, u8 shift_amount) {
+IR::U64 MakeSig(IREmitter& ir, IR::U64 data, u8 first_rot_amount, u8 second_rot_amount,
+                u8 shift_amount) {
     const IR::U64 tmp1 = ir.RotateRight(data, ir.Imm8(first_rot_amount));
     const IR::U64 tmp2 = ir.RotateRight(data, ir.Imm8(second_rot_amount));
     const IR::U64 tmp3 = ir.LogicalShiftRight(data, ir.Imm8(shift_amount));
@@ -15,12 +16,13 @@ IR::U64 MakeSig(IREmitter& ir, IR::U64 data, u8 first_rot_amount, u8 second_rot_
     return ir.Eor(tmp1, ir.Eor(tmp2, tmp3));
 }
 
-IR::U64 MakeMNSig(IREmitter& ir, IR::U64 data, u8 first_rot_amount, u8 second_rot_amount, u8 third_rot_amount) {
+IR::U64 MakeMNSig(IREmitter& ir, IR::U64 data, u8 first_rot_amount, u8 second_rot_amount,
+                  u8 third_rot_amount) {
     const IR::U64 tmp1 = ir.RotateRight(data, ir.Imm8(first_rot_amount));
     const IR::U64 tmp2 = ir.RotateRight(data, ir.Imm8(second_rot_amount));
     const IR::U64 tmp3 = ir.RotateRight(data, ir.Imm8(third_rot_amount));
 
-     return ir.Eor(tmp1, ir.Eor(tmp2, tmp3));
+    return ir.Eor(tmp1, ir.Eor(tmp2, tmp3));
 }
 
 enum class SHA512HashPart {
@@ -59,7 +61,7 @@ IR::U128 SHA512Hash(IREmitter& ir, Vec Vm, Vec Vn, Vec Vd, SHA512HashPart part) 
         return ir.Eor(tmp1, ir.Eor(tmp2, tmp3));
     };
 
-    const IR::U64 Vtmp = [&]  {
+    const IR::U64 Vtmp = [&] {
         const IR::U64 partial = [&] {
             if (part == SHA512HashPart::Part1) {
                 return make_partial_half(upper_y, lower_x, upper_x);
@@ -99,12 +101,10 @@ IR::U128 SHA512Hash(IREmitter& ir, Vec Vm, Vec Vn, Vec Vd, SHA512HashPart part) 
     return ir.VectorSetElement(64, low_result, 1, Vtmp);
 }
 
-enum class SM4RotationType {
-    SM4E,
-    SM4EKEY
-};
+enum class SM4RotationType { SM4E, SM4EKEY };
 
-IR::U32 SM4Rotation(IREmitter& ir, IR::U32 intval, IR::U32 round_result_low_word, SM4RotationType type) {
+IR::U32 SM4Rotation(IREmitter& ir, IR::U32 intval, IR::U32 round_result_low_word,
+                    SM4RotationType type) {
     if (type == SM4RotationType::SM4E) {
         const IR::U32 tmp1 = ir.RotateRight(intval, ir.Imm8(30));
         const IR::U32 tmp2 = ir.RotateRight(intval, ir.Imm8(22));
@@ -131,11 +131,13 @@ IR::U128 SM4Hash(IREmitter& ir, Vec Vn, Vec Vd, SM4RotationType type) {
         const IR::U32 before_upper_round = ir.VectorGetElement(32, roundresult, 2);
         const IR::U32 after_lower_round = ir.VectorGetElement(32, roundresult, 1);
 
-        IR::U128 intval_vec = ir.ZeroExtendToQuad(ir.Eor(upper_round, ir.Eor(before_upper_round, ir.Eor(after_lower_round, round_key))));
+        IR::U128 intval_vec = ir.ZeroExtendToQuad(
+            ir.Eor(upper_round, ir.Eor(before_upper_round, ir.Eor(after_lower_round, round_key))));
 
         for (size_t j = 0; j < 4; j++) {
             const IR::U8 byte_element = ir.VectorGetElement(8, intval_vec, j);
-            intval_vec = ir.VectorSetElement(8, intval_vec, j, ir.SM4AccessSubstitutionBox(byte_element));
+            intval_vec =
+                ir.VectorSetElement(8, intval_vec, j, ir.SM4AccessSubstitutionBox(byte_element));
         }
 
         const IR::U32 intval_low_word = ir.VectorGetElement(32, intval_vec, 0);
@@ -157,9 +159,7 @@ bool TranslatorVisitor::SHA512SU0(Vec Vn, Vec Vd) {
     const IR::U64 lower_w = ir.VectorGetElement(64, w, 0);
     const IR::U64 upper_w = ir.VectorGetElement(64, w, 1);
 
-    const auto make_sig0 = [&](IR::U64 data) {
-        return MakeSig(ir, data, 1, 8, 7);
-    };
+    const auto make_sig0 = [&](IR::U64 data) { return MakeSig(ir, data, 1, 8, 7); };
 
     const IR::U128 low_result = ir.ZeroExtendToQuad(ir.Add(lower_w, make_sig0(upper_w)));
     const IR::U64 high_result = ir.Add(upper_w, make_sig0(lower_x));
@@ -174,9 +174,7 @@ bool TranslatorVisitor::SHA512SU1(Vec Vm, Vec Vn, Vec Vd) {
     const IR::U128 y = ir.GetQ(Vm);
     const IR::U128 w = ir.GetQ(Vd);
 
-    const auto make_sig1 = [&](IR::U64 data) {
-        return MakeSig(ir, data, 19, 61, 6);
-    };
+    const auto make_sig1 = [&](IR::U64 data) { return MakeSig(ir, data, 19, 61, 6); };
 
     const IR::U128 sig_vector = [&] {
         const IR::U64 lower_x = ir.VectorGetElement(64, x, 0);
@@ -247,15 +245,16 @@ bool TranslatorVisitor::SM3PARTW1(Vec Vm, Vec Vn, Vec Vd) {
         if (i == 3) {
             const IR::U32 top_eor_d_n = ir.VectorGetElement(32, eor_d_n, 3);
             const IR::U32 low_result_word = ir.VectorGetElement(32, result, 0);
-            const IR::U32 top_result_word = ir.Eor(top_eor_d_n, ir.RotateRight(low_result_word, ir.Imm8(17)));
+            const IR::U32 top_result_word =
+                ir.Eor(top_eor_d_n, ir.RotateRight(low_result_word, ir.Imm8(17)));
 
             // Now the uppermost word is well-defined data.
             result = ir.VectorSetElement(32, result, 3, top_result_word);
         }
 
         const IR::U32 word = ir.VectorGetElement(32, result, i);
-        const IR::U32 modified = ir.Eor(word, ir.Eor(ir.RotateRight(word, ir.Imm8(17)),
-                                                     ir.RotateRight(word, ir.Imm8(9))));
+        const IR::U32 modified = ir.Eor(
+            word, ir.Eor(ir.RotateRight(word, ir.Imm8(17)), ir.RotateRight(word, ir.Imm8(9))));
 
         result = ir.VectorSetElement(32, result, i, modified);
     }

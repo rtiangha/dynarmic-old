@@ -49,7 +49,8 @@ bool ArmTranslatorVisitor::arm_BFI(Cond cond, Imm<5> msb, Reg d, Imm<5> lsb, Reg
     const u32 inclusion_mask = Common::Ones<u32>(msb_value - lsb_value + 1) << lsb_value;
     const u32 exclusion_mask = ~inclusion_mask;
     const IR::U32 operand1 = ir.And(ir.GetRegister(d), ir.Imm32(exclusion_mask));
-    const IR::U32 operand2 = ir.And(ir.LogicalShiftLeft(ir.GetRegister(n), ir.Imm8(u8(lsb_value))), ir.Imm32(inclusion_mask));
+    const IR::U32 operand2 = ir.And(ir.LogicalShiftLeft(ir.GetRegister(n), ir.Imm8(u8(lsb_value))),
+                                    ir.Imm32(inclusion_mask));
     const IR::U32 result = ir.Or(operand1, operand2);
 
     ir.SetRegister(d, result);

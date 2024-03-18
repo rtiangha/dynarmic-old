@@ -38,18 +38,9 @@ static_assert(std::is_same_v<append<list<>, int, int>, list<int, int>>);
 static_assert(
     std::is_same_v<
         cartesian_product<list<int, bool>, list<double, float>, list<char, unsigned>>,
-        list<
-            list<int, double, char>,
-            list<int, double, unsigned>,
-            list<int, float, char>,
-            list<int, float, unsigned>,
-            list<bool, double, char>,
-            list<bool, double, unsigned>,
-            list<bool, float, char>,
-            list<bool, float, unsigned>
-        >
-    >
-);
+        list<list<int, double, char>, list<int, double, unsigned>, list<int, float, char>,
+             list<int, float, unsigned>, list<bool, double, char>, list<bool, double, unsigned>,
+             list<bool, float, char>, list<bool, float, unsigned>>>);
 
 // concat
 
@@ -89,17 +80,15 @@ static_assert(length_v<list<int, int, int>> == 3);
 
 // lift_sequence
 
-static_assert(
-    std::is_same_v<
-        lift_sequence<std::make_index_sequence<3>>,
-        list<size_value<0>, size_value<1>, size_value<2>>
-    >
-);
+static_assert(std::is_same_v<lift_sequence<std::make_index_sequence<3>>,
+                             list<size_value<0>, size_value<1>, size_value<2>>>);
 
 // lower_to_tuple
 
-static_assert(lower_to_tuple_v<list<size_value<0>, size_value<1>, size_value<2>>> == std::tuple<std::size_t, std::size_t, std::size_t>(0, 1, 2));
-static_assert(lower_to_tuple_v<list<std::true_type, std::false_type>> == std::make_tuple(true, false));
+static_assert(lower_to_tuple_v<list<size_value<0>, size_value<1>, size_value<2>>> ==
+              std::tuple<std::size_t, std::size_t, std::size_t>(0, 1, 2));
+static_assert(lower_to_tuple_v<list<std::true_type, std::false_type>> ==
+              std::make_tuple(true, false));
 
 // prepend
 

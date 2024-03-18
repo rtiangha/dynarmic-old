@@ -122,7 +122,7 @@ bool ArmTranslatorVisitor::arm_UADD8(Cond cond, Reg n, Reg d, Reg m) {
 // UADD16<c> <Rd>, <Rn>, <Rm>
 bool ArmTranslatorVisitor::arm_UADD16(Cond cond, Reg n, Reg d, Reg m) {
     if (d == Reg::PC || n == Reg::PC || m == Reg::PC) {
-       return UnpredictableInstruction();
+        return UnpredictableInstruction();
     }
 
     if (!ConditionPassed(cond)) {
@@ -183,7 +183,7 @@ bool ArmTranslatorVisitor::arm_USAD8(Cond cond, Reg d, Reg m, Reg n) {
 }
 
 // USADA8<c> <Rd>, <Rn>, <Rm>, <Ra>
-bool ArmTranslatorVisitor::arm_USADA8(Cond cond, Reg d, Reg a, Reg m, Reg n){
+bool ArmTranslatorVisitor::arm_USADA8(Cond cond, Reg d, Reg a, Reg m, Reg n) {
     if (d == Reg::PC || n == Reg::PC || m == Reg::PC) {
         return UnpredictableInstruction();
     }

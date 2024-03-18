@@ -22,8 +22,10 @@ class Callback {
 public:
     virtual ~Callback();
 
-    virtual void EmitCall(BlockOfCode& code, std::function<void(RegList)> fn = [](RegList) {}) const = 0;
-    virtual void EmitCallWithReturnPointer(BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> fn) const = 0;
+    virtual void EmitCall(
+        BlockOfCode& code, std::function<void(RegList)> fn = [](RegList) {}) const = 0;
+    virtual void EmitCallWithReturnPointer(
+        BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> fn) const = 0;
 };
 
 class SimpleCallback final : public Callback {
@@ -31,8 +33,10 @@ public:
     template <typename Function>
     SimpleCallback(Function fn) : fn(reinterpret_cast<void (*)()>(fn)) {}
 
-    void EmitCall(BlockOfCode& code, std::function<void(RegList)> fn = [](RegList) {}) const override;
-    void EmitCallWithReturnPointer(BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> fn) const override;
+    void EmitCall(
+        BlockOfCode& code, std::function<void(RegList)> fn = [](RegList) {}) const override;
+    void EmitCallWithReturnPointer(
+        BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> fn) const override;
 
 private:
     void (*fn)();
@@ -43,8 +47,10 @@ public:
     template <typename Function>
     ArgCallback(Function fn, u64 arg) : fn(reinterpret_cast<void (*)()>(fn)), arg(arg) {}
 
-    void EmitCall(BlockOfCode& code, std::function<void(RegList)> fn = [](RegList) {}) const override;
-    void EmitCallWithReturnPointer(BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> fn) const override;
+    void EmitCall(
+        BlockOfCode& code, std::function<void(RegList)> fn = [](RegList) {}) const override;
+    void EmitCallWithReturnPointer(
+        BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> fn) const override;
 
 private:
     void (*fn)();

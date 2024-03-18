@@ -32,7 +32,9 @@ std::string DisassembleX64(const void* begin, const void* end) {
     size_t remaining = reinterpret_cast<size_t>(end) - reinterpret_cast<size_t>(pos);
     while (pos < end) {
         char buffer[80];
-        size_t inst_size = LLVMDisasmInstruction(llvm_ctx, const_cast<u8*>(pos), remaining, reinterpret_cast<u64>(pos), buffer, sizeof(buffer));
+        size_t inst_size =
+            LLVMDisasmInstruction(llvm_ctx, const_cast<u8*>(pos), remaining,
+                                  reinterpret_cast<u64>(pos), buffer, sizeof(buffer));
         ASSERT(inst_size);
         for (const u8* i = pos; i < pos + inst_size; i++)
             result += fmt::format("{:02x} ", *i);
@@ -47,7 +49,8 @@ std::string DisassembleX64(const void* begin, const void* end) {
 
     LLVMDisasmDispose(llvm_ctx);
 #else
-    result += fmt::format("(recompile with DYNARMIC_USE_LLVM=ON to disassemble the generated x86_64 code)\n");
+    result += fmt::format(
+        "(recompile with DYNARMIC_USE_LLVM=ON to disassemble the generated x86_64 code)\n");
     result += fmt::format("start: {:016x}, end: {:016x}\n", begin, end);
 #endif
 
@@ -65,7 +68,8 @@ std::string DisassembleAArch32([[maybe_unused]] u32 instruction, [[maybe_unused]
     LLVMSetDisasmOptions(llvm_ctx, LLVMDisassembler_Option_AsmPrinterVariant);
 
     char buffer[80];
-    size_t inst_size = LLVMDisasmInstruction(llvm_ctx, (u8*)&instruction, sizeof(instruction), pc, buffer, sizeof(buffer));
+    size_t inst_size = LLVMDisasmInstruction(llvm_ctx, (u8*)&instruction, sizeof(instruction), pc,
+                                             buffer, sizeof(buffer));
     result = inst_size > 0 ? buffer : "<invalid instruction>";
     result += '\n';
 
@@ -88,7 +92,8 @@ std::string DisassembleAArch64([[maybe_unused]] u32 instruction, [[maybe_unused]
     LLVMSetDisasmOptions(llvm_ctx, LLVMDisassembler_Option_AsmPrinterVariant);
 
     char buffer[80];
-    size_t inst_size = LLVMDisasmInstruction(llvm_ctx, (u8*)&instruction, sizeof(instruction), pc, buffer, sizeof(buffer));
+    size_t inst_size = LLVMDisasmInstruction(llvm_ctx, (u8*)&instruction, sizeof(instruction), pc,
+                                             buffer, sizeof(buffer));
     result = inst_size > 0 ? buffer : "<invalid instruction>";
     result += '\n';
 

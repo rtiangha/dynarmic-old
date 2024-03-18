@@ -8,7 +8,7 @@
 namespace mp {
 
 /// Contains a list of types
-template<class... E>
+template <class... E>
 struct list {};
 
 } // namespace mp

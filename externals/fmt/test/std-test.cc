@@ -6,11 +6,11 @@
 // For the license information refer to format.h.
 
 #include "fmt/std.h"
-#include "fmt/ranges.h"
 
 #include <string>
 #include <vector>
 
+#include "fmt/ranges.h"
 #include "gtest/gtest.h"
 
 TEST(std_test, path) {

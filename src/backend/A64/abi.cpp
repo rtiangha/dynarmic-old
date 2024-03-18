@@ -19,14 +19,14 @@
 
 #include "backend/A64/abi.h"
 #include "common/common_types.h"
-#include "common/math_util.h"
 #include "common/iterator_util.h"
+#include "common/math_util.h"
 
 namespace Dynarmic::BackendA64 {
 
-template<typename RegisterArrayT>
+template <typename RegisterArrayT>
 void ABI_PushRegistersAndAdjustStack(BlockOfCode& code, const RegisterArrayT& regs) {
-    u32 gprs = 0 , fprs = 0;
+    u32 gprs = 0, fprs = 0;
 
     for (HostLoc reg : regs) {
         if (HostLocIsGPR(reg)) {
@@ -40,7 +40,7 @@ void ABI_PushRegistersAndAdjustStack(BlockOfCode& code, const RegisterArrayT& re
     code.ABI_PushRegisters(gprs);
 }
 
-template<typename RegisterArrayT>
+template <typename RegisterArrayT>
 void ABI_PopRegistersAndAdjustStack(BlockOfCode& code, const RegisterArrayT& regs) {
     u32 gprs = 0, fprs = 0;
 
@@ -74,14 +74,16 @@ void ABI_PopCallerSaveRegistersAndAdjustStack(BlockOfCode& code) {
 
 void ABI_PushCallerSaveRegistersAndAdjustStackExcept(BlockOfCode& code, HostLoc exception) {
     std::vector<HostLoc> regs;
-    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(), std::back_inserter(regs), exception);
+    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(),
+                     std::back_inserter(regs), exception);
     ABI_PushRegistersAndAdjustStack(code, regs);
 }
 
 void ABI_PopCallerSaveRegistersAndAdjustStackExcept(BlockOfCode& code, HostLoc exception) {
     std::vector<HostLoc> regs;
-    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(), std::back_inserter(regs), exception);
+    std::remove_copy(ABI_ALL_CALLER_SAVE.begin(), ABI_ALL_CALLER_SAVE.end(),
+                     std::back_inserter(regs), exception);
     ABI_PopRegistersAndAdjustStack(code, regs);
 }
 
-} // namespace Dynarmic::BackendX64
+} // namespace Dynarmic::BackendA64

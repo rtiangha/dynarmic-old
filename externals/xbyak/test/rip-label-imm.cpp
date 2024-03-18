@@ -34,55 +34,53 @@ dump of vc
 00000000003A00FA F0 DE BC 9A 78 56 34 12
 */
 struct Code : Xbyak::CodeGenerator {
-	Code()
-	{
-		Xbyak::Label label;
-		cmpss(xmm0, ptr[rip + label], 0);
-		test(dword[rip + label], 33);
-		bt(dword[rip + label ], 3);
-		vblendpd(xmm0, xmm0, dword[rip + label], 3);
-		vpalignr(xmm0, xmm0, qword[rip + label], 4);
-		vextractf128(dword[rip + label], ymm3, 12);
-		vperm2i128(ymm0, ymm1, qword[rip + label], 13);
-		vcvtps2ph(ptr[rip + label], xmm2, 44);
-		mov(dword[rip + label], 0x1234);
-		shl(dword[rip + label], 3);
-		shr(dword[rip + label], 1);
-		shld(qword[rip + label], rax, 3);
-		imul(rax, qword[rip + label], 21);
-		rorx(rax, qword[rip + label], 21);
-		test(dword[rip + label], 5);
-		pextrq(ptr[rip + label], xmm0, 3);
-		pinsrq(xmm2, ptr[rip + label], 5);
-		pextrw(ptr[rip + label], xmm1, 4);
-		adc(dword[rip + label], 0x12345);
-		bt(byte[rip + label], 0x34);
-		btc(word[rip + label], 0x34);
-		btr(dword[rip + label], 0x34);
-		rcl(dword[rip + label], 4);
-		shld(qword[rip + label], rax, 4);
-		palignr(mm0, ptr[rip + label], 4);
-		aeskeygenassist(xmm3, ptr[rip + label], 4);
-		vpcmpestrm(xmm2, ptr[rip + label], 7);
-		ret();
-	L(label);
-		dq(0x123456789abcdef0ull);
-	};
+    Code() {
+        Xbyak::Label label;
+        cmpss(xmm0, ptr[rip + label], 0);
+        test(dword[rip + label], 33);
+        bt(dword[rip + label], 3);
+        vblendpd(xmm0, xmm0, dword[rip + label], 3);
+        vpalignr(xmm0, xmm0, qword[rip + label], 4);
+        vextractf128(dword[rip + label], ymm3, 12);
+        vperm2i128(ymm0, ymm1, qword[rip + label], 13);
+        vcvtps2ph(ptr[rip + label], xmm2, 44);
+        mov(dword[rip + label], 0x1234);
+        shl(dword[rip + label], 3);
+        shr(dword[rip + label], 1);
+        shld(qword[rip + label], rax, 3);
+        imul(rax, qword[rip + label], 21);
+        rorx(rax, qword[rip + label], 21);
+        test(dword[rip + label], 5);
+        pextrq(ptr[rip + label], xmm0, 3);
+        pinsrq(xmm2, ptr[rip + label], 5);
+        pextrw(ptr[rip + label], xmm1, 4);
+        adc(dword[rip + label], 0x12345);
+        bt(byte[rip + label], 0x34);
+        btc(word[rip + label], 0x34);
+        btr(dword[rip + label], 0x34);
+        rcl(dword[rip + label], 4);
+        shld(qword[rip + label], rax, 4);
+        palignr(mm0, ptr[rip + label], 4);
+        aeskeygenassist(xmm3, ptr[rip + label], 4);
+        vpcmpestrm(xmm2, ptr[rip + label], 7);
+        ret();
+        L(label);
+        dq(0x123456789abcdef0ull);
+    };
 };
 
-void dump(const unsigned char *p, size_t n)
-{
-	for (int i = 0; i < n; i++) {
-		printf("%02x ", p[i]);
-		if ((i % 16) == 15) putchar('\n');
-	}
-	putchar('\n');
+void dump(const unsigned char* p, size_t n) {
+    for (int i = 0; i < n; i++) {
+        printf("%02x ", p[i]);
+        if ((i % 16) == 15)
+            putchar('\n');
+    }
+    putchar('\n');
 }
 
-int main()
-{
-	Code code;
-	void (*f)() = code.getCode<void (*)()>();
-	dump(code.getCode(), code.getSize());
-	f();
+int main() {
+    Code code;
+    void (*f)() = code.getCode<void (*)()>();
+    dump(code.getCode(), code.getSize());
+    f();
 }

@@ -55,7 +55,7 @@ bool A64EmitContext::AccurateNaN() const {
 }
 
 A64EmitX64::A64EmitX64(BlockOfCode& code, A64::UserConfig conf, A64::Jit* jit_interface)
-        : EmitX64(code), conf(conf), jit_interface{jit_interface} {
+    : EmitX64(code), conf(conf), jit_interface{jit_interface} {
     GenMemory128Accessors();
     GenFastmemFallbacks();
     GenTerminalHandlers();
@@ -67,7 +67,9 @@ A64EmitX64::~A64EmitX64() = default;
 
 A64EmitX64::BlockDescriptor A64EmitX64::Emit(IR::Block& block) {
     code.EnableWriting();
-    SCOPE_EXIT { code.DisableWriting(); };
+    SCOPE_EXIT {
+        code.DisableWriting();
+    };
 
     RegAlloc reg_alloc{code, A64JitState::SpillCount, SpillToOpArg<A64JitState>, any_gpr, any_xmm};
     A64EmitContext ctx{conf, reg_alloc, block};
@@ -84,15 +86,15 @@ A64EmitX64::BlockDescriptor A64EmitX64::Emit(IR::Block& block) {
         // Call the relevant Emit* member function.
         switch (inst->GetOpcode()) {
 
-#define OPCODE(name, type, ...)                 \
-        case IR::Opcode::name:                  \
-            A64EmitX64::Emit##name(ctx, inst);  \
-            break;
+#define OPCODE(name, type, ...)                                                                    \
+    case IR::Opcode::name:                                                                         \
+        A64EmitX64::Emit##name(ctx, inst);                                                         \
+        break;
 #define A32OPC(...)
-#define A64OPC(name, type, ...)                    \
-        case IR::Opcode::A64##name:                \
-            A64EmitX64::EmitA64##name(ctx, inst);  \
-            break;
+#define A64OPC(name, type, ...)                                                                    \
+    case IR::Opcode::A64##name:                                                                    \
+        A64EmitX64::EmitA64##name(ctx, inst);                                                      \
+        break;
 #include "frontend/ir/opcodes.inc"
 #undef OPCODE
 #undef A32OPC
@@ -109,7 +111,8 @@ A64EmitX64::BlockDescriptor A64EmitX64::Emit(IR::Block& block) {
     reg_alloc.AssertNoMoreUses();
 
     EmitAddCycles(block.CycleCount());
-    EmitX64::EmitTerminal(block.GetTerminal(), ctx.Location().SetSingleStepping(false), ctx.IsSingleStep());
+    EmitX64::EmitTerminal(block.GetTerminal(), ctx.Location().SetSingleStepping(false),
+                          ctx.IsSingleStep());
     code.int3();
 
     const size_t size = static_cast<size_t>(code.getCurr() - entrypoint);
@@ -117,7 +120,8 @@ A64EmitX64::BlockDescriptor A64EmitX64::Emit(IR::Block& block) {
     const A64::LocationDescriptor descriptor{block.Location()};
     const A64::LocationDescriptor end_location{block.EndLocation()};
 
-    const auto range = boost::icl::discrete_interval<u64>::closed(descriptor.PC(), end_location.PC() - 1);
+    const auto range =
+        boost::icl::discrete_interval<u64>::closed(descriptor.PC(), end_location.PC() - 1);
     block_ranges.AddRange(range, descriptor);
 
     return RegisterBlock(descriptor, entrypoint, size);
@@ -141,14 +145,15 @@ void A64EmitX64::ClearFastDispatchTable() {
 
 void A64EmitX64::GenMemory128Accessors() {
     code.align();
-    memory_read_128 = code.getCurr<void(*)()>();
+    memory_read_128 = code.getCurr<void (*)()>();
 #ifdef _WIN32
-    Devirtualize<&A64::UserCallbacks::MemoryRead128>(conf.callbacks).EmitCallWithReturnPointer(code,
-        [&](Xbyak::Reg64 return_value_ptr, [[maybe_unused]] RegList args) {
-            code.mov(code.ABI_PARAM3, code.ABI_PARAM2);
-            code.sub(rsp, 8 + 16 + ABI_SHADOW_SPACE);
-            code.lea(return_value_ptr, ptr[rsp + ABI_SHADOW_SPACE]);
-        });
+    Devirtualize<&A64::UserCallbacks::MemoryRead128>(conf.callbacks)
+        .EmitCallWithReturnPointer(
+            code, [&](Xbyak::Reg64 return_value_ptr, [[maybe_unused]] RegList args) {
+                code.mov(code.ABI_PARAM3, code.ABI_PARAM2);
+                code.sub(rsp, 8 + 16 + ABI_SHADOW_SPACE);
+                code.lea(return_value_ptr, ptr[rsp + ABI_SHADOW_SPACE]);
+            });
     code.movups(xmm1, xword[code.ABI_RETURN]);
     code.add(rsp, 8 + 16 + ABI_SHADOW_SPACE);
 #else
@@ -168,7 +173,7 @@ void A64EmitX64::GenMemory128Accessors() {
     PerfMapRegister(memory_read_128, code.getCurr(), "a64_memory_read_128");
 
     code.align();
-    memory_write_128 = code.getCurr<void(*)()>();
+    memory_write_128 = code.getCurr<void (*)()>();
 #ifdef _WIN32
     code.sub(rsp, 8 + 16 + ABI_SHADOW_SPACE);
     code.lea(code.ABI_PARAM3, ptr[rsp + ABI_SHADOW_SPACE]);
@@ -214,7 +219,7 @@ void A64EmitX64::GenFastmemFallbacks() {
 
         for (int value_idx : idxes) {
             code.align();
-            read_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)] = code.getCurr<void(*)()>();
+            read_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)] = code.getCurr<void (*)()>();
             ABI_PushCallerSaveRegistersAndAdjustStackExcept(code, HostLocXmmIdx(value_idx));
             if (vaddr_idx != code.ABI_PARAM2.getIdx()) {
                 code.mov(code.ABI_PARAM2, Xbyak::Reg64{vaddr_idx});
@@ -225,10 +230,12 @@ void A64EmitX64::GenFastmemFallbacks() {
             }
             ABI_PopCallerSaveRegistersAndAdjustStackExcept(code, HostLocXmmIdx(value_idx));
             code.ret();
-            PerfMapRegister(read_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)], code.getCurr(), "a64_read_fallback_128");
+            PerfMapRegister(read_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)],
+                            code.getCurr(), "a64_read_fallback_128");
 
             code.align();
-            write_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)] = code.getCurr<void(*)()>();
+            write_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)] =
+                code.getCurr<void (*)()>();
             ABI_PushCallerSaveRegistersAndAdjustStack(code);
             if (vaddr_idx != code.ABI_PARAM2.getIdx()) {
                 code.mov(code.ABI_PARAM2, Xbyak::Reg64{vaddr_idx});
@@ -239,7 +246,8 @@ void A64EmitX64::GenFastmemFallbacks() {
             code.call(memory_write_128);
             ABI_PopCallerSaveRegistersAndAdjustStack(code);
             code.ret();
-            PerfMapRegister(write_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)], code.getCurr(), "a64_write_fallback_128");
+            PerfMapRegister(write_fallbacks[std::make_tuple(128, vaddr_idx, value_idx)],
+                            code.getCurr(), "a64_write_fallback_128");
 
             if (value_idx == 4 || value_idx == 15) {
                 continue;
@@ -247,7 +255,8 @@ void A64EmitX64::GenFastmemFallbacks() {
 
             for (const auto& [bitsize, callback] : read_callbacks) {
                 code.align();
-                read_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)] = code.getCurr<void(*)()>();
+                read_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)] =
+                    code.getCurr<void (*)()>();
                 ABI_PushCallerSaveRegistersAndAdjustStackExcept(code, HostLocRegIdx(value_idx));
                 if (vaddr_idx != code.ABI_PARAM2.getIdx()) {
                     code.mov(code.ABI_PARAM2, Xbyak::Reg64{vaddr_idx});
@@ -258,14 +267,17 @@ void A64EmitX64::GenFastmemFallbacks() {
                 }
                 ABI_PopCallerSaveRegistersAndAdjustStackExcept(code, HostLocRegIdx(value_idx));
                 code.ret();
-                PerfMapRegister(read_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)], code.getCurr(), fmt::format("a64_read_fallback_{}", bitsize));
+                PerfMapRegister(read_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)],
+                                code.getCurr(), fmt::format("a64_read_fallback_{}", bitsize));
             }
 
             for (const auto& [bitsize, callback] : write_callbacks) {
                 code.align();
-                write_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)] = code.getCurr<void(*)()>();
+                write_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)] =
+                    code.getCurr<void (*)()>();
                 ABI_PushCallerSaveRegistersAndAdjustStack(code);
-                if (vaddr_idx == code.ABI_PARAM3.getIdx() && value_idx == code.ABI_PARAM2.getIdx()) {
+                if (vaddr_idx == code.ABI_PARAM3.getIdx() &&
+                    value_idx == code.ABI_PARAM2.getIdx()) {
                     code.xchg(code.ABI_PARAM2, code.ABI_PARAM3);
                 } else if (vaddr_idx == code.ABI_PARAM3.getIdx()) {
                     code.mov(code.ABI_PARAM2, Xbyak::Reg64{vaddr_idx});
@@ -283,7 +295,8 @@ void A64EmitX64::GenFastmemFallbacks() {
                 callback.EmitCall(code);
                 ABI_PopCallerSaveRegistersAndAdjustStack(code);
                 code.ret();
-                PerfMapRegister(write_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)], code.getCurr(), fmt::format("a64_write_fallback_{}", bitsize));
+                PerfMapRegister(write_fallbacks[std::make_tuple(bitsize, vaddr_idx, value_idx)],
+                                code.getCurr(), fmt::format("a64_write_fallback_{}", bitsize));
             }
         }
     }
@@ -320,7 +333,8 @@ void A64EmitX64::GenTerminalHandlers() {
     }
     code.mov(rax, qword[r15 + offsetof(A64JitState, rsb_codeptrs) + rax * sizeof(u64)]);
     code.jmp(rax);
-    PerfMapRegister(terminal_handler_pop_rsb_hint, code.getCurr(), "a64_terminal_handler_pop_rsb_hint");
+    PerfMapRegister(terminal_handler_pop_rsb_hint, code.getCurr(),
+                    "a64_terminal_handler_pop_rsb_hint");
 
     if (conf.enable_fast_dispatch) {
         code.align();
@@ -341,10 +355,11 @@ void A64EmitX64::GenTerminalHandlers() {
         code.LookupBlock();
         code.mov(ptr[rbp + offsetof(FastDispatchEntry, code_ptr)], rax);
         code.jmp(rax);
-        PerfMapRegister(terminal_handler_fast_dispatch_hint, code.getCurr(), "a64_terminal_handler_fast_dispatch_hint");
+        PerfMapRegister(terminal_handler_fast_dispatch_hint, code.getCurr(),
+                        "a64_terminal_handler_fast_dispatch_hint");
 
         code.align();
-        fast_dispatch_table_lookup = code.getCurr<FastDispatchEntry&(*)(u64)>();
+        fast_dispatch_table_lookup = code.getCurr<FastDispatchEntry& (*)(u64)>();
         code.mov(code.ABI_PARAM2, reinterpret_cast<u64>(fast_dispatch_table.data()));
         if (code.HasSSE42()) {
             code.crc32(code.ABI_PARAM1, code.ABI_PARAM2);
@@ -422,7 +437,8 @@ void A64EmitX64::EmitA64GetW(A64EmitContext& ctx, IR::Inst* inst) {
     const A64::Reg reg = inst->GetArg(0).GetA64RegRef();
     const Xbyak::Reg32 result = ctx.reg_alloc.ScratchGpr().cvt32();
 
-    code.mov(result, dword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)]);
+    code.mov(result,
+             dword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)]);
     ctx.reg_alloc.DefineValue(inst, result);
 }
 
@@ -430,13 +446,15 @@ void A64EmitX64::EmitA64GetX(A64EmitContext& ctx, IR::Inst* inst) {
     const A64::Reg reg = inst->GetArg(0).GetA64RegRef();
     const Xbyak::Reg64 result = ctx.reg_alloc.ScratchGpr();
 
-    code.mov(result, qword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)]);
+    code.mov(result,
+             qword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)]);
     ctx.reg_alloc.DefineValue(inst, result);
 }
 
 void A64EmitX64::EmitA64GetS(A64EmitContext& ctx, IR::Inst* inst) {
     const A64::Vec vec = inst->GetArg(0).GetA64VecRef();
-    const auto addr = qword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
+    const auto addr =
+        qword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
 
     const Xbyak::Xmm result = ctx.reg_alloc.ScratchXmm();
     code.movd(result, addr);
@@ -445,7 +463,8 @@ void A64EmitX64::EmitA64GetS(A64EmitContext& ctx, IR::Inst* inst) {
 
 void A64EmitX64::EmitA64GetD(A64EmitContext& ctx, IR::Inst* inst) {
     const A64::Vec vec = inst->GetArg(0).GetA64VecRef();
-    const auto addr = qword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
+    const auto addr =
+        qword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
 
     const Xbyak::Xmm result = ctx.reg_alloc.ScratchXmm();
     code.movq(result, addr);
@@ -454,7 +473,8 @@ void A64EmitX64::EmitA64GetD(A64EmitContext& ctx, IR::Inst* inst) {
 
 void A64EmitX64::EmitA64GetQ(A64EmitContext& ctx, IR::Inst* inst) {
     const A64::Vec vec = inst->GetArg(0).GetA64VecRef();
-    const auto addr = xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
+    const auto addr =
+        xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
 
     const Xbyak::Xmm result = ctx.reg_alloc.ScratchXmm();
     code.movaps(result, addr);
@@ -487,7 +507,8 @@ void A64EmitX64::EmitA64GetFPSR(A64EmitContext& ctx, IR::Inst* inst) {
 void A64EmitX64::EmitA64SetW(A64EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
     const A64::Reg reg = inst->GetArg(0).GetA64RegRef();
-    const auto addr = qword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)];
+    const auto addr =
+        qword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)];
     if (args[1].FitsInImmediateS32()) {
         code.mov(addr, args[1].GetImmediateS32());
     } else {
@@ -501,7 +522,8 @@ void A64EmitX64::EmitA64SetW(A64EmitContext& ctx, IR::Inst* inst) {
 void A64EmitX64::EmitA64SetX(A64EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
     const A64::Reg reg = inst->GetArg(0).GetA64RegRef();
-    const auto addr = qword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)];
+    const auto addr =
+        qword[r15 + offsetof(A64JitState, reg) + sizeof(u64) * static_cast<size_t>(reg)];
     if (args[1].FitsInImmediateS32()) {
         code.mov(addr, args[1].GetImmediateS32());
     } else if (args[1].IsInXmm()) {
@@ -516,7 +538,8 @@ void A64EmitX64::EmitA64SetX(A64EmitContext& ctx, IR::Inst* inst) {
 void A64EmitX64::EmitA64SetS(A64EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
     const A64::Vec vec = inst->GetArg(0).GetA64VecRef();
-    const auto addr = xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
+    const auto addr =
+        xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
 
     const Xbyak::Xmm to_store = ctx.reg_alloc.UseXmm(args[1]);
     const Xbyak::Xmm tmp = ctx.reg_alloc.ScratchXmm();
@@ -529,7 +552,8 @@ void A64EmitX64::EmitA64SetS(A64EmitContext& ctx, IR::Inst* inst) {
 void A64EmitX64::EmitA64SetD(A64EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
     const A64::Vec vec = inst->GetArg(0).GetA64VecRef();
-    const auto addr = xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
+    const auto addr =
+        xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
 
     const Xbyak::Xmm to_store = ctx.reg_alloc.UseScratchXmm(args[1]);
     code.movq(to_store, to_store); // TODO: Remove when able
@@ -539,7 +563,8 @@ void A64EmitX64::EmitA64SetD(A64EmitContext& ctx, IR::Inst* inst) {
 void A64EmitX64::EmitA64SetQ(A64EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
     const A64::Vec vec = inst->GetArg(0).GetA64VecRef();
-    const auto addr = xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
+    const auto addr =
+        xword[r15 + offsetof(A64JitState, vec) + sizeof(u64) * 2 * static_cast<size_t>(vec)];
 
     const Xbyak::Xmm to_store = ctx.reg_alloc.UseXmm(args[1]);
     code.movaps(addr, to_store);
@@ -618,10 +643,9 @@ void A64EmitX64::EmitA64CallSupervisor(A64EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
     ASSERT(args[0].IsImmediate());
     const u32 imm = args[0].GetImmediateU32();
-    Devirtualize<&A64::UserCallbacks::CallSVC>(conf.callbacks).EmitCall(code,
-        [&](RegList param) {
-            code.mov(param[0], imm);
-        });
+    Devirtualize<&A64::UserCallbacks::CallSVC>(conf.callbacks).EmitCall(code, [&](RegList param) {
+        code.mov(param[0], imm);
+    });
     // The kernel would have to execute ERET to get here, which would clear exclusive state.
     code.mov(code.byte[r15 + offsetof(A64JitState, exclusive_state)], u8(0));
 }
@@ -632,8 +656,8 @@ void A64EmitX64::EmitA64ExceptionRaised(A64EmitContext& ctx, IR::Inst* inst) {
     ASSERT(args[0].IsImmediate() && args[1].IsImmediate());
     const u64 pc = args[0].GetImmediateU64();
     const u64 exception = args[1].GetImmediateU64();
-    Devirtualize<&A64::UserCallbacks::ExceptionRaised>(conf.callbacks).EmitCall(code,
-        [&](RegList param) {
+    Devirtualize<&A64::UserCallbacks::ExceptionRaised>(conf.callbacks)
+        .EmitCall(code, [&](RegList param) {
             code.mov(param[0], pc);
             code.mov(param[1], exception);
         });
@@ -653,7 +677,7 @@ void A64EmitX64::EmitA64DataMemoryBarrier(A64EmitContext&, IR::Inst*) {
     code.lfence();
 }
 
-void A64EmitX64::EmitA64InstructionSynchronizationBarrier(A64EmitContext& ctx, IR::Inst* ) {
+void A64EmitX64::EmitA64InstructionSynchronizationBarrier(A64EmitContext& ctx, IR::Inst*) {
     ctx.reg_alloc.HostCall(nullptr);
 
     code.mov(code.ABI_PARAM1, reinterpret_cast<u64>(jit_interface));
@@ -727,7 +751,8 @@ namespace {
 constexpr size_t page_bits = 12;
 constexpr size_t page_size = 1 << page_bits;
 
-void EmitDetectMisaignedVAddr(BlockOfCode& code, A64EmitContext& ctx, size_t bitsize, Xbyak::Label& abort, Xbyak::Reg64 vaddr, Xbyak::Reg64 tmp) {
+void EmitDetectMisaignedVAddr(BlockOfCode& code, A64EmitContext& ctx, size_t bitsize,
+                              Xbyak::Label& abort, Xbyak::Reg64 vaddr, Xbyak::Reg64 tmp) {
     if (bitsize == 8 || (ctx.conf.detect_misaligned_access_via_page_table & bitsize) == 0) {
         return;
     }
@@ -770,7 +795,9 @@ void EmitDetectMisaignedVAddr(BlockOfCode& code, A64EmitContext& ctx, size_t bit
     code.SwitchToNearCode();
 }
 
-Xbyak::RegExp EmitVAddrLookup(BlockOfCode& code, A64EmitContext& ctx, size_t bitsize, Xbyak::Label& abort, Xbyak::Reg64 vaddr, std::optional<Xbyak::Reg64> arg_scratch = {}) {
+Xbyak::RegExp EmitVAddrLookup(BlockOfCode& code, A64EmitContext& ctx, size_t bitsize,
+                              Xbyak::Label& abort, Xbyak::Reg64 vaddr,
+                              std::optional<Xbyak::Reg64> arg_scratch = {}) {
     const size_t valid_page_index_bits = ctx.conf.page_table_address_space_bits - page_bits;
     const size_t unused_top_bits = 64 - ctx.conf.page_table_address_space_bits;
 
@@ -808,9 +835,10 @@ Xbyak::RegExp EmitVAddrLookup(BlockOfCode& code, A64EmitContext& ctx, size_t bit
     return page_table + tmp;
 }
 
-} // anonymous namepsace
+} // namespace
 
-void A64EmitX64::EmitDirectPageTableMemoryRead(A64EmitContext& ctx, IR::Inst* inst, size_t bitsize) {
+void A64EmitX64::EmitDirectPageTableMemoryRead(A64EmitContext& ctx, IR::Inst* inst,
+                                               size_t bitsize) {
     Xbyak::Label abort, end;
 
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
@@ -843,7 +871,8 @@ void A64EmitX64::EmitDirectPageTableMemoryRead(A64EmitContext& ctx, IR::Inst* in
     ctx.reg_alloc.DefineValue(inst, value);
 }
 
-void A64EmitX64::EmitDirectPageTableMemoryWrite(A64EmitContext& ctx, IR::Inst* inst, size_t bitsize) {
+void A64EmitX64::EmitDirectPageTableMemoryWrite(A64EmitContext& ctx, IR::Inst* inst,
+                                                size_t bitsize) {
     Xbyak::Label abort, end;
 
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
@@ -952,13 +981,10 @@ void A64EmitX64::EmitA64ExclusiveReadMemory8(A64EmitContext& ctx, IR::Inst* inst
     ctx.reg_alloc.HostCall(inst, {}, args[0]);
     code.mov(code.byte[r15 + offsetof(A64JitState, exclusive_state)], u8(1));
     code.mov(code.ABI_PARAM1, reinterpret_cast<u64>(&conf));
-    code.CallLambda(
-        [](A64::UserConfig& conf, u64 vaddr) -> u8 {
-            return conf.global_monitor->ReadAndMark<u8>(conf.processor_id, vaddr, [&]() -> u8 {
-                return conf.callbacks->MemoryRead8(vaddr);
-            });
-        }
-    );
+    code.CallLambda([](A64::UserConfig& conf, u64 vaddr) -> u8 {
+        return conf.global_monitor->ReadAndMark<u8>(
+            conf.processor_id, vaddr, [&]() -> u8 { return conf.callbacks->MemoryRead8(vaddr); });
+    });
 }
 
 void A64EmitX64::EmitA64ExclusiveReadMemory16(A64EmitContext& ctx, IR::Inst* inst) {
@@ -967,13 +993,10 @@ void A64EmitX64::EmitA64ExclusiveReadMemory16(A64EmitContext& ctx, IR::Inst* ins
     ctx.reg_alloc.HostCall(inst, {}, args[0]);
     code.mov(code.byte[r15 + offsetof(A64JitState, exclusive_state)], u8(1));
     code.mov(code.ABI_PARAM1, reinterpret_cast<u64>(&conf));
-    code.CallLambda(
-        [](A64::UserConfig& conf, u64 vaddr) -> u16 {
-            return conf.global_monitor->ReadAndMark<u16>(conf.processor_id, vaddr, [&]() -> u16 {
-                return conf.callbacks->MemoryRead16(vaddr);
-            });
-        }
-    );
+    code.CallLambda([](A64::UserConfig& conf, u64 vaddr) -> u16 {
+        return conf.global_monitor->ReadAndMark<u16>(
+            conf.processor_id, vaddr, [&]() -> u16 { return conf.callbacks->MemoryRead16(vaddr); });
+    });
 }
 
 void A64EmitX64::EmitA64ExclusiveReadMemory32(A64EmitContext& ctx, IR::Inst* inst) {
@@ -982,13 +1005,10 @@ void A64EmitX64::EmitA64ExclusiveReadMemory32(A64EmitContext& ctx, IR::Inst* ins
     ctx.reg_alloc.HostCall(inst, {}, args[0]);
     code.mov(code.byte[r15 + offsetof(A64JitState, exclusive_state)], u8(1));
     code.mov(code.ABI_PARAM1, reinterpret_cast<u64>(&conf));
-    code.CallLambda(
-        [](A64::UserConfig& conf, u64 vaddr) -> u32 {
-            return conf.global_monitor->ReadAndMark<u32>(conf.processor_id, vaddr, [&]() -> u32 {
-                return conf.callbacks->MemoryRead32(vaddr);
-            });
-        }
-    );
+    code.CallLambda([](A64::UserConfig& conf, u64 vaddr) -> u32 {
+        return conf.global_monitor->ReadAndMark<u32>(
+            conf.processor_id, vaddr, [&]() -> u32 { return conf.callbacks->MemoryRead32(vaddr); });
+    });
 }
 
 void A64EmitX64::EmitA64ExclusiveReadMemory64(A64EmitContext& ctx, IR::Inst* inst) {
@@ -997,13 +1017,10 @@ void A64EmitX64::EmitA64ExclusiveReadMemory64(A64EmitContext& ctx, IR::Inst* ins
     ctx.reg_alloc.HostCall(inst, {}, args[0]);
     code.mov(code.byte[r15 + offsetof(A64JitState, exclusive_state)], u8(1));
     code.mov(code.ABI_PARAM1, reinterpret_cast<u64>(&conf));
-    code.CallLambda(
-        [](A64::UserConfig& conf, u64 vaddr) -> u64 {
-            return conf.global_monitor->ReadAndMark<u64>(conf.processor_id, vaddr, [&]() -> u64 {
-                return conf.callbacks->MemoryRead64(vaddr);
-            });
-        }
-    );
+    code.CallLambda([](A64::UserConfig& conf, u64 vaddr) -> u64 {
+        return conf.global_monitor->ReadAndMark<u64>(
+            conf.processor_id, vaddr, [&]() -> u64 { return conf.callbacks->MemoryRead64(vaddr); });
+    });
 }
 
 void A64EmitX64::EmitA64ExclusiveReadMemory128(A64EmitContext& ctx, IR::Inst* inst) {
@@ -1018,13 +1035,11 @@ void A64EmitX64::EmitA64ExclusiveReadMemory128(A64EmitContext& ctx, IR::Inst* in
     code.mov(code.ABI_PARAM1, reinterpret_cast<u64>(&conf));
     code.sub(rsp, 16 + ABI_SHADOW_SPACE);
     code.lea(code.ABI_PARAM3, ptr[rsp + ABI_SHADOW_SPACE]);
-    code.CallLambda(
-        [](A64::UserConfig& conf, u64 vaddr, A64::Vector& ret) {
-            ret = conf.global_monitor->ReadAndMark<A64::Vector>(conf.processor_id, vaddr, [&]() -> A64::Vector {
-                return conf.callbacks->MemoryRead128(vaddr);
-            });
-        }
-    );
+    code.CallLambda([](A64::UserConfig& conf, u64 vaddr, A64::Vector& ret) {
+        ret = conf.global_monitor->ReadAndMark<A64::Vector>(
+            conf.processor_id, vaddr,
+            [&]() -> A64::Vector { return conf.callbacks->MemoryRead128(vaddr); });
+    });
     code.movups(result, xword[rsp + ABI_SHADOW_SPACE]);
     code.add(rsp, 16 + ABI_SHADOW_SPACE);
     ctx.reg_alloc.DefineValue(inst, result);
@@ -1124,57 +1139,62 @@ void A64EmitX64::EmitExclusiveWrite(A64EmitContext& ctx, IR::Inst* inst, size_t 
     code.mov(code.ABI_PARAM1, reinterpret_cast<u64>(&conf));
     switch (bitsize) {
     case 8:
-        code.CallLambda(
-            [](A64::UserConfig& conf, u64 vaddr, u8 value) -> u32 {
-                return conf.global_monitor->DoExclusiveOperation<u8>(conf.processor_id, vaddr,
-                    [&](u8 expected) -> bool {
-                        return conf.callbacks->MemoryWriteExclusive8(vaddr, value, expected);
-                }) ? 0 : 1;
-            }
-        );
+        code.CallLambda([](A64::UserConfig& conf, u64 vaddr, u8 value) -> u32 {
+            return conf.global_monitor->DoExclusiveOperation<u8>(
+                       conf.processor_id, vaddr,
+                       [&](u8 expected) -> bool {
+                           return conf.callbacks->MemoryWriteExclusive8(vaddr, value, expected);
+                       })
+                       ? 0
+                       : 1;
+        });
         break;
     case 16:
-        code.CallLambda(
-            [](A64::UserConfig& conf, u64 vaddr, u16 value) -> u32 {
-                return conf.global_monitor->DoExclusiveOperation<u16>(conf.processor_id, vaddr,
-                    [&](u16 expected) -> bool {
-                        return conf.callbacks->MemoryWriteExclusive16(vaddr, value, expected);
-                }) ? 0 : 1;
-            }
-        );
+        code.CallLambda([](A64::UserConfig& conf, u64 vaddr, u16 value) -> u32 {
+            return conf.global_monitor->DoExclusiveOperation<u16>(
+                       conf.processor_id, vaddr,
+                       [&](u16 expected) -> bool {
+                           return conf.callbacks->MemoryWriteExclusive16(vaddr, value, expected);
+                       })
+                       ? 0
+                       : 1;
+        });
         break;
     case 32:
-        code.CallLambda(
-            [](A64::UserConfig& conf, u64 vaddr, u32 value) -> u32 {
-                return conf.global_monitor->DoExclusiveOperation<u32>(conf.processor_id, vaddr,
-                    [&](u32 expected) -> bool {
-                        return conf.callbacks->MemoryWriteExclusive32(vaddr, value, expected);
-                }) ? 0 : 1;
-            }
-        );
+        code.CallLambda([](A64::UserConfig& conf, u64 vaddr, u32 value) -> u32 {
+            return conf.global_monitor->DoExclusiveOperation<u32>(
+                       conf.processor_id, vaddr,
+                       [&](u32 expected) -> bool {
+                           return conf.callbacks->MemoryWriteExclusive32(vaddr, value, expected);
+                       })
+                       ? 0
+                       : 1;
+        });
         break;
     case 64:
-        code.CallLambda(
-            [](A64::UserConfig& conf, u64 vaddr, u64 value) -> u32 {
-                return conf.global_monitor->DoExclusiveOperation<u64>(conf.processor_id, vaddr,
-                    [&](u64 expected) -> bool {
-                        return conf.callbacks->MemoryWriteExclusive64(vaddr, value, expected);
-                }) ? 0 : 1;
-            }
-        );
+        code.CallLambda([](A64::UserConfig& conf, u64 vaddr, u64 value) -> u32 {
+            return conf.global_monitor->DoExclusiveOperation<u64>(
+                       conf.processor_id, vaddr,
+                       [&](u64 expected) -> bool {
+                           return conf.callbacks->MemoryWriteExclusive64(vaddr, value, expected);
+                       })
+                       ? 0
+                       : 1;
+        });
         break;
     case 128:
         code.sub(rsp, 16 + ABI_SHADOW_SPACE);
         code.lea(code.ABI_PARAM3, ptr[rsp + ABI_SHADOW_SPACE]);
         code.movaps(xword[code.ABI_PARAM3], xmm1);
-        code.CallLambda(
-            [](A64::UserConfig& conf, u64 vaddr, A64::Vector& value) -> u32 {
-                return conf.global_monitor->DoExclusiveOperation<A64::Vector>(conf.processor_id, vaddr,
-                    [&](A64::Vector expected) -> bool {
-                        return conf.callbacks->MemoryWriteExclusive128(vaddr, value, expected);
-                }) ? 0 : 1;
-            }
-        );
+        code.CallLambda([](A64::UserConfig& conf, u64 vaddr, A64::Vector& value) -> u32 {
+            return conf.global_monitor->DoExclusiveOperation<A64::Vector>(
+                       conf.processor_id, vaddr,
+                       [&](A64::Vector expected) -> bool {
+                           return conf.callbacks->MemoryWriteExclusive128(vaddr, value, expected);
+                       })
+                       ? 0
+                       : 1;
+        });
         code.add(rsp, 16 + ABI_SHADOW_SPACE);
         break;
     default:
@@ -1203,17 +1223,16 @@ void A64EmitX64::EmitA64ExclusiveWriteMemory128(A64EmitContext& ctx, IR::Inst* i
     EmitExclusiveWrite(ctx, inst, 128);
 }
 
-std::string A64EmitX64::LocationDescriptorToFriendlyName(const IR::LocationDescriptor& ir_descriptor) const {
+std::string A64EmitX64::LocationDescriptorToFriendlyName(
+    const IR::LocationDescriptor& ir_descriptor) const {
     const A64::LocationDescriptor descriptor{ir_descriptor};
-    return fmt::format("a64_{:016X}_fpcr{:08X}",
-                       descriptor.PC(),
-                       descriptor.FPCR().Value());
+    return fmt::format("a64_{:016X}_fpcr{:08X}", descriptor.PC(), descriptor.FPCR().Value());
 }
 
 void A64EmitX64::EmitTerminalImpl(IR::Term::Interpret terminal, IR::LocationDescriptor, bool) {
     code.SwitchMxcsrOnExit();
-    Devirtualize<&A64::UserCallbacks::InterpreterFallback>(conf.callbacks).EmitCall(code,
-        [&](RegList param) {
+    Devirtualize<&A64::UserCallbacks::InterpreterFallback>(conf.callbacks)
+        .EmitCall(code, [&](RegList param) {
             code.mov(param[0], A64::LocationDescriptor{terminal.next}.PC());
             code.mov(qword[r15 + offsetof(A64JitState, pc)], param[0]);
             code.mov(param[1].cvt32(), terminal.num_instructions);
@@ -1225,7 +1244,8 @@ void A64EmitX64::EmitTerminalImpl(IR::Term::ReturnToDispatch, IR::LocationDescri
     code.ReturnFromRunCode();
 }
 
-void A64EmitX64::EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDescriptor, bool is_single_step) {
+void A64EmitX64::EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDescriptor,
+                                  bool is_single_step) {
     if (!conf.enable_optimizations || is_single_step) {
         code.mov(rax, A64::LocationDescriptor{terminal.next}.PC());
         code.mov(qword[r15 + offsetof(A64JitState, pc)], rax);
@@ -1246,7 +1266,8 @@ void A64EmitX64::EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDesc
     code.ForceReturnFromRunCode();
 }
 
-void A64EmitX64::EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::LocationDescriptor, bool is_single_step) {
+void A64EmitX64::EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::LocationDescriptor,
+                                  bool is_single_step) {
     if (!conf.enable_optimizations || is_single_step) {
         code.mov(rax, A64::LocationDescriptor{terminal.next}.PC());
         code.mov(qword[r15 + offsetof(A64JitState, pc)], rax);
@@ -1262,7 +1283,8 @@ void A64EmitX64::EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::Location
     }
 }
 
-void A64EmitX64::EmitTerminalImpl(IR::Term::PopRSBHint, IR::LocationDescriptor, bool is_single_step) {
+void A64EmitX64::EmitTerminalImpl(IR::Term::PopRSBHint, IR::LocationDescriptor,
+                                  bool is_single_step) {
     if (!conf.enable_optimizations || is_single_step) {
         code.ReturnFromRunCode();
         return;
@@ -1271,7 +1293,8 @@ void A64EmitX64::EmitTerminalImpl(IR::Term::PopRSBHint, IR::LocationDescriptor, 
     code.jmp(terminal_handler_pop_rsb_hint);
 }
 
-void A64EmitX64::EmitTerminalImpl(IR::Term::FastDispatchHint, IR::LocationDescriptor, bool is_single_step) {
+void A64EmitX64::EmitTerminalImpl(IR::Term::FastDispatchHint, IR::LocationDescriptor,
+                                  bool is_single_step) {
     if (conf.enable_fast_dispatch && !is_single_step) {
         code.jmp(terminal_handler_fast_dispatch_hint);
     } else {
@@ -1279,7 +1302,8 @@ void A64EmitX64::EmitTerminalImpl(IR::Term::FastDispatchHint, IR::LocationDescri
     }
 }
 
-void A64EmitX64::EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void A64EmitX64::EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location,
+                                  bool is_single_step) {
     switch (terminal.if_) {
     case IR::Cond::AL:
     case IR::Cond::NV:
@@ -1294,7 +1318,8 @@ void A64EmitX64::EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor 
     }
 }
 
-void A64EmitX64::EmitTerminalImpl(IR::Term::CheckBit terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void A64EmitX64::EmitTerminalImpl(IR::Term::CheckBit terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) {
     Xbyak::Label fail;
     code.cmp(code.byte[r15 + offsetof(A64JitState, check_bit)], u8(0));
     code.jz(fail);
@@ -1303,7 +1328,8 @@ void A64EmitX64::EmitTerminalImpl(IR::Term::CheckBit terminal, IR::LocationDescr
     EmitTerminal(terminal.else_, initial_location, is_single_step);
 }
 
-void A64EmitX64::EmitTerminalImpl(IR::Term::CheckHalt terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void A64EmitX64::EmitTerminalImpl(IR::Term::CheckHalt terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) {
     code.cmp(code.byte[r15 + offsetof(A64JitState, halt_requested)], u8(0));
     code.jne(code.GetForceReturnFromRunCodeAddress());
     EmitTerminal(terminal.else_, initial_location, is_single_step);

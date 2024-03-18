@@ -10,11 +10,11 @@
 namespace mp {
 
 /// Metafunction that returns the number of arguments it has
-template<typename... Ts>
+template <typename... Ts>
 using argument_count = lift_value<sizeof...(Ts)>;
 
 /// Metafunction that returns the number of arguments it has
-template<typename... Ts>
+template <typename... Ts>
 constexpr auto argument_count_v = sizeof...(Ts);
 
 } // namespace mp

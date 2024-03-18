@@ -331,7 +331,9 @@ TEST(arg_test, make_value_with_custom_context) {
 struct test_result {};
 
 template <typename T> struct mock_visitor {
-  template <typename U> struct result { using type = test_result; };
+  template <typename U> struct result {
+    using type = test_result;
+  };
 
   mock_visitor() {
     ON_CALL(*this, visit(_)).WillByDefault(Return(test_result()));
@@ -348,10 +350,14 @@ template <typename T> struct mock_visitor {
   }
 };
 
-template <typename T> struct visit_type { using type = T; };
+template <typename T> struct visit_type {
+  using type = T;
+};
 
-#define VISIT_TYPE(type_, visit_type_) \
-  template <> struct visit_type<type_> { using type = visit_type_; }
+#define VISIT_TYPE(type_, visit_type_)   \
+  template <> struct visit_type<type_> { \
+    using type = visit_type_;            \
+  }
 
 VISIT_TYPE(signed char, int);
 VISIT_TYPE(unsigned char, unsigned);

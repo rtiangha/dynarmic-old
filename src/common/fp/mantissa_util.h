@@ -23,7 +23,8 @@ inline ResidualError ResidualErrorOnRightShift(u64 mantissa, int shift_amount) {
     }
 
     if (shift_amount > static_cast<int>(Common::BitSize<u64>())) {
-        return Common::MostSignificantBit(mantissa) ? ResidualError::GreaterThanHalf : ResidualError::LessThanHalf;
+        return Common::MostSignificantBit(mantissa) ? ResidualError::GreaterThanHalf
+                                                    : ResidualError::LessThanHalf;
     }
 
     const size_t half_bit_position = static_cast<size_t>(shift_amount - 1);

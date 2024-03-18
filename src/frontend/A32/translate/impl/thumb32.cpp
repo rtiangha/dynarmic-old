@@ -28,9 +28,7 @@ bool ThumbTranslatorVisitor::thumb32_BLX_imm(Imm<11> hi, Imm<11> lo) {
     ir.SetRegister(Reg::LR, ir.Imm32((ir.current_location.PC() + 4) | 1));
 
     const s32 imm32 = static_cast<s32>(concatenate(hi, lo).SignExtend<u32>() << 1);
-    const auto new_location = ir.current_location
-                                .SetPC(ir.AlignPC(4) + imm32)
-                                .SetTFlag(false);
+    const auto new_location = ir.current_location.SetPC(ir.AlignPC(4) + imm32).SetTFlag(false);
     ir.SetTerm(IR::Term::LinkBlock{new_location});
     return false;
 }

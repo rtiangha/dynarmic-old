@@ -786,7 +786,8 @@ void ARM64XEmitter::EncodeBitfieldMOVInst(u32 op, ARM64Reg Rd, ARM64Reg Rn, u32 
 
 void ARM64XEmitter::EncodeLoadStoreRegisterOffset(u32 size, u32 opc, ARM64Reg Rt, ARM64Reg Rn,
                                                   ArithOption Rm) {
-    ASSERT_MSG(Rm.GetType() == ArithOption::TYPE_EXTENDEDREG, "Shifted registers are not supported used Indexed registers");
+    ASSERT_MSG(Rm.GetType() == ArithOption::TYPE_EXTENDEDREG,
+               "Shifted registers are not supported used Indexed registers");
 
     Rt = DecodeReg(Rt);
     Rn = DecodeReg(Rn);
@@ -871,7 +872,7 @@ void ARM64XEmitter::EncodeLoadStoreUnscaled(u32 size, u32 op, ARM64Reg Rt, ARM64
 
 // FixupBranch branching
 void ARM64XEmitter::SetJumpTarget(FixupBranch const& branch, u8* target) {
-    if(!target)
+    if (!target)
         target = m_code;
     bool Not = false;
     u32 inst = 0;
@@ -992,8 +993,8 @@ void ARM64XEmitter::B(CCFlags cond, const void* ptr) {
     distance >>= 2;
 
     ASSERT_MSG(IsInRangeImm19(distance),
-               "%s: Received too large distance: %p->%p %" PRIi64 " %" PRIx64, __func__, fmt::ptr(m_code),
-               fmt::ptr(ptr), distance, distance);
+               "%s: Received too large distance: %p->%p %" PRIi64 " %" PRIx64, __func__,
+               fmt::ptr(m_code), fmt::ptr(ptr), distance, distance);
     Write32((0x54 << 24) | (MaskImm19(distance) << 5) | cond);
 }
 
@@ -1884,8 +1885,8 @@ void ARM64XEmitter::ABI_PushRegisters(u32 registers) {
     } else {
         STP(INDEX_PRE, gpr[0], gpr[1], SP, -stack_size);
         it += 2;
-    }    
-	
+    }
+
     // Fast store for all other registers, this is always an even number.
     for (int i = 0; i < (num_regs - 1) / 2; i++) {
         STP(INDEX_SIGNED, gpr[it], gpr[it + 1], SP, 16 * (i + 1));
@@ -2008,7 +2009,7 @@ void ARM64FloatEmitter::EmitThreeSame(bool U, u32 size, u32 opcode, ARM64Reg Rd,
 }
 
 void ARM64FloatEmitter::EmitScalarThreeSame(bool U, u32 size, u32 opcode, ARM64Reg Rd, ARM64Reg Rn,
-                                      ARM64Reg Rm) {
+                                            ARM64Reg Rm) {
     ASSERT_MSG(!IsQuad(Rd), "%s doesn't support quads!", __func__);
     Rd = DecodeReg(Rd);
     Rn = DecodeReg(Rn);
@@ -2032,9 +2033,8 @@ void ARM64FloatEmitter::EmitScalarThreeSame(bool U, u32 size, u32 opcode, ARM64R
         break;
     }
 
-
-    Write32((U << 29) | (0b1011110001 << 21) | (esize << 22) | (Rm << 16) |
-            (opcode << 11) | (1 << 10) | (Rn << 5) | Rd);
+    Write32((U << 29) | (0b1011110001 << 21) | (esize << 22) | (Rm << 16) | (opcode << 11) |
+            (1 << 10) | (Rn << 5) | Rd);
 }
 
 void ARM64FloatEmitter::EmitCopy(bool Q, u32 op, u32 imm5, u32 imm4, ARM64Reg Rd, ARM64Reg Rn) {
@@ -2745,7 +2745,8 @@ void ARM64FloatEmitter::FMOV(ARM64Reg Rd, ARM64Reg Rn, bool top) {
         }
         Rd = DecodeReg(Rd);
         Rn = DecodeReg(Rn);
-        Write32((sf << 31) | (encoded_size << 22) | (0x1e2 << 20)  | (rmode << 19) | (opcode << 16) | (Rn << 5) | Rd);
+        Write32((sf << 31) | (encoded_size << 22) | (0x1e2 << 20) | (rmode << 19) | (opcode << 16) |
+                (Rn << 5) | Rd);
     }
 }
 

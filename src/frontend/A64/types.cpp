@@ -13,10 +13,8 @@
 namespace Dynarmic::A64 {
 
 const char* CondToString(Cond cond) {
-    static constexpr std::array cond_strs = {
-        "eq", "ne", "hs", "lo", "mi", "pl", "vs", "vc",
-        "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"
-    };
+    static constexpr std::array cond_strs = {"eq", "ne", "hs", "lo", "mi", "pl", "vs", "vc",
+                                             "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"};
     return cond_strs.at(static_cast<size_t>(cond));
 }
 

@@ -15,7 +15,11 @@ using namespace Xbyak::util;
 
 namespace {
 
-void EmitVectorSaturatedNative(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst, void (Xbyak::CodeGenerator::*saturated_fn)(const Xbyak::Mmx& mmx, const Xbyak::Operand&), void (Xbyak::CodeGenerator::*unsaturated_fn)(const Xbyak::Mmx& mmx, const Xbyak::Operand&), void (Xbyak::CodeGenerator::*sub_fn)(const Xbyak::Mmx& mmx, const Xbyak::Operand&)) {
+void EmitVectorSaturatedNative(
+    BlockOfCode& code, EmitContext& ctx, IR::Inst* inst,
+    void (Xbyak::CodeGenerator::*saturated_fn)(const Xbyak::Mmx& mmx, const Xbyak::Operand&),
+    void (Xbyak::CodeGenerator::*unsaturated_fn)(const Xbyak::Mmx& mmx, const Xbyak::Operand&),
+    void (Xbyak::CodeGenerator::*sub_fn)(const Xbyak::Mmx& mmx, const Xbyak::Operand&)) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
 
     const Xbyak::Xmm result = ctx.reg_alloc.UseScratchXmm(args[0]);
@@ -49,7 +53,7 @@ enum class Op {
     Sub,
 };
 
-template<Op op, size_t esize>
+template <Op op, size_t esize>
 void EmitVectorSignedSaturated(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
     static_assert(esize == 32 || esize == 64);
     constexpr u64 msb_mask = esize == 32 ? 0x8000000080000000 : 0x8000000000000000;
@@ -134,11 +138,13 @@ void EmitVectorSignedSaturated(BlockOfCode& code, EmitContext& ctx, IR::Inst* in
 } // anonymous namespace
 
 void EmitX64::EmitVectorSignedSaturatedAdd8(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddsb, &Xbyak::CodeGenerator::paddb, &Xbyak::CodeGenerator::psubb);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddsb,
+                              &Xbyak::CodeGenerator::paddb, &Xbyak::CodeGenerator::psubb);
 }
 
 void EmitX64::EmitVectorSignedSaturatedAdd16(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddsw, &Xbyak::CodeGenerator::paddw, &Xbyak::CodeGenerator::psubw);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddsw,
+                              &Xbyak::CodeGenerator::paddw, &Xbyak::CodeGenerator::psubw);
 }
 
 void EmitX64::EmitVectorSignedSaturatedAdd32(EmitContext& ctx, IR::Inst* inst) {
@@ -150,11 +156,13 @@ void EmitX64::EmitVectorSignedSaturatedAdd64(EmitContext& ctx, IR::Inst* inst) {
 }
 
 void EmitX64::EmitVectorSignedSaturatedSub8(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubsb, &Xbyak::CodeGenerator::psubb, &Xbyak::CodeGenerator::psubb);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubsb,
+                              &Xbyak::CodeGenerator::psubb, &Xbyak::CodeGenerator::psubb);
 }
 
 void EmitX64::EmitVectorSignedSaturatedSub16(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubsw, &Xbyak::CodeGenerator::psubw, &Xbyak::CodeGenerator::psubw);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubsw,
+                              &Xbyak::CodeGenerator::psubw, &Xbyak::CodeGenerator::psubw);
 }
 
 void EmitX64::EmitVectorSignedSaturatedSub32(EmitContext& ctx, IR::Inst* inst) {
@@ -166,11 +174,13 @@ void EmitX64::EmitVectorSignedSaturatedSub64(EmitContext& ctx, IR::Inst* inst) {
 }
 
 void EmitX64::EmitVectorUnsignedSaturatedAdd8(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddusb, &Xbyak::CodeGenerator::paddb, &Xbyak::CodeGenerator::psubb);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddusb,
+                              &Xbyak::CodeGenerator::paddb, &Xbyak::CodeGenerator::psubb);
 }
 
 void EmitX64::EmitVectorUnsignedSaturatedAdd16(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddusw, &Xbyak::CodeGenerator::paddw, &Xbyak::CodeGenerator::psubw);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::paddusw,
+                              &Xbyak::CodeGenerator::paddw, &Xbyak::CodeGenerator::psubw);
 }
 
 void EmitX64::EmitVectorUnsignedSaturatedAdd32(EmitContext& ctx, IR::Inst* inst) {
@@ -245,11 +255,13 @@ void EmitX64::EmitVectorUnsignedSaturatedAdd64(EmitContext& ctx, IR::Inst* inst)
 }
 
 void EmitX64::EmitVectorUnsignedSaturatedSub8(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubusb, &Xbyak::CodeGenerator::psubb, &Xbyak::CodeGenerator::psubb);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubusb,
+                              &Xbyak::CodeGenerator::psubb, &Xbyak::CodeGenerator::psubb);
 }
 
 void EmitX64::EmitVectorUnsignedSaturatedSub16(EmitContext& ctx, IR::Inst* inst) {
-    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubusw, &Xbyak::CodeGenerator::psubw, &Xbyak::CodeGenerator::psubw);
+    EmitVectorSaturatedNative(code, ctx, inst, &Xbyak::CodeGenerator::psubusw,
+                              &Xbyak::CodeGenerator::psubw, &Xbyak::CodeGenerator::psubw);
 }
 
 void EmitX64::EmitVectorUnsignedSaturatedSub32(EmitContext& ctx, IR::Inst* inst) {

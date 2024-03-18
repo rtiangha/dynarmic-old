@@ -11,10 +11,10 @@
 
 #include "common/bit_util.h"
 #include "common/string_util.h"
-#include "frontend/imm.h"
 #include "frontend/A32/decoder/thumb16.h"
 #include "frontend/A32/disassembler/disassembler.h"
 #include "frontend/A32/types.h"
+#include "frontend/imm.h"
 
 namespace Dynarmic::A32 {
 
@@ -286,12 +286,14 @@ public:
     }
 
     std::string thumb16_PUSH(bool M, RegList reg_list) {
-        if (M) reg_list |= 1 << 14;
+        if (M)
+            reg_list |= 1 << 14;
         return fmt::format("push {{{}}}", RegListToString(reg_list));
     }
 
     std::string thumb16_POP(bool P, RegList reg_list) {
-        if (P) reg_list |= 1 << 15;
+        if (P)
+            reg_list |= 1 << 15;
         return fmt::format("pop {{{}}}", RegListToString(reg_list));
     }
 
@@ -300,7 +302,8 @@ public:
     }
 
     std::string thumb16_CPS(bool im, bool a, bool i, bool f) {
-        return fmt::format("cps{} {}{}{}", im ? "id" : "ie", a ? "a" : "", i ? "i" : "", f ? "f" : "");
+        return fmt::format("cps{} {}{}{}", im ? "id" : "ie", a ? "a" : "", i ? "i" : "",
+                           f ? "f" : "");
     }
 
     std::string thumb16_REV(Reg m, Reg d) {
@@ -353,24 +356,20 @@ public:
 
     std::string thumb16_B_t1(Cond cond, Imm<8> imm8) {
         const s32 imm32 = static_cast<s32>((imm8.SignExtend<u32>() << 1) + 4);
-        return fmt::format("b{} {}#{}",
-                           CondToString(cond),
-                           Common::SignToChar(imm32),
-                           abs(imm32));
+        return fmt::format("b{} {}#{}", CondToString(cond), Common::SignToChar(imm32), abs(imm32));
     }
 
     std::string thumb16_B_t2(Imm<11> imm11) {
         const s32 imm32 = static_cast<s32>((imm11.SignExtend<u32>() << 1) + 4);
-        return fmt::format("b {}#{}",
-                           Common::SignToChar(imm32),
-                           abs(imm32));
+        return fmt::format("b {}#{}", Common::SignToChar(imm32), abs(imm32));
     }
 };
 
 std::string DisassembleThumb16(u16 instruction) {
     DisassemblerVisitor visitor;
     auto decoder = DecodeThumb16<DisassemblerVisitor>(instruction);
-    return !decoder ? fmt::format("UNKNOWN: {:x}", instruction) : decoder->get().call(visitor, instruction);
+    return !decoder ? fmt::format("UNKNOWN: {:x}", instruction)
+                    : decoder->get().call(visitor, instruction);
 }
 
 } // namespace Dynarmic::A32

@@ -19,12 +19,8 @@ TEST_CASE("Unicorn: Sanity test", "[a64]") {
     env.code_mem.emplace_back(0x8b020020); // ADD X0, X1, X2
     env.code_mem.emplace_back(0x14000000); // B .
 
-    constexpr A64Unicorn::RegisterArray regs{
-        0, 1, 2, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0
-    };
+    constexpr A64Unicorn::RegisterArray regs{0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     A64Unicorn unicorn{env};
 

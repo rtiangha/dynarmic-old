@@ -8,31 +8,24 @@
 
 namespace Dynarmic::A32 {
 
-bool ArmTranslatorVisitor::arm_PLD_imm([[maybe_unused]] bool add,
-                                       bool R,
-                                       [[maybe_unused]] Reg n,
+bool ArmTranslatorVisitor::arm_PLD_imm([[maybe_unused]] bool add, bool R, [[maybe_unused]] Reg n,
                                        [[maybe_unused]] Imm<12> imm12) {
     if (!options.hook_hint_instructions) {
         return true;
     }
 
-    const auto exception = R ? Exception::PreloadData
-                             : Exception::PreloadDataWithIntentToWrite;
+    const auto exception = R ? Exception::PreloadData : Exception::PreloadDataWithIntentToWrite;
     return RaiseException(exception);
 }
 
-bool ArmTranslatorVisitor::arm_PLD_reg([[maybe_unused]] bool add,
-                                       bool R,
-                                       [[maybe_unused]] Reg n,
+bool ArmTranslatorVisitor::arm_PLD_reg([[maybe_unused]] bool add, bool R, [[maybe_unused]] Reg n,
                                        [[maybe_unused]] Imm<5> imm5,
-                                       [[maybe_unused]] ShiftType shift,
-                                       [[maybe_unused]] Reg m) {
+                                       [[maybe_unused]] ShiftType shift, [[maybe_unused]] Reg m) {
     if (!options.hook_hint_instructions) {
         return true;
     }
 
-    const auto exception = R ? Exception::PreloadData
-                             : Exception::PreloadDataWithIntentToWrite;
+    const auto exception = R ? Exception::PreloadData : Exception::PreloadDataWithIntentToWrite;
     return RaiseException(exception);
 }
 

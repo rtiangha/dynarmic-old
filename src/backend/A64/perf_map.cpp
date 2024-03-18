@@ -55,7 +55,9 @@ void PerfMapRegister(const void* start, const void* end, const std::string& frie
         }
     }
 
-    const std::string line = fmt::format("{:016x} {:016x} {:s}\n", reinterpret_cast<u64>(start), reinterpret_cast<u64>(end) - reinterpret_cast<u64>(start), friendly_name);
+    const std::string line =
+        fmt::format("{:016x} {:016x} {:s}\n", reinterpret_cast<u64>(start),
+                    reinterpret_cast<u64>(end) - reinterpret_cast<u64>(start), friendly_name);
     std::fwrite(line.data(), sizeof *line.data(), line.size(), file);
 }
 } // namespace detail
@@ -72,7 +74,7 @@ void PerfMapClear() {
     OpenFile();
 }
 
-} // namespace Dynarmic::BackendX64
+} // namespace Dynarmic::BackendA64
 
 #else
 
@@ -84,6 +86,6 @@ void PerfMapRegister(const void*, const void*, const std::string&) {}
 
 void PerfMapClear() {}
 
-} // namespace Dynarmic::BackendX64
+} // namespace Dynarmic::BackendA64
 
 #endif

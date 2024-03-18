@@ -78,7 +78,8 @@ bool TranslatorVisitor::FMOV_float_imm(Imm<2> type, Imm<8> imm8, Vec Vd) {
         case 64:
         default: {
             const u64 sign = imm8.Bit<7>() ? 1 : 0;
-            const u64 exp = (imm8.Bit<6>() ? 0b011'1111'1100 : 0b100'0000'0000) | imm8.Bits<4, 5, u64>();
+            const u64 exp =
+                (imm8.Bit<6>() ? 0b011'1111'1100 : 0b100'0000'0000) | imm8.Bits<4, 5, u64>();
             const u64 fract = imm8.Bits<0, 3, u64>() << 48;
             return ir.Imm64((sign << 63) | (exp << 52) | fract);
         }
@@ -127,7 +128,7 @@ bool TranslatorVisitor::FCVT_float(Imm<2> type, Imm<2> opc, Vec Vn, Vec Vd) {
         }
         break;
     case 64:
-    switch (*dstsize) {
+        switch (*dstsize) {
         case 16:
             result = ir.FPDoubleToHalf(operand, rounding_mode);
             break;
@@ -157,15 +158,18 @@ static bool FloatingPointRoundToIntegral(TranslatorVisitor& v, Imm<2> type, Vec 
 }
 
 bool TranslatorVisitor::FRINTN_float(Imm<2> type, Vec Vn, Vec Vd) {
-    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, FP::RoundingMode::ToNearest_TieEven, false);
+    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, FP::RoundingMode::ToNearest_TieEven,
+                                        false);
 }
 
 bool TranslatorVisitor::FRINTP_float(Imm<2> type, Vec Vn, Vec Vd) {
-    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, FP::RoundingMode::TowardsPlusInfinity, false);
+    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, FP::RoundingMode::TowardsPlusInfinity,
+                                        false);
 }
 
 bool TranslatorVisitor::FRINTM_float(Imm<2> type, Vec Vn, Vec Vd) {
-    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, FP::RoundingMode::TowardsMinusInfinity, false);
+    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, FP::RoundingMode::TowardsMinusInfinity,
+                                        false);
 }
 
 bool TranslatorVisitor::FRINTZ_float(Imm<2> type, Vec Vn, Vec Vd) {
@@ -173,15 +177,18 @@ bool TranslatorVisitor::FRINTZ_float(Imm<2> type, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::FRINTA_float(Imm<2> type, Vec Vn, Vec Vd) {
-    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, FP::RoundingMode::ToNearest_TieAwayFromZero, false);
+    return FloatingPointRoundToIntegral(*this, type, Vn, Vd,
+                                        FP::RoundingMode::ToNearest_TieAwayFromZero, false);
 }
 
 bool TranslatorVisitor::FRINTX_float(Imm<2> type, Vec Vn, Vec Vd) {
-    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, ir.current_location->FPCR().RMode(), true);
+    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, ir.current_location->FPCR().RMode(),
+                                        true);
 }
 
 bool TranslatorVisitor::FRINTI_float(Imm<2> type, Vec Vn, Vec Vd) {
-    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, ir.current_location->FPCR().RMode(), false);
+    return FloatingPointRoundToIntegral(*this, type, Vn, Vd, ir.current_location->FPCR().RMode(),
+                                        false);
 }
 
 } // namespace Dynarmic::A64

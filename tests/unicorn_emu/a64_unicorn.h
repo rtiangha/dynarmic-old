@@ -16,8 +16,8 @@
 #include <unicorn/unicorn.h>
 #endif
 
-#include "common/common_types.h"
 #include "A64/testenv.h"
+#include "common/common_types.h"
 
 class A64Unicorn final {
 public:
@@ -63,8 +63,10 @@ public:
 
 private:
     static void InterruptHook(uc_engine* uc, u32 interrupt, void* user_data);
-    static bool UnmappedMemoryHook(uc_engine* uc, uc_mem_type type, u64 addr, int size, u64 value, void* user_data);
-    static bool MemoryWriteHook(uc_engine* uc, uc_mem_type type, u64 addr, int size, u64 value, void* user_data);
+    static bool UnmappedMemoryHook(uc_engine* uc, uc_mem_type type, u64 addr, int size, u64 value,
+                                   void* user_data);
+    static bool MemoryWriteHook(uc_engine* uc, uc_mem_type type, u64 addr, int size, u64 value,
+                                void* user_data);
 
     struct Page {
         u64 address;

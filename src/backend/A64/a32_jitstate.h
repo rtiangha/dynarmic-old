@@ -16,13 +16,15 @@ class BlockOfCode;
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4324) // Structure was padded due to alignment specifier
+#pragma warning(disable : 4324) // Structure was padded due to alignment specifier
 #endif
 
 struct A32JitState {
     using ProgramCounterType = u32;
 
-    A32JitState() { ResetRSB(); }
+    A32JitState() {
+        ResetRSB();
+    }
 
     std::array<u32, 16> Reg{}; // Current register file.
     // TODO: Mode-specific register sets unimplemented.

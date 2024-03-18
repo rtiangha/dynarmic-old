@@ -47,7 +47,10 @@ public:
 private:
     auto FindCodeBlockInfo(CodePtr PC) {
         return std::find_if(code_block_infos.begin(), code_block_infos.end(),
-                            [&](const CodeBlockInfo& x) { return x.block->GetRegion() <= PC && x.block->GetRegion() + x.block->GetRegionSize() > PC; });
+                            [&](const CodeBlockInfo& x) {
+                                return x.block->GetRegion() <= PC &&
+                                       x.block->GetRegion() + x.block->GetRegionSize() > PC;
+                            });
     }
 
     std::vector<CodeBlockInfo> code_block_infos;
@@ -113,10 +116,9 @@ void SigHandler::SigAction(int sig, siginfo_t* info, void* raw_context) {
         return;
     }
 
-    fmt::print(
-        stderr,
-        "dynarmic: POSIX SigHandler: Exception was not in registered code blocks (PC {})\n",
-        PC);
+    fmt::print(stderr,
+               "dynarmic: POSIX SigHandler: Exception was not in registered code blocks (PC {})\n",
+               PC);
 
     struct sigaction* retry_sa =
         sig == SIGSEGV ? &sig_handler.old_sa_segv : &sig_handler.old_sa_bus;

@@ -11,8 +11,9 @@
 namespace Dynarmic {
 namespace A64 {
 
-ExclusiveMonitor::ExclusiveMonitor(size_t processor_count) :
-    exclusive_addresses(processor_count, INVALID_EXCLUSIVE_ADDRESS), exclusive_values(processor_count) {
+ExclusiveMonitor::ExclusiveMonitor(size_t processor_count)
+    : exclusive_addresses(processor_count, INVALID_EXCLUSIVE_ADDRESS),
+      exclusive_values(processor_count) {
     Unlock();
 }
 
@@ -21,7 +22,8 @@ size_t ExclusiveMonitor::GetProcessorCount() const {
 }
 
 void ExclusiveMonitor::Lock() {
-    while (is_locked.test_and_set(std::memory_order_acquire)) {}
+    while (is_locked.test_and_set(std::memory_order_acquire)) {
+    }
 }
 
 void ExclusiveMonitor::Unlock() {
@@ -56,7 +58,6 @@ void ExclusiveMonitor::ClearProcessor(size_t processor_id) {
     exclusive_addresses[processor_id] = INVALID_EXCLUSIVE_ADDRESS;
     Unlock();
 }
-
 
 } // namespace A64
 } // namespace Dynarmic

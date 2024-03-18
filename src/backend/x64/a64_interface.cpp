@@ -25,7 +25,9 @@ namespace Dynarmic::A64 {
 
 using namespace Backend::X64;
 
-static RunCodeCallbacks GenRunCodeCallbacks(A64::UserCallbacks* cb, CodePtr (*LookupBlock)(void* lookup_block_arg), void* arg) {
+static RunCodeCallbacks GenRunCodeCallbacks(A64::UserCallbacks* cb,
+                                            CodePtr (*LookupBlock)(void* lookup_block_arg),
+                                            void* arg) {
     return RunCodeCallbacks{
         std::make_unique<ArgCallback>(LookupBlock, reinterpret_cast<u64>(arg)),
         std::make_unique<ArgCallback>(Devirtualize<&A64::UserCallbacks::AddTicks>(cb)),
@@ -34,17 +36,18 @@ static RunCodeCallbacks GenRunCodeCallbacks(A64::UserCallbacks* cb, CodePtr (*Lo
 }
 
 static std::function<void(BlockOfCode&)> GenRCP(const A64::UserConfig&) {
-    return [](BlockOfCode&){};
+    return [](BlockOfCode&) {};
 }
 
 struct Jit::Impl final {
 public:
     Impl(Jit* jit, UserConfig conf)
-        : conf(conf)
-        , block_of_code(GenRunCodeCallbacks(conf.callbacks, &GetCurrentBlockThunk, this), JitStateInfo{jit_state}, GenRCP(conf))
-        , emitter(block_of_code, conf, jit)
-    {
-        ASSERT(conf.page_table_address_space_bits >= 12 && conf.page_table_address_space_bits <= 64);
+        : conf(conf),
+          block_of_code(GenRunCodeCallbacks(conf.callbacks, &GetCurrentBlockThunk, this),
+                        JitStateInfo{jit_state}, GenRCP(conf)),
+          emitter(block_of_code, conf, jit) {
+        ASSERT(conf.page_table_address_space_bits >= 12 &&
+               conf.page_table_address_space_bits <= 64);
     }
 
     ~Impl() = default;
@@ -52,12 +55,14 @@ public:
     void Run() {
         ASSERT(!is_executing);
         is_executing = true;
-        SCOPE_EXIT { this->is_executing = false; };
+        SCOPE_EXIT {
+            this->is_executing = false;
+        };
         jit_state.halt_requested = false;
 
         // TODO: Check code alignment
 
-        const CodePtr current_code_ptr = [this]{
+        const CodePtr current_code_ptr = [this] {
             // RSB optimization
             const u32 new_rsb_ptr = (jit_state.rsb_ptr - 1) & A64JitState::RSBPtrMask;
             if (jit_state.GetUniqueHash() == jit_state.rsb_location_descriptors[new_rsb_ptr]) {
@@ -75,7 +80,9 @@ public:
     void Step() {
         ASSERT(!is_executing);
         is_executing = true;
-        SCOPE_EXIT { this->is_executing = false; };
+        SCOPE_EXIT {
+            this->is_executing = false;
+        };
         jit_state.halt_requested = true;
 
         block_of_code.StepCode(&jit_state, GetCurrentSingleStep());
@@ -242,8 +249,9 @@ private:
 
         // JIT Compile
         const auto get_code = [this](u64 vaddr) { return conf.callbacks->MemoryReadCode(vaddr); };
-        IR::Block ir_block = A64::Translate(A64::LocationDescriptor{current_location}, get_code,
-                                                {conf.define_unpredictable_behaviour, conf.wall_clock_cntpct});
+        IR::Block ir_block =
+            A64::Translate(A64::LocationDescriptor{current_location}, get_code,
+                           {conf.define_unpredictable_behaviour, conf.wall_clock_cntpct});
         Optimization::A64CallbackConfigPass(ir_block, conf);
         if (conf.enable_optimizations) {
             Optimization::A64GetSetElimination(ir_block);
@@ -293,8 +301,7 @@ private:
     boost::icl::interval_set<u64> invalid_cache_ranges;
 };
 
-Jit::Jit(UserConfig conf)
-    : impl(std::make_unique<Jit::Impl>(this, conf)) {}
+Jit::Jit(UserConfig conf) : impl(std::make_unique<Jit::Impl>(this, conf)) {}
 
 Jit::~Jit() = default;
 

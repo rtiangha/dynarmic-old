@@ -24,6 +24,7 @@ public:
     ~ScopeExit() noexcept {
         function();
     }
+
 private:
     Function function;
 };
@@ -31,12 +32,14 @@ private:
 template <typename Function>
 class ScopeFail final {
 public:
-    explicit ScopeFail(Function&& fn) : function(std::move(fn)), exception_count(std::uncaught_exceptions()) {}
+    explicit ScopeFail(Function&& fn)
+        : function(std::move(fn)), exception_count(std::uncaught_exceptions()) {}
     ~ScopeFail() noexcept {
         if (std::uncaught_exceptions() > exception_count) {
             function();
         }
     }
+
 private:
     Function function;
     int exception_count;
@@ -45,12 +48,14 @@ private:
 template <typename Function>
 class ScopeSuccess final {
 public:
-    explicit ScopeSuccess(Function&& fn) : function(std::move(fn)), exception_count(std::uncaught_exceptions()) {}
+    explicit ScopeSuccess(Function&& fn)
+        : function(std::move(fn)), exception_count(std::uncaught_exceptions()) {}
     ~ScopeSuccess() {
         if (std::uncaught_exceptions() <= exception_count) {
             function();
         }
     }
+
 private:
     Function function;
     int exception_count;
@@ -75,6 +80,9 @@ auto operator->*(ScopeSuccessTag, Function&& function) {
 
 } // namespace Dynarmic::detail
 
-#define SCOPE_EXIT auto ANONYMOUS_VARIABLE(_SCOPE_EXIT_) = ::Dynarmic::detail::ScopeExitTag{} ->* [&]() noexcept
-#define SCOPE_FAIL auto ANONYMOUS_VARIABLE(_SCOPE_FAIL_) = ::Dynarmic::detail::ScopeFailTag{} ->* [&]() noexcept
-#define SCOPE_SUCCESS auto ANONYMOUS_VARIABLE(_SCOPE_FAIL_) = ::Dynarmic::detail::ScopeSuccessTag{} ->* [&]()
+#define SCOPE_EXIT                                                                                 \
+    auto ANONYMOUS_VARIABLE(_SCOPE_EXIT_) = ::Dynarmic::detail::ScopeExitTag{}->*[&]() noexcept
+#define SCOPE_FAIL                                                                                 \
+    auto ANONYMOUS_VARIABLE(_SCOPE_FAIL_) = ::Dynarmic::detail::ScopeFailTag{}->*[&]() noexcept
+#define SCOPE_SUCCESS                                                                              \
+    auto ANONYMOUS_VARIABLE(_SCOPE_FAIL_) = ::Dynarmic::detail::ScopeSuccessTag{}->*[&]()

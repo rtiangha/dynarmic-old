@@ -97,7 +97,8 @@ bool TranslatorVisitor::FMLA_elt_1(Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Ve
     return MultiplyByElementHalfPrecision(*this, L, M, Vmlo, H, Vn, Vd, ExtraBehavior::Accumulate);
 }
 
-bool TranslatorVisitor::FMLA_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd) {
+bool TranslatorVisitor::FMLA_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                                   Vec Vd) {
     return MultiplyByElement(*this, sz, L, M, Vmlo, H, Vn, Vd, ExtraBehavior::Accumulate);
 }
 
@@ -105,19 +106,23 @@ bool TranslatorVisitor::FMLS_elt_1(Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Ve
     return MultiplyByElementHalfPrecision(*this, L, M, Vmlo, H, Vn, Vd, ExtraBehavior::Subtract);
 }
 
-bool TranslatorVisitor::FMLS_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd) {
+bool TranslatorVisitor::FMLS_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                                   Vec Vd) {
     return MultiplyByElement(*this, sz, L, M, Vmlo, H, Vn, Vd, ExtraBehavior::Subtract);
 }
 
-bool TranslatorVisitor::FMUL_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd) {
+bool TranslatorVisitor::FMUL_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                                   Vec Vd) {
     return MultiplyByElement(*this, sz, L, M, Vmlo, H, Vn, Vd, ExtraBehavior::None);
 }
 
-bool TranslatorVisitor::FMULX_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd) {
+bool TranslatorVisitor::FMULX_elt_2(bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                                    Vec Vd) {
     return MultiplyByElement(*this, sz, L, M, Vmlo, H, Vn, Vd, ExtraBehavior::MultiplyExtended);
 }
 
-bool TranslatorVisitor::SQDMULH_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd) {
+bool TranslatorVisitor::SQDMULH_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H,
+                                      Vec Vn, Vec Vd) {
     if (size == 0b00 || size == 0b11) {
         return ReservedValue();
     }
@@ -135,7 +140,8 @@ bool TranslatorVisitor::SQDMULH_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vm
     return true;
 }
 
-bool TranslatorVisitor::SQRDMULH_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd) {
+bool TranslatorVisitor::SQRDMULH_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H,
+                                       Vec Vn, Vec Vd) {
     if (size == 0b00 || size == 0b11) {
         return ReservedValue();
     }
@@ -146,14 +152,18 @@ bool TranslatorVisitor::SQRDMULH_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> V
     const IR::U128 operand1 = ir.ZeroExtendToQuad(ir.VectorGetElement(esize, V(128, Vn), 0));
     const IR::UAny operand2 = ir.VectorGetElement(esize, V(128, Vm), index);
     const IR::U128 broadcast = ir.VectorBroadcast(esize, operand2);
-    const IR::UpperAndLower multiply = ir.VectorSignedSaturatedDoublingMultiply(esize, operand1, broadcast);
-    const IR::U128 result = ir.VectorAdd(esize, multiply.upper, ir.VectorLogicalShiftRight(esize, multiply.lower, static_cast<u8>(esize - 1)));
+    const IR::UpperAndLower multiply =
+        ir.VectorSignedSaturatedDoublingMultiply(esize, operand1, broadcast);
+    const IR::U128 result =
+        ir.VectorAdd(esize, multiply.upper,
+                     ir.VectorLogicalShiftRight(esize, multiply.lower, static_cast<u8>(esize - 1)));
 
     V(128, Vd, result);
     return true;
 }
 
-bool TranslatorVisitor::SQDMULL_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd) {
+bool TranslatorVisitor::SQDMULL_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H,
+                                      Vec Vn, Vec Vd) {
     if (size == 0b00 || size == 0b11) {
         return ReservedValue();
     }
@@ -164,7 +174,8 @@ bool TranslatorVisitor::SQDMULL_elt_1(Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vm
     const IR::U128 operand1 = ir.ZeroExtendToQuad(ir.VectorGetElement(esize, V(128, Vn), 0));
     const IR::UAny operand2 = ir.VectorGetElement(esize, V(128, Vm), index);
     const IR::U128 broadcast = ir.VectorBroadcast(esize, operand2);
-    const IR::U128 result = ir.VectorSignedSaturatedDoublingMultiplyLong(esize, operand1, broadcast);
+    const IR::U128 result =
+        ir.VectorSignedSaturatedDoublingMultiplyLong(esize, operand1, broadcast);
 
     V(128, Vd, result);
     return true;

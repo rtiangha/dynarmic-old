@@ -7,18 +7,20 @@
 
 #include <optional>
 
-#include "frontend/imm.h"
 #include "frontend/A64/ir_emitter.h"
 #include "frontend/A64/location_descriptor.h"
 #include "frontend/A64/translate/translate.h"
 #include "frontend/A64/types.h"
+#include "frontend/imm.h"
 
 namespace Dynarmic::A64 {
 
 struct TranslatorVisitor final {
     using instruction_return_type = bool;
 
-    explicit TranslatorVisitor(IR::Block& block, LocationDescriptor descriptor, TranslationOptions options) : ir(block, descriptor), options(std::move(options)) {}
+    explicit TranslatorVisitor(IR::Block& block, LocationDescriptor descriptor,
+                               TranslationOptions options)
+        : ir(block, descriptor), options(std::move(options)) {}
 
     A64::IREmitter ir;
     TranslationOptions options;
@@ -34,7 +36,8 @@ struct TranslatorVisitor final {
         u64 wmask, tmask;
     };
 
-    static std::optional<BitMasks> DecodeBitMasks(bool immN, Imm<6> imms, Imm<6> immr, bool immediate);
+    static std::optional<BitMasks> DecodeBitMasks(bool immN, Imm<6> imms, Imm<6> immr,
+                                                  bool immediate);
 
     IR::UAny I(size_t bitsize, u64 value);
     IR::UAny X(size_t bitsize, Reg reg);
@@ -256,8 +259,10 @@ struct TranslatorVisitor final {
     bool STNP_LDNP_fpsimd(Imm<2> opc, Imm<1> L, Imm<7> imm7, Vec Vt2, Reg Rn, Vec Vt);
 
     // Loads and stores - Load/Store register pair
-    bool STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L, Imm<7> imm7, Reg Rt2, Reg Rn, Reg Rt);
-    bool STP_LDP_fpsimd(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L, Imm<7> imm7, Vec Vt2, Reg Rn, Vec Vt);
+    bool STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L, Imm<7> imm7, Reg Rt2,
+                     Reg Rn, Reg Rt);
+    bool STP_LDP_fpsimd(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L, Imm<7> imm7, Vec Vt2,
+                        Reg Rn, Vec Vt);
     bool STGP_1(Imm<7> offset_imm, Reg Rt2, Reg Rn, Reg Rt);
     bool STGP_2(Imm<7> offset_imm, Reg Rt2, Reg Rn, Reg Rt);
     bool STGP_3(Imm<7> offset_imm, Reg Rt2, Reg Rn, Reg Rt);
@@ -268,9 +273,11 @@ struct TranslatorVisitor final {
     bool STURx_LDURx(Imm<2> size, Imm<2> opc, Imm<9> imm9, Reg Rn, Reg Rt);
     bool PRFM_imm(Imm<12> imm12, Reg Rn, Reg Rt);
     bool PRFM_unscaled_imm(Imm<9> imm9, Reg Rn, Reg Rt);
-    bool STR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex, Reg Rn, Vec Vt);
+    bool STR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex, Reg Rn,
+                          Vec Vt);
     bool STR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm12, Reg Rn, Vec Vt);
-    bool LDR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex, Reg Rn, Vec Vt);
+    bool LDR_imm_fpsimd_1(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, bool not_postindex, Reg Rn,
+                          Vec Vt);
     bool LDR_imm_fpsimd_2(Imm<2> size, Imm<1> opc_1, Imm<12> imm12, Reg Rn, Vec Vt);
     bool STUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg Rn, Vec Vt);
     bool LDUR_fpsimd(Imm<2> size, Imm<1> opc_1, Imm<9> imm9, Reg Rn, Vec Vt);
@@ -899,9 +906,12 @@ struct TranslatorVisitor final {
     bool SQRDMULH_vec_2(bool Q, Imm<2> size, Vec Vm, Vec Vn, Vec Vd);
 
     // Data Processing - FP and SIMD - SIMD modified immediate
-    bool MOVI(bool Q, bool op, Imm<1> a, Imm<1> b, Imm<1> c, Imm<4> cmode, Imm<1> d, Imm<1> e, Imm<1> f, Imm<1> g, Imm<1> h, Vec Vd);
-    bool FMOV_2(bool Q, bool op, Imm<1> a, Imm<1> b, Imm<1> c, Imm<1> d, Imm<1> e, Imm<1> f, Imm<1> g, Imm<1> h, Vec Vd);
-    bool FMOV_3(bool Q, Imm<1> a, Imm<1> b, Imm<1> c, Imm<1> d, Imm<1> e, Imm<1> f, Imm<1> g, Imm<1> h, Vec Vd);
+    bool MOVI(bool Q, bool op, Imm<1> a, Imm<1> b, Imm<1> c, Imm<4> cmode, Imm<1> d, Imm<1> e,
+              Imm<1> f, Imm<1> g, Imm<1> h, Vec Vd);
+    bool FMOV_2(bool Q, bool op, Imm<1> a, Imm<1> b, Imm<1> c, Imm<1> d, Imm<1> e, Imm<1> f,
+                Imm<1> g, Imm<1> h, Vec Vd);
+    bool FMOV_3(bool Q, Imm<1> a, Imm<1> b, Imm<1> c, Imm<1> d, Imm<1> e, Imm<1> f, Imm<1> g,
+                Imm<1> h, Vec Vd);
 
     // Data Processing - FP and SIMD - SIMD Shift by immediate
     bool SSHR_2(bool Q, Imm<4> immh, Imm<3> immb, Vec Vn, Vec Vd);
@@ -935,14 +945,19 @@ struct TranslatorVisitor final {
 
     // Data Processing - FP and SIMD - SIMD vector x indexed element
     bool SMLAL_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
-    bool SQDMLAL_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
+    bool SQDMLAL_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                       Vec Vd);
     bool SMLSL_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
-    bool SQDMLSL_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
+    bool SQDMLSL_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                       Vec Vd);
     bool MUL_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
     bool SMULL_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vm, Imm<1> H, Vec Vn, Vec Vd);
-    bool SQDMULL_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
-    bool SQDMULH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
-    bool SQRDMULH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
+    bool SQDMULL_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                       Vec Vd);
+    bool SQDMULH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                       Vec Vd);
+    bool SQRDMULH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                        Vec Vd);
     bool SDOT_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
     bool FMLA_elt_3(bool Q, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
     bool FMLA_elt_4(bool Q, bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
@@ -959,12 +974,15 @@ struct TranslatorVisitor final {
     bool MLS_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
     bool UMLSL_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
     bool UMULL_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
-    bool SQRDMLAH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
+    bool SQRDMLAH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                        Vec Vd);
     bool UDOT_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
-    bool SQRDMLSH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
+    bool SQRDMLSH_elt_2(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn,
+                        Vec Vd);
     bool FMULX_elt_3(bool Q, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
     bool FMULX_elt_4(bool Q, bool sz, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<1> H, Vec Vn, Vec Vd);
-    bool FCMLA_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<2> rot, Imm<1> H, Vec Vn, Vec Vd);
+    bool FCMLA_elt(bool Q, Imm<2> size, Imm<1> L, Imm<1> M, Imm<4> Vmlo, Imm<2> rot, Imm<1> H,
+                   Vec Vn, Vec Vd);
 
     // Data Processing - FP and SIMD - Cryptographic three register
     bool SM3TT1A(Vec Vm, Imm<2> imm2, Vec Vn, Vec Vd);

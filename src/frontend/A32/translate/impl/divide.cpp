@@ -9,8 +9,7 @@ namespace Dynarmic::A32 {
 namespace {
 using DivideFunction = IR::U32U64 (IREmitter::*)(const IR::U32U64&, const IR::U32U64&);
 
-bool DivideOperation(ArmTranslatorVisitor& v, Cond cond, Reg d, Reg m, Reg n,
-                     DivideFunction fn) {
+bool DivideOperation(ArmTranslatorVisitor& v, Cond cond, Reg d, Reg m, Reg n, DivideFunction fn) {
     if (d == Reg::PC || m == Reg::PC || n == Reg::PC) {
         return v.UnpredictableInstruction();
     }

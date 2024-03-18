@@ -14,7 +14,7 @@
 
 namespace Dynarmic::FP {
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRecipStepFused(FPT op1, FPT op2, FPCR fpcr, FPSR& fpsr) {
     op1 = FPNeg(op1);
 

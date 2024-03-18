@@ -77,10 +77,9 @@ TEST_CASE("arm: Unintended modification in SetCFlag", "[arm][A32]") {
         0xeafffffe, // b +#0
     };
 
-    jit.Regs() = {
-            0x6973b6bb, 0x267ea626, 0x69debf49, 0x8f976895, 0x4ecd2d0d, 0xcf89b8c7, 0xb6713f85, 0x15e2aa5,
-            0xcd14336a, 0xafca0f3e, 0xace2efd9, 0x68fb82cd, 0x775447c0, 0xc9e1f8cd, 0xebe0e626, 0x0
-    };
+    jit.Regs() = {0x6973b6bb, 0x267ea626, 0x69debf49, 0x8f976895, 0x4ecd2d0d, 0xcf89b8c7,
+                  0xb6713f85, 0x15e2aa5,  0xcd14336a, 0xafca0f3e, 0xace2efd9, 0x68fb82cd,
+                  0x775447c0, 0xc9e1f8cd, 0xebe0e626, 0x0};
     jit.SetCpsr(0x000001d0); // User-mode
 
     test_env.ticks_left = 6;
@@ -105,7 +104,7 @@ TEST_CASE("arm: Unintended modification in SetCFlag", "[arm][A32]") {
     REQUIRE(jit.Cpsr() == 0x200001d0);
 }
 
-TEST_CASE( "arm: shsax (Edge-case)", "[arm][A32]" ) {
+TEST_CASE("arm: shsax (Edge-case)", "[arm][A32]") {
     // This was a randomized test-case that was failing.
     //
     // The issue here was one of the words to be subtracted was 0x8000.
@@ -118,10 +117,9 @@ TEST_CASE( "arm: shsax (Edge-case)", "[arm][A32]" ) {
         0xeafffffe, // b +#0
     };
 
-    jit.Regs() = {
-            0x3a3b8b18, 0x96156555, 0xffef039f, 0xafb946f2, 0x2030a69a, 0xafe09b2a, 0x896823c8, 0xabde0ded,
-            0x9825d6a6, 0x17498000, 0x999d2c95, 0x8b812a59, 0x209bdb58, 0x2f7fb1d4, 0x0f378107, 0x00000000
-    };
+    jit.Regs() = {0x3a3b8b18, 0x96156555, 0xffef039f, 0xafb946f2, 0x2030a69a, 0xafe09b2a,
+                  0x896823c8, 0xabde0ded, 0x9825d6a6, 0x17498000, 0x999d2c95, 0x8b812a59,
+                  0x209bdb58, 0x2f7fb1d4, 0x0f378107, 0x00000000};
     jit.SetCpsr(0x000001d0); // User-mode
 
     test_env.ticks_left = 2;
@@ -146,7 +144,7 @@ TEST_CASE( "arm: shsax (Edge-case)", "[arm][A32]" ) {
     REQUIRE(jit.Cpsr() == 0x000001d0);
 }
 
-TEST_CASE( "arm: uasx (Edge-case)", "[arm][A32]" ) {
+TEST_CASE("arm: uasx (Edge-case)", "[arm][A32]") {
     // UASX's Rm<31:16> == 0x0000.
     // An implementation that depends on addition overflow to detect
     // if diff >= 0 will fail this testcase.
@@ -182,13 +180,10 @@ TEST_CASE("arm: smuad (Edge-case)", "[arm][A32]") {
     };
 
     jit.Regs() = {
-            0, // Rd
-            0x80008000, // Rn
-            0x80008000, // Rm
-            0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
+        0,          // Rd
+        0x80008000, // Rn
+        0x80008000, // Rm
+        0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
     jit.SetCpsr(0x000001d0); // User-mode
 
@@ -256,7 +251,7 @@ TEST_CASE("arm: Step blx", "[arm]") {
     };
 
     jit.Regs()[0] = 8;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x000001d0); // User-mode
 
     test_env.ticks_left = 10;
@@ -284,7 +279,7 @@ TEST_CASE("arm: Step bx", "[arm]") {
     };
 
     jit.Regs()[0] = 8;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x000001d0); // User-mode
 
     test_env.ticks_left = 10;
@@ -294,7 +289,6 @@ TEST_CASE("arm: Step bx", "[arm]") {
     REQUIRE(jit.Regs()[15] == 8);
     REQUIRE(jit.Cpsr() == 0x000001d0);
 }
-
 
 TEST_CASE("arm: Test stepping", "[arm]") {
     ArmTestEnv test_env;
@@ -328,7 +322,7 @@ TEST_CASE("arm: Test stepping", "[arm]") {
     };
 
     jit.Regs()[0] = 8;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x000001d0); // User-mode
 
     for (size_t i = 0; i < 5; ++i) {
@@ -378,7 +372,7 @@ TEST_CASE("arm: Test stepping 2", "[arm]") {
     };
 
     jit.Regs()[0] = 4;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x000001d0); // User-mode
 
     for (size_t i = 0; i < 5; ++i) {
@@ -410,7 +404,7 @@ TEST_CASE("arm: Test stepping 3", "[arm]") {
     };
 
     jit.Regs()[0] = 4;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x000001d0); // User-mode
 
     test_env.ticks_left = 10;
@@ -428,7 +422,8 @@ TEST_CASE("arm: Test stepping 3", "[arm]") {
 
 TEST_CASE("arm: PackedAbsDiffSumS8", "[arm][A32]") {
     // This was a randomized test-case that was failing.
-    // In circumstances there were cases when the upper 32 bits of an argument to psadbw were not zero.
+    // In circumstances there were cases when the upper 32 bits of an argument to psadbw were not
+    // zero.
 
     ArmTestEnv test_env;
     A32::Jit jit{GetUserConfig(&test_env)};
@@ -439,8 +434,9 @@ TEST_CASE("arm: PackedAbsDiffSumS8", "[arm][A32]") {
     };
 
     jit.Regs() = {
-        0xea85297c, 0x417ad918, 0x64f8b70b, 0xcca0373e, 0xbc722361, 0xc528c69e, 0xca926de8, 0xd665d210,
-        0xb5650555, 0x4a24b25b, 0xaed44144, 0xe87230b2, 0x98e391de, 0x126efc0c, 0xe591fd11, 0x00000000,
+        0xea85297c, 0x417ad918, 0x64f8b70b, 0xcca0373e, 0xbc722361, 0xc528c69e,
+        0xca926de8, 0xd665d210, 0xb5650555, 0x4a24b25b, 0xaed44144, 0xe87230b2,
+        0x98e391de, 0x126efc0c, 0xe591fd11, 0x00000000,
     };
     jit.SetCpsr(0xb0000010);
 
@@ -478,17 +474,15 @@ TEST_CASE("arm: Cleared Q flag", "[arm][A32]") {
         0xe1001050,
         0xe328f000,
         0xe1023052,
-        0xeafffffe, 
+        0xeafffffe,
     };
 
     jit.Regs() = {
-                0x7FFFFFFF, // R0
-                0x80008000, // R1
-                0x00008000, // R2
-                0x7f7f7f7f, // R3
-                0, 0, 0, 0,
-                0, 0, 0, 0,
-                0, 0, 0, 0,
+        0x7FFFFFFF, // R0
+        0x80008000, // R1
+        0x00008000, // R2
+        0x7f7f7f7f, // R3
+        0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
 
     jit.SetCpsr(0x000001d0); // User-mode
@@ -517,17 +511,15 @@ TEST_CASE("arm: Cleared Q flag 2", "[arm][A32][JitA64]") {
     test_env.code_mem = {
         0xe6101f90,
         0xe1023052,
-        0xeafffffe, 
+        0xeafffffe,
     };
 
     jit.Regs() = {
-                0x7F007F00, // R0
-                0x80008000, // R1
-                0x00008000, // R2
-                0x7f7f7f7f, // R3
-                0, 0, 0, 0,
-                0, 0, 0, 0,
-                0, 0, 0, 0,
+        0x7F007F00, // R0
+        0x80008000, // R1
+        0x00008000, // R2
+        0x7f7f7f7f, // R3
+        0,          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
 
     jit.SetCpsr(0x000001d0); // User-mode

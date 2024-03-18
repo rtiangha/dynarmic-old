@@ -16,7 +16,9 @@
 FMT_BEGIN_NAMESPACE
 FMT_MODULE_EXPORT_BEGIN
 
-template <typename T> struct printf_formatter { printf_formatter() = delete; };
+template <typename T> struct printf_formatter {
+  printf_formatter() = delete;
+};
 
 template <typename Char>
 class basic_printf_parse_context : public basic_format_parse_context<Char> {
@@ -108,7 +110,9 @@ class is_zero_int {
 
 template <typename T> struct make_unsigned_or_bool : std::make_unsigned<T> {};
 
-template <> struct make_unsigned_or_bool<bool> { using type = bool; };
+template <> struct make_unsigned_or_bool<bool> {
+  using type = bool;
+};
 
 template <typename T, typename Context> class arg_converter {
  private:

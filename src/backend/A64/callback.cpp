@@ -4,8 +4,8 @@
  * General Public License version 2 or any later version.
  */
 
-#include "backend/A64/callback.h"
 #include "backend/A64/block_of_code.h"
+#include "backend/A64/callback.h"
 
 namespace Dynarmic::BackendA64 {
 
@@ -16,7 +16,8 @@ void SimpleCallback::EmitCall(BlockOfCode& code, std::function<void(RegList)> l)
     code.QuickCallFunction(fn);
 }
 
-void SimpleCallback::EmitCallWithReturnPointer(BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> l) const {
+void SimpleCallback::EmitCallWithReturnPointer(
+    BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> l) const {
     l(code.ABI_PARAM1, {code.ABI_PARAM2, code.ABI_PARAM3, code.ABI_PARAM4});
     code.QuickCallFunction(fn);
 }
@@ -27,7 +28,8 @@ void ArgCallback::EmitCall(BlockOfCode& code, std::function<void(RegList)> l) co
     code.QuickCallFunction(fn);
 }
 
-void ArgCallback::EmitCallWithReturnPointer(BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> l) const {
+void ArgCallback::EmitCallWithReturnPointer(
+    BlockOfCode& code, std::function<void(Arm64Gen::ARM64Reg, RegList)> l) const {
 #if defined(WIN32) && !defined(__MINGW64__)
     l(code.ABI_PARAM2, {code.ABI_PARAM3, code.ABI_PARAM4});
     code.MOVI2R(code.ABI_PARAM1, arg);
@@ -38,4 +40,4 @@ void ArgCallback::EmitCallWithReturnPointer(BlockOfCode& code, std::function<voi
     code.QuickCallFunction(fn);
 }
 
-} // namespace Dynarmic::BackendX64
+} // namespace Dynarmic::BackendA64

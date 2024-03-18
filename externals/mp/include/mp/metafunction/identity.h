@@ -9,7 +9,7 @@ namespace mp {
 
 namespace detail {
 
-template<class T>
+template <class T>
 struct identity_impl {
     using type = T;
 };
@@ -17,7 +17,7 @@ struct identity_impl {
 } // namespace detail
 
 /// Identity metafunction
-template<class T>
+template <class T>
 using identity = typename identity_impl<T>::type;
 
 } // namespace mp

@@ -45,9 +45,9 @@ std::string GetNameOf(Opcode op);
 
 } // namespace Dynarmic::IR
 
-template<>
+template <>
 struct fmt::formatter<Dynarmic::IR::Opcode> : fmt::formatter<std::string> {
-    template<typename FormatContext>
+    template <typename FormatContext>
     auto format(Dynarmic::IR::Opcode op, FormatContext& ctx) const {
         return formatter<std::string>::format(Dynarmic::IR::GetNameOf(op), ctx);
     }

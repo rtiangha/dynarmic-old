@@ -38,9 +38,10 @@
 
 namespace Dynarmic::BackendA64 {
 
-// Note that unlike the x64 backend these only returns ONLY the offset to register and not the address!
+// Note that unlike the x64 backend these only returns ONLY the offset to register and not the
+// address!
 static size_t MJitStateReg(A32::Reg reg) {
-    return offsetof(A32JitState, Reg) + sizeof(u32) * static_cast<size_t>(reg);    
+    return offsetof(A32JitState, Reg) + sizeof(u32) * static_cast<size_t>(reg);
 }
 
 static size_t MJitStateExtReg(A32::ExtReg reg) {
@@ -55,7 +56,8 @@ static size_t MJitStateExtReg(A32::ExtReg reg) {
     ASSERT_FALSE("Should never happen.");
 }
 
-A32EmitContext::A32EmitContext(RegAlloc& reg_alloc, IR::Block& block) : EmitContext(reg_alloc, block) {}
+A32EmitContext::A32EmitContext(RegAlloc& reg_alloc, IR::Block& block)
+    : EmitContext(reg_alloc, block) {}
 
 A32::LocationDescriptor A32EmitContext::Location() const {
     return A32::LocationDescriptor{block.Location()};
@@ -87,7 +89,7 @@ std::ptrdiff_t A32EmitContext::GetInstOffset(IR::Inst* inst) const {
 
 A32EmitA64::A32EmitA64(BlockOfCode& code, A32::UserConfig config, A32::Jit* jit_interface)
     : EmitA64(code), config(std::move(config)), jit_interface(jit_interface) {
-    exception_handler.Register(code, [this](CodePtr PC){FastmemCallback(PC);});
+    exception_handler.Register(code, [this](CodePtr PC) { FastmemCallback(PC); });
     GenMemoryAccessors();
     GenTerminalHandlers();
     code.PreludeComplete();
@@ -104,7 +106,7 @@ A32EmitA64::BlockDescriptor A32EmitA64::Emit(IR::Block& block) {
     };
 
     RegAlloc reg_alloc{code, A32JitState::SpillCount, SpillToOpArg<A32JitState>};
-    A32EmitContext ctx{reg_alloc, block};    
+    A32EmitContext ctx{reg_alloc, block};
 
     const u8* entrypoint = code.AlignCode16();
 
@@ -117,14 +119,14 @@ A32EmitA64::BlockDescriptor A32EmitA64::Emit(IR::Block& block) {
         // Call the relevant Emit* member function.
         switch (inst->GetOpcode()) {
 
-#define OPCODE(name, type, ...)                                                  \
-    case IR::Opcode::name:                                                       \
-         A32EmitA64::Emit##name(ctx, inst);                                      \
-         break;
-#define A32OPC(name, type, ...)                                                  \
-    case IR::Opcode::A32##name:                                                  \
-         A32EmitA64::EmitA32##name(ctx, inst);                                   \
-         break;
+#define OPCODE(name, type, ...)                                                                    \
+    case IR::Opcode::name:                                                                         \
+        A32EmitA64::Emit##name(ctx, inst);                                                         \
+        break;
+#define A32OPC(name, type, ...)                                                                    \
+    case IR::Opcode::A32##name:                                                                    \
+        A32EmitA64::EmitA32##name(ctx, inst);                                                      \
+        break;
 #define A64OPC(...)
 #include "backend/A64/opcodes.inc"
 #undef OPCODE
@@ -142,7 +144,8 @@ A32EmitA64::BlockDescriptor A32EmitA64::Emit(IR::Block& block) {
     reg_alloc.AssertNoMoreUses();
 
     EmitAddCycles(block.CycleCount());
-    EmitA64::EmitTerminal(block.GetTerminal(), ctx.Location().SetSingleStepping(false), ctx.IsSingleStep());
+    EmitA64::EmitTerminal(block.GetTerminal(), ctx.Location().SetSingleStepping(false),
+                          ctx.IsSingleStep());
     code.BRK(0);
     code.PatchConstPool();
     code.FlushIcacheSection(entrypoint, code.GetCodePtr());
@@ -152,7 +155,8 @@ A32EmitA64::BlockDescriptor A32EmitA64::Emit(IR::Block& block) {
     const A32::LocationDescriptor descriptor{block.Location()};
     const A32::LocationDescriptor end_location{block.EndLocation()};
 
-    const auto range = boost::icl::discrete_interval<u32>::closed(descriptor.PC(), end_location.PC() - 1);
+    const auto range =
+        boost::icl::discrete_interval<u32>::closed(descriptor.PC(), end_location.PC() - 1);
     block_ranges.AddRange(range, descriptor);
 
     return RegisterBlock(descriptor, entrypoint, size);
@@ -179,7 +183,8 @@ void A32EmitA64::EmitCondPrelude(const A32EmitContext& ctx) {
 
     FixupBranch pass = EmitCond(ctx.block.GetCondition());
     EmitAddCycles(ctx.block.ConditionFailedCycleCount());
-    EmitTerminal(IR::Term::LinkBlock{ctx.block.ConditionFailedLocation()}, ctx.block.Location(),  ctx.IsSingleStep());
+    EmitTerminal(IR::Term::LinkBlock{ctx.block.ConditionFailedLocation()}, ctx.block.Location(),
+                 ctx.IsSingleStep());
     code.SetJumpTarget(pass);
 }
 
@@ -291,12 +296,17 @@ void A32EmitA64::GenTerminalHandlers() {
     const ARM64Reg fast_dispatch_entry_reg = X19;
     const ARM64Reg location_descriptor_reg = X20;
 
-    // PC ends up in fast_dispatch_entry_reg, location_descriptor ends up in location_descriptor_reg.
-    const auto calculate_location_descriptor = [this](ARM64Reg fast_dispatch_entry_reg_, ARM64Reg location_descriptor_reg_) {
+    // PC ends up in fast_dispatch_entry_reg, location_descriptor ends up in
+    // location_descriptor_reg.
+    const auto calculate_location_descriptor = [this](ARM64Reg fast_dispatch_entry_reg_,
+                                                      ARM64Reg location_descriptor_reg_) {
         // This calculation has to match up with IREmitter::PushRSB
-        code.LDR(INDEX_UNSIGNED, DecodeReg(location_descriptor_reg_), X28, offsetof(A32JitState, upper_location_descriptor));
-        code.LDR(INDEX_UNSIGNED, DecodeReg(fast_dispatch_entry_reg_), X28, MJitStateReg(A32::Reg::PC));
-        code.ORR(location_descriptor_reg_, fast_dispatch_entry_reg_, location_descriptor_reg_, ArithOption{location_descriptor_reg_, ST_LSL, 32});
+        code.LDR(INDEX_UNSIGNED, DecodeReg(location_descriptor_reg_), X28,
+                 offsetof(A32JitState, upper_location_descriptor));
+        code.LDR(INDEX_UNSIGNED, DecodeReg(fast_dispatch_entry_reg_), X28,
+                 MJitStateReg(A32::Reg::PC));
+        code.ORR(location_descriptor_reg_, fast_dispatch_entry_reg_, location_descriptor_reg_,
+                 ArithOption{location_descriptor_reg_, ST_LSL, 32});
     };
 
     FixupBranch fast_dispatch_cache_miss, rsb_cache_miss;
@@ -309,51 +319,63 @@ void A32EmitA64::GenTerminalHandlers() {
     code.ANDI2R(code.ABI_SCRATCH1, DecodeReg(code.ABI_SCRATCH1), u32(A32JitState::RSBPtrMask));
     code.STR(INDEX_UNSIGNED, DecodeReg(code.ABI_SCRATCH1), X28, offsetof(A32JitState, rsb_ptr));
 
-    // cmp(location_descriptor_reg, qword[r15 + offsetof(A32JitState, rsb_location_descriptors) + rsb_ptr * sizeof(u64)]);
+    // cmp(location_descriptor_reg, qword[r15 + offsetof(A32JitState, rsb_location_descriptors) +
+    // rsb_ptr * sizeof(u64)]);
     code.ADD(code.ABI_SCRATCH1, X28, code.ABI_SCRATCH1, ArithOption{code.ABI_SCRATCH1, ST_LSL, 3});
-    code.LDR(INDEX_UNSIGNED, X8, code.ABI_SCRATCH1, offsetof(A32JitState, rsb_location_descriptors));
+    code.LDR(INDEX_UNSIGNED, X8, code.ABI_SCRATCH1,
+             offsetof(A32JitState, rsb_location_descriptors));
     code.CMP(location_descriptor_reg, X8);
     if (config.enable_fast_dispatch) {
         rsb_cache_miss = code.B(CC_NEQ);
     } else {
         code.B(CC_NEQ, code.GetReturnFromRunCodeAddress());
     }
-    code.LDR(INDEX_UNSIGNED, code.ABI_SCRATCH1, code.ABI_SCRATCH1, offsetof(A32JitState, rsb_codeptrs));
+    code.LDR(INDEX_UNSIGNED, code.ABI_SCRATCH1, code.ABI_SCRATCH1,
+             offsetof(A32JitState, rsb_codeptrs));
     code.BR(code.ABI_SCRATCH1);
-    PerfMapRegister(terminal_handler_pop_rsb_hint, code.GetCodePtr(), "a32_terminal_handler_pop_rsb_hint");
+    PerfMapRegister(terminal_handler_pop_rsb_hint, code.GetCodePtr(),
+                    "a32_terminal_handler_pop_rsb_hint");
 
     if (config.enable_fast_dispatch) {
         terminal_handler_fast_dispatch_hint = code.AlignCode16();
         calculate_location_descriptor(fast_dispatch_entry_reg, location_descriptor_reg);
         code.SetJumpTarget(rsb_cache_miss);
         code.MOVI2R(code.ABI_SCRATCH1, reinterpret_cast<u64>(fast_dispatch_table.data()));
-        code.CRC32CW(DecodeReg(fast_dispatch_entry_reg), DecodeReg(fast_dispatch_entry_reg), DecodeReg(code.ABI_SCRATCH1));
+        code.CRC32CW(DecodeReg(fast_dispatch_entry_reg), DecodeReg(fast_dispatch_entry_reg),
+                     DecodeReg(code.ABI_SCRATCH1));
         code.ANDI2R(fast_dispatch_entry_reg, fast_dispatch_entry_reg, fast_dispatch_table_mask);
         code.ADD(fast_dispatch_entry_reg, fast_dispatch_entry_reg, code.ABI_SCRATCH1);
 
-        code.LDR(INDEX_UNSIGNED, code.ABI_SCRATCH1, fast_dispatch_entry_reg, offsetof(FastDispatchEntry, location_descriptor));
+        code.LDR(INDEX_UNSIGNED, code.ABI_SCRATCH1, fast_dispatch_entry_reg,
+                 offsetof(FastDispatchEntry, location_descriptor));
         code.CMP(location_descriptor_reg, code.ABI_SCRATCH1);
         fast_dispatch_cache_miss = code.B(CC_NEQ);
-        code.LDR(INDEX_UNSIGNED, code.ABI_SCRATCH1, fast_dispatch_entry_reg, offsetof(FastDispatchEntry, code_ptr));
+        code.LDR(INDEX_UNSIGNED, code.ABI_SCRATCH1, fast_dispatch_entry_reg,
+                 offsetof(FastDispatchEntry, code_ptr));
         code.BR(code.ABI_SCRATCH1);
 
         code.SetJumpTarget(fast_dispatch_cache_miss);
-        code.STR(INDEX_UNSIGNED, location_descriptor_reg, fast_dispatch_entry_reg, offsetof(FastDispatchEntry, location_descriptor) );
+        code.STR(INDEX_UNSIGNED, location_descriptor_reg, fast_dispatch_entry_reg,
+                 offsetof(FastDispatchEntry, location_descriptor));
         code.LookupBlock();
-        code.STR(INDEX_UNSIGNED, code.ABI_RETURN, fast_dispatch_entry_reg, offsetof(FastDispatchEntry, code_ptr));
+        code.STR(INDEX_UNSIGNED, code.ABI_RETURN, fast_dispatch_entry_reg,
+                 offsetof(FastDispatchEntry, code_ptr));
         code.BR(code.ABI_RETURN);
-        PerfMapRegister(terminal_handler_fast_dispatch_hint, code.GetCodePtr(), "a32_terminal_handler_fast_dispatch_hint");
+        PerfMapRegister(terminal_handler_fast_dispatch_hint, code.GetCodePtr(),
+                        "a32_terminal_handler_fast_dispatch_hint");
 
         code.AlignCode16();
-        fast_dispatch_table_lookup = reinterpret_cast<FastDispatchEntry& (*)(u64)>(code.GetWritableCodePtr());
+        fast_dispatch_table_lookup =
+            reinterpret_cast<FastDispatchEntry& (*)(u64)>(code.GetWritableCodePtr());
         code.MOVI2R(code.ABI_PARAM2, reinterpret_cast<u64>(fast_dispatch_table.data()));
-        code.CRC32CW(DecodeReg(code.ABI_PARAM1), DecodeReg(code.ABI_PARAM1), DecodeReg(code.ABI_PARAM2));
-        code.ANDI2R(DecodeReg(code.ABI_PARAM1), DecodeReg(code.ABI_PARAM1), fast_dispatch_table_mask);
+        code.CRC32CW(DecodeReg(code.ABI_PARAM1), DecodeReg(code.ABI_PARAM1),
+                     DecodeReg(code.ABI_PARAM2));
+        code.ANDI2R(DecodeReg(code.ABI_PARAM1), DecodeReg(code.ABI_PARAM1),
+                    fast_dispatch_table_mask);
         code.ADD(code.ABI_RETURN, code.ABI_PARAM1, code.ABI_PARAM2);
         code.RET();
     }
 }
-
 
 void A32EmitA64::EmitA32GetRegister(A32EmitContext& ctx, IR::Inst* inst) {
     A32::Reg reg = inst->GetArg(0).GetA32RegRef();
@@ -413,8 +435,7 @@ void A32EmitA64::EmitA32SetExtendedRegister64(A32EmitContext& ctx, IR::Inst* ins
     if (args[1].IsInFpr()) {
         ARM64Reg to_store = ctx.reg_alloc.UseFpr(args[1]);
         code.fp_emitter.STR(64, INDEX_UNSIGNED, to_store, X28, MJitStateExtReg(reg));
-    }
-    else {
+    } else {
         ARM64Reg to_store = ctx.reg_alloc.UseGpr(args[1]);
         code.STR(INDEX_UNSIGNED, to_store, X28, MJitStateExtReg(reg));
     }
@@ -437,18 +458,18 @@ static void SetCpsrImpl(u32 value, A32JitState* jit_state) {
 
 void A32EmitA64::EmitA32SetCpsr(A32EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
-    
+
     // TODO:Inline
     ctx.reg_alloc.HostCall(nullptr, args[0]);
 
     // Use an unused HostCall register
     ARM64Reg host_fpsr = X9;
-    
+
     if (config.always_little_endian) {
         code.ANDI2R(code.ABI_PARAM1, code.ABI_PARAM1, 0xFFFFFDFF, ctx.reg_alloc.ScratchGpr());
     }
 
-    // Since this is one of the only places where the ~sticky~ 
+    // Since this is one of the only places where the ~sticky~
     // guest's Q flag can be cleared it is also a great place to clear the host's Q flag
     code.MRS(host_fpsr, FIELD_FPSR);
     code.ANDI2R(host_fpsr, host_fpsr, ~(1 << 27));
@@ -491,7 +512,7 @@ void A32EmitA64::EmitA32SetCpsrNZCVQ(A32EmitContext& ctx, IR::Inst* inst) {
         code.STR(INDEX_UNSIGNED, a, X28, offsetof(A32JitState, cpsr_nzcv));
     }
 
-    // Since this is one of the only places where the ~sticky~ 
+    // Since this is one of the only places where the ~sticky~
     // guest's Q flag can be cleared it is also a great place to clear the host's Q flag.
     // TODO : possibly a better job at explaining.
     code.MRS(host_fpsr, FIELD_FPSR);
@@ -681,7 +702,8 @@ void A32EmitA64::EmitA32BXWritePC(A32EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
     auto& arg = args[0];
 
-    const u32 upper_without_t = (ctx.Location().SetSingleStepping(false).UniqueHash() >> 32) & 0xFFFFFFFE;
+    const u32 upper_without_t =
+        (ctx.Location().SetSingleStepping(false).UniqueHash() >> 32) & 0xFFFFFFFE;
 
     // Pseudocode:
     // if (new_pc & 1) {
@@ -692,7 +714,7 @@ void A32EmitA64::EmitA32BXWritePC(A32EmitContext& ctx, IR::Inst* inst) {
     //    cpsr.T = false;
     // }
     // We rely on the fact we disallow EFlag from changing within a block.
-    
+
     if (arg.IsImmediate()) {
         const ARM64Reg scratch = DecodeReg(ctx.reg_alloc.ScratchGpr());
         u32 new_pc = arg.GetImmediateU32();
@@ -743,10 +765,11 @@ void A32EmitA64::EmitA32ExceptionRaised(A32EmitContext& ctx, IR::Inst* inst) {
     ASSERT(args[0].IsImmediate() && args[1].IsImmediate());
     u32 pc = args[0].GetImmediateU32();
     u64 exception = args[1].GetImmediateU64();
-    Devirtualize<&A32::UserCallbacks::ExceptionRaised>(config.callbacks).EmitCall(code, [&](RegList param) {
-        code.MOVI2R(param[0], pc);
-        code.MOVI2R(param[1], exception);
-    });
+    Devirtualize<&A32::UserCallbacks::ExceptionRaised>(config.callbacks)
+        .EmitCall(code, [&](RegList param) {
+            code.MOVI2R(param[0], pc);
+            code.MOVI2R(param[1], exception);
+        });
 }
 
 static u32 GetFpscrImpl(A32JitState* jit_state) {
@@ -818,12 +841,14 @@ void A32EmitA64::EmitA32SetExclusive(A32EmitContext& ctx, IR::Inst* inst) {
     code.STR(INDEX_UNSIGNED, address, X28, offsetof(A32JitState, exclusive_address));
 }
 
-A32EmitA64::DoNotFastmemMarker A32EmitA64::GenerateDoNotFastmemMarker(A32EmitContext& ctx, IR::Inst* inst) {
+A32EmitA64::DoNotFastmemMarker A32EmitA64::GenerateDoNotFastmemMarker(A32EmitContext& ctx,
+                                                                      IR::Inst* inst) {
     return std::make_tuple(ctx.Location(), ctx.GetInstOffset(inst));
 }
 
 bool A32EmitA64::ShouldFastmem(const DoNotFastmemMarker& marker) const {
-    return config.fastmem_pointer && exception_handler.SupportsFastmem() && do_not_fastmem.count(marker) == 0;
+    return config.fastmem_pointer && exception_handler.SupportsFastmem() &&
+           do_not_fastmem.count(marker) == 0;
 }
 
 void A32EmitA64::DoNotFastmem(const DoNotFastmemMarker& marker) {
@@ -854,21 +879,21 @@ void A32EmitA64::ReadMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr c
         FixupBranch abort = code.CBZ(result);
         code.ANDI2R(vaddr, vaddr, 4095);
         switch (bit_size) {
-            case 8:
-                code.LDRB(DecodeReg(result), result, vaddr);
-                break;
-            case 16:
-                code.LDRH(DecodeReg(result), result, vaddr);
-                break;
-            case 32:
-                code.LDR(DecodeReg(result), result, vaddr);
-                break;
-            case 64:
-                code.LDR(result, result, vaddr);
-                break;
-            default:
-                ASSERT_FALSE("Invalid bit_size");
-                break;
+        case 8:
+            code.LDRB(DecodeReg(result), result, vaddr);
+            break;
+        case 16:
+            code.LDRH(DecodeReg(result), result, vaddr);
+            break;
+        case 32:
+            code.LDR(DecodeReg(result), result, vaddr);
+            break;
+        case 64:
+            code.LDR(result, result, vaddr);
+            break;
+        default:
+            ASSERT_FALSE("Invalid bit_size");
+            break;
         }
         end = code.B();
         code.SetJumpTarget(abort);
@@ -876,54 +901,51 @@ void A32EmitA64::ReadMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr c
         code.MOV(result, code.ABI_RETURN);
     };
 
-
     if (ShouldFastmem(do_not_fastmem_marker)) {
         const CodePtr patch_location = code.GetCodePtr();
         switch (bit_size) {
-            case 8:
-                code.LDRB(DecodeReg(result), X27, vaddr);
-                break;
-            case 16:
-                code.LDRH(DecodeReg(result), X27, vaddr);
-                break;
-            case 32:
-                code.LDR(DecodeReg(result), X27, vaddr);
-                break;
-            case 64:
-                code.LDR(result, X27, vaddr);
-                break;
-            default:
-                ASSERT_FALSE("Invalid bit_size");
-                break;
+        case 8:
+            code.LDRB(DecodeReg(result), X27, vaddr);
+            break;
+        case 16:
+            code.LDRH(DecodeReg(result), X27, vaddr);
+            break;
+        case 32:
+            code.LDR(DecodeReg(result), X27, vaddr);
+            break;
+        case 64:
+            code.LDR(result, X27, vaddr);
+            break;
+        default:
+            ASSERT_FALSE("Invalid bit_size");
+            break;
         }
 
         fastmem_patch_info.emplace(
-                patch_location,
-                FastmemPatchInfo{
-                        [this, patch_location, page_table_lookup, callback_fn, result, do_not_fastmem_marker]{
-                            CodePtr save_code_ptr = code.GetCodePtr();
-                            code.SetCodePtr(patch_location);
-                            FixupBranch thunk = code.B();
-                            u8* end_ptr = code.GetWritableCodePtr();
-                            code.FlushIcacheSection(reinterpret_cast<const u8*>(patch_location), end_ptr);
-                            code.SetCodePtr(save_code_ptr);
-                            code.SwitchToFarCode();
-                            code.SetJumpTarget(thunk);
-                            if (config.page_table) {
-                                FixupBranch end{};
-                                page_table_lookup(end);
-                                code.SetJumpTarget(end, end_ptr);
-                            } else {
-                                code.BL(callback_fn);
-                                code.MOV(result, code.ABI_RETURN);
-                            }
-                            code.B(end_ptr);
-                            code.FlushIcache();
-                            code.SwitchToNearCode();
+            patch_location, FastmemPatchInfo{[this, patch_location, page_table_lookup, callback_fn,
+                                              result, do_not_fastmem_marker] {
+                CodePtr save_code_ptr = code.GetCodePtr();
+                code.SetCodePtr(patch_location);
+                FixupBranch thunk = code.B();
+                u8* end_ptr = code.GetWritableCodePtr();
+                code.FlushIcacheSection(reinterpret_cast<const u8*>(patch_location), end_ptr);
+                code.SetCodePtr(save_code_ptr);
+                code.SwitchToFarCode();
+                code.SetJumpTarget(thunk);
+                if (config.page_table) {
+                    FixupBranch end{};
+                    page_table_lookup(end);
+                    code.SetJumpTarget(end, end_ptr);
+                } else {
+                    code.BL(callback_fn);
+                    code.MOV(result, code.ABI_RETURN);
+                }
+                code.B(end_ptr);
+                code.FlushIcache();
+                code.SwitchToNearCode();
 
-                            DoNotFastmem(do_not_fastmem_marker);
-                        }
-                });
+                DoNotFastmem(do_not_fastmem_marker);
+            }});
 
         ctx.reg_alloc.DefineValue(inst, result);
         return;
@@ -943,7 +965,7 @@ void A32EmitA64::ReadMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr c
     ctx.reg_alloc.DefineValue(inst, result);
 }
 
-template<typename T>
+template <typename T>
 void A32EmitA64::WriteMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr callback_fn) {
     constexpr size_t bit_size = Common::BitSize<T>();
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
@@ -959,7 +981,8 @@ void A32EmitA64::WriteMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr 
 
     const auto do_not_fastmem_marker = GenerateDoNotFastmemMarker(ctx, inst);
 
-    const auto page_table_lookup = [this, vaddr, value, page_index, addr, callback_fn](FixupBranch& end) {
+    const auto page_table_lookup = [this, vaddr, value, page_index, addr,
+                                    callback_fn](FixupBranch& end) {
         constexpr size_t bit_size = Common::BitSize<T>();
 
         code.MOVP2R(addr, config.page_table);
@@ -968,21 +991,22 @@ void A32EmitA64::WriteMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr 
         FixupBranch abort = code.CBZ(addr);
         code.ANDI2R(vaddr, vaddr, 4095);
         switch (bit_size) {
-            case 8:
-                code.STRB(DecodeReg(value), addr, vaddr);
-                break;
-            case 16:
-                code.STRH(DecodeReg(value), addr, vaddr);
-                break;
-            case 32:
-                code.STR(DecodeReg(value), addr, vaddr);;
-                break;
-            case 64:
-                code.STR(value, addr, vaddr);
-                break;
-            default:
-                ASSERT_FALSE("Invalid bit_size");
-                break;
+        case 8:
+            code.STRB(DecodeReg(value), addr, vaddr);
+            break;
+        case 16:
+            code.STRH(DecodeReg(value), addr, vaddr);
+            break;
+        case 32:
+            code.STR(DecodeReg(value), addr, vaddr);
+            ;
+            break;
+        case 64:
+            code.STR(value, addr, vaddr);
+            break;
+        default:
+            ASSERT_FALSE("Invalid bit_size");
+            break;
         }
         end = code.B();
         code.SetJumpTarget(abort);
@@ -992,49 +1016,47 @@ void A32EmitA64::WriteMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr 
     if (ShouldFastmem(do_not_fastmem_marker)) {
         const CodePtr patch_location = code.GetCodePtr();
         switch (bit_size) {
-            case 8:
-                code.STRB(DecodeReg(value), X27, vaddr);
-                break;
-            case 16:
-                code.STRH(DecodeReg(value), X27, vaddr);
-                break;
-            case 32:
-                code.STR(DecodeReg(value), X27, vaddr);
-                break;
-            case 64:
-                code.STR(value, X27, vaddr);
-                break;
-            default:
-                ASSERT_FALSE("Invalid bit_size");
-                break;
+        case 8:
+            code.STRB(DecodeReg(value), X27, vaddr);
+            break;
+        case 16:
+            code.STRH(DecodeReg(value), X27, vaddr);
+            break;
+        case 32:
+            code.STR(DecodeReg(value), X27, vaddr);
+            break;
+        case 64:
+            code.STR(value, X27, vaddr);
+            break;
+        default:
+            ASSERT_FALSE("Invalid bit_size");
+            break;
         }
 
         fastmem_patch_info.emplace(
-                patch_location,
-                FastmemPatchInfo{
-                        [this, patch_location, page_table_lookup, callback_fn, do_not_fastmem_marker]{
-                            CodePtr save_code_ptr = code.GetCodePtr();
-                            code.SetCodePtr(patch_location);
-                            FixupBranch thunk = code.B();
-                            u8* end_ptr = code.GetWritableCodePtr();
-                            code.FlushIcacheSection(reinterpret_cast<const u8*>(patch_location), end_ptr);
-                            code.SetCodePtr(save_code_ptr);
-                            code.SwitchToFarCode();
-                            code.SetJumpTarget(thunk);
-                            if (config.page_table) {
-                                FixupBranch end{};
-                                page_table_lookup(end);
-                                code.SetJumpTarget(end, end_ptr);
-                            } else {
-                                code.BL(callback_fn);
-                            }
-                            code.B(end_ptr);
-                            code.FlushIcache();
-                            code.SwitchToNearCode();
+            patch_location, FastmemPatchInfo{[this, patch_location, page_table_lookup, callback_fn,
+                                              do_not_fastmem_marker] {
+                CodePtr save_code_ptr = code.GetCodePtr();
+                code.SetCodePtr(patch_location);
+                FixupBranch thunk = code.B();
+                u8* end_ptr = code.GetWritableCodePtr();
+                code.FlushIcacheSection(reinterpret_cast<const u8*>(patch_location), end_ptr);
+                code.SetCodePtr(save_code_ptr);
+                code.SwitchToFarCode();
+                code.SetJumpTarget(thunk);
+                if (config.page_table) {
+                    FixupBranch end{};
+                    page_table_lookup(end);
+                    code.SetJumpTarget(end, end_ptr);
+                } else {
+                    code.BL(callback_fn);
+                }
+                code.B(end_ptr);
+                code.FlushIcache();
+                code.SwitchToNearCode();
 
-                            DoNotFastmem(do_not_fastmem_marker);
-                        }
-                });
+                DoNotFastmem(do_not_fastmem_marker);
+            }});
         return;
     }
 
@@ -1081,7 +1103,8 @@ void A32EmitA64::EmitA32WriteMemory64(A32EmitContext& ctx, IR::Inst* inst) {
 }
 
 template <typename T, void (A32::UserCallbacks::*fn)(A32::VAddr, T)>
-static void ExclusiveWrite(BlockOfCode& code, RegAlloc& reg_alloc, IR::Inst* inst, const A32::UserConfig& config) {
+static void ExclusiveWrite(BlockOfCode& code, RegAlloc& reg_alloc, IR::Inst* inst,
+                           const A32::UserConfig& config) {
     auto args = reg_alloc.GetArgumentInfo(inst);
     reg_alloc.HostCall(nullptr, {}, args[0], args[1]);
 
@@ -1104,7 +1127,7 @@ static void ExclusiveWrite(BlockOfCode& code, RegAlloc& reg_alloc, IR::Inst* ins
     code.MOVI2R(passed, 0);
 
     for (FixupBranch e : end) {
-         code.SetJumpTarget(e);
+        code.SetJumpTarget(e);
     }
 
     reg_alloc.DefineValue(inst, passed);
@@ -1130,8 +1153,10 @@ static void EmitCoprocessorException() {
     ASSERT_FALSE("Should raise coproc exception here");
 }
 
-static void CallCoprocCallback(BlockOfCode& code, RegAlloc& reg_alloc, A32::Jit* jit_interface, A32::Coprocessor::Callback callback,
-                               IR::Inst* inst = nullptr, std::optional<Argument::copyable_reference> arg0 = {}, std::optional<Argument::copyable_reference> arg1 = {}) {
+static void CallCoprocCallback(BlockOfCode& code, RegAlloc& reg_alloc, A32::Jit* jit_interface,
+                               A32::Coprocessor::Callback callback, IR::Inst* inst = nullptr,
+                               std::optional<Argument::copyable_reference> arg0 = {},
+                               std::optional<Argument::copyable_reference> arg1 = {}) {
     reg_alloc.HostCall(inst, {}, {}, arg0, arg1);
 
     code.MOVP2R(code.ABI_PARAM1, jit_interface);
@@ -1191,7 +1216,8 @@ void A32EmitA64::EmitA32CoprocSendOneWord(A32EmitContext& ctx, IR::Inst* inst) {
         EmitCoprocessorException();
         return;
     case 1:
-        CallCoprocCallback(code, ctx.reg_alloc, jit_interface, std::get<A32::Coprocessor::Callback>(action), nullptr, args[1]);
+        CallCoprocCallback(code, ctx.reg_alloc, jit_interface,
+                           std::get<A32::Coprocessor::Callback>(action), nullptr, args[1]);
         return;
     case 2: {
         u32* destination_ptr = std::get<u32*>(action);
@@ -1230,7 +1256,8 @@ void A32EmitA64::EmitA32CoprocSendTwoWords(A32EmitContext& ctx, IR::Inst* inst) 
         EmitCoprocessorException();
         return;
     case 1:
-        CallCoprocCallback(code, ctx.reg_alloc, jit_interface, std::get<A32::Coprocessor::Callback>(action), nullptr, args[1], args[2]);
+        CallCoprocCallback(code, ctx.reg_alloc, jit_interface,
+                           std::get<A32::Coprocessor::Callback>(action), nullptr, args[1], args[2]);
         return;
     case 2: {
         auto destination_ptrs = std::get<std::array<u32*, 2>>(action);
@@ -1273,7 +1300,8 @@ void A32EmitA64::EmitA32CoprocGetOneWord(A32EmitContext& ctx, IR::Inst* inst) {
         EmitCoprocessorException();
         return;
     case 1:
-        CallCoprocCallback(code, ctx.reg_alloc, jit_interface, std::get<A32::Coprocessor::Callback>(action), inst);
+        CallCoprocCallback(code, ctx.reg_alloc, jit_interface,
+                           std::get<A32::Coprocessor::Callback>(action), inst);
         return;
     case 2: {
         u32* source_ptr = std::get<u32*>(action);
@@ -1312,7 +1340,8 @@ void A32EmitA64::EmitA32CoprocGetTwoWords(A32EmitContext& ctx, IR::Inst* inst) {
         EmitCoprocessorException();
         return;
     case 1:
-        CallCoprocCallback(code, ctx.reg_alloc, jit_interface, std::get<A32::Coprocessor::Callback>(action), inst);
+        CallCoprocCallback(code, ctx.reg_alloc, jit_interface,
+                           std::get<A32::Coprocessor::Callback>(action), inst);
         return;
     case 2: {
         auto source_ptrs = std::get<std::array<u32*, 2>>(action);
@@ -1324,7 +1353,7 @@ void A32EmitA64::EmitA32CoprocGetTwoWords(A32EmitContext& ctx, IR::Inst* inst) {
         code.LDR(INDEX_UNSIGNED, DecodeReg(reg_result), reg_tmp, 0);
         code.MOVP2R(reg_tmp, source_ptrs[0]);
         code.LDR(INDEX_UNSIGNED, DecodeReg(reg_tmp), reg_tmp, 0);
-        code.ORR(reg_result, reg_tmp, reg_result, ArithOption{ reg_result , ST_LSL, 32});
+        code.ORR(reg_result, reg_tmp, reg_result, ArithOption{reg_result, ST_LSL, 32});
 
         ctx.reg_alloc.DefineValue(inst, reg_result);
 
@@ -1348,7 +1377,6 @@ void A32EmitA64::EmitA32CoprocLoadWords(A32EmitContext& ctx, IR::Inst* inst) {
     if (has_option) {
         option = coproc_info[5];
     }
-
 
     std::shared_ptr<A32::Coprocessor> coproc = config.coprocessors[coproc_num];
     if (!coproc) {
@@ -1394,10 +1422,11 @@ void A32EmitA64::EmitA32CoprocStoreWords(A32EmitContext& ctx, IR::Inst* inst) {
     CallCoprocCallback(code, ctx.reg_alloc, jit_interface, *action, nullptr, args[1]);
 }
 
-
-std::string A32EmitA64::LocationDescriptorToFriendlyName(const IR::LocationDescriptor& ir_descriptor) const {
+std::string A32EmitA64::LocationDescriptorToFriendlyName(
+    const IR::LocationDescriptor& ir_descriptor) const {
     const A32::LocationDescriptor descriptor{ir_descriptor};
-    return fmt::format("a32_{}{:08X}_{}_fpcr{:08X}", descriptor.TFlag() ? "t" : "a", descriptor.PC(), descriptor.EFlag() ? "be" : "le",
+    return fmt::format("a32_{}{:08X}_{}_fpcr{:08X}", descriptor.TFlag() ? "t" : "a",
+                       descriptor.PC(), descriptor.EFlag() ? "be" : "le",
                        descriptor.FPSCR().Value());
 }
 
@@ -1408,9 +1437,14 @@ void A32EmitA64::FastmemCallback(CodePtr PC) {
     fastmem_patch_info.erase(iter);
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::Interpret terminal, IR::LocationDescriptor initial_location, bool) {
-    ASSERT_MSG(A32::LocationDescriptor{terminal.next}.TFlag() == A32::LocationDescriptor{initial_location}.TFlag(), "Unimplemented");
-    ASSERT_MSG(A32::LocationDescriptor{terminal.next}.EFlag() == A32::LocationDescriptor{initial_location}.EFlag(), "Unimplemented");
+void A32EmitA64::EmitTerminalImpl(IR::Term::Interpret terminal,
+                                  IR::LocationDescriptor initial_location, bool) {
+    ASSERT_MSG(A32::LocationDescriptor{terminal.next}.TFlag() ==
+                   A32::LocationDescriptor{initial_location}.TFlag(),
+               "Unimplemented");
+    ASSERT_MSG(A32::LocationDescriptor{terminal.next}.EFlag() ==
+                   A32::LocationDescriptor{initial_location}.EFlag(),
+               "Unimplemented");
 
     code.MOVI2R(DecodeReg(code.ABI_PARAM2), A32::LocationDescriptor{terminal.next}.PC());
     code.MOVI2R(DecodeReg(code.ABI_PARAM3), terminal.num_instructions);
@@ -1424,9 +1458,11 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::ReturnToDispatch, IR::LocationDescri
     code.ReturnFromRunCode();
 }
 
-void A32EmitA64::EmitSetUpperLocationDescriptor(IR::LocationDescriptor new_location, IR::LocationDescriptor old_location) {
-    auto get_upper = [](const IR::LocationDescriptor &desc) -> u32 {
-        return static_cast<u32>(A32::LocationDescriptor{desc}.SetSingleStepping(false).UniqueHash() >> 32);
+void A32EmitA64::EmitSetUpperLocationDescriptor(IR::LocationDescriptor new_location,
+                                                IR::LocationDescriptor old_location) {
+    auto get_upper = [](const IR::LocationDescriptor& desc) -> u32 {
+        return static_cast<u32>(
+            A32::LocationDescriptor{desc}.SetSingleStepping(false).UniqueHash() >> 32);
     };
 
     const u32 old_upper = get_upper(old_location);
@@ -1437,11 +1473,13 @@ void A32EmitA64::EmitSetUpperLocationDescriptor(IR::LocationDescriptor new_locat
 
     if (old_upper != new_upper) {
         code.MOVI2R(DecodeReg(code.ABI_SCRATCH1), new_upper);
-        code.STR(INDEX_UNSIGNED, DecodeReg(code.ABI_SCRATCH1), X28, offsetof(A32JitState, upper_location_descriptor));
+        code.STR(INDEX_UNSIGNED, DecodeReg(code.ABI_SCRATCH1), X28,
+                 offsetof(A32JitState, upper_location_descriptor));
     }
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void A32EmitA64::EmitTerminalImpl(IR::Term::LinkBlock terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) {
     EmitSetUpperLocationDescriptor(terminal.next, initial_location);
 
     if (!config.enable_optimizations || is_single_step) {
@@ -1461,7 +1499,7 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDesc
     }
     FixupBranch dest = code.B();
 
-    code.SwitchToFarCode();    
+    code.SwitchToFarCode();
     code.AlignCode16();
     code.SetJumpTarget(dest);
     code.MOVI2R(DecodeReg(code.ABI_SCRATCH1), A32::LocationDescriptor{terminal.next}.PC());
@@ -1469,15 +1507,16 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDesc
     PushRSBHelper(X1, X2, terminal.next);
     code.ForceReturnFromRunCode();
 
-    //Todo: find a better/generic place to FlushIcache when switching between
-    //      far code and near code
+    // Todo: find a better/generic place to FlushIcache when switching between
+    //       far code and near code
     code.FlushIcache();
     code.SwitchToNearCode();
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void A32EmitA64::EmitTerminalImpl(IR::Term::LinkBlockFast terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) {
     EmitSetUpperLocationDescriptor(terminal.next, initial_location);
-    
+
     if (!config.enable_optimizations || is_single_step) {
         code.MOVI2R(DecodeReg(code.ABI_SCRATCH1), A32::LocationDescriptor{terminal.next}.PC());
         code.STR(INDEX_UNSIGNED, DecodeReg(code.ABI_SCRATCH1), X28, MJitStateReg(A32::Reg::PC));
@@ -1493,7 +1532,8 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::Location
     }
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::PopRSBHint, IR::LocationDescriptor, bool is_single_step) {
+void A32EmitA64::EmitTerminalImpl(IR::Term::PopRSBHint, IR::LocationDescriptor,
+                                  bool is_single_step) {
     if (!config.enable_optimizations || is_single_step) {
         code.ReturnFromRunCode();
         return;
@@ -1501,7 +1541,8 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::PopRSBHint, IR::LocationDescriptor, 
     code.B(terminal_handler_pop_rsb_hint);
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::FastDispatchHint, IR::LocationDescriptor, bool is_single_step) {
+void A32EmitA64::EmitTerminalImpl(IR::Term::FastDispatchHint, IR::LocationDescriptor,
+                                  bool is_single_step) {
     if (config.enable_fast_dispatch && !is_single_step) {
         code.B(terminal_handler_fast_dispatch_hint);
     } else {
@@ -1509,14 +1550,16 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::FastDispatchHint, IR::LocationDescri
     }
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void A32EmitA64::EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location,
+                                  bool is_single_step) {
     FixupBranch pass = EmitCond(terminal.if_);
     EmitTerminal(terminal.else_, initial_location, is_single_step);
     code.SetJumpTarget(pass);
     EmitTerminal(terminal.then_, initial_location, is_single_step);
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::CheckBit terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void A32EmitA64::EmitTerminalImpl(IR::Term::CheckBit terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) {
     FixupBranch fail;
     code.LDRB(INDEX_UNSIGNED, DecodeReg(code.ABI_SCRATCH1), X28, offsetof(A32JitState, check_bit));
     fail = code.CBZ(DecodeReg(code.ABI_SCRATCH1));
@@ -1525,8 +1568,10 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::CheckBit terminal, IR::LocationDescr
     EmitTerminal(terminal.else_, initial_location, is_single_step);
 }
 
-void A32EmitA64::EmitTerminalImpl(IR::Term::CheckHalt terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
-    code.LDRB(INDEX_UNSIGNED, DecodeReg(code.ABI_SCRATCH1), X28, offsetof(A32JitState, halt_requested));
+void A32EmitA64::EmitTerminalImpl(IR::Term::CheckHalt terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) {
+    code.LDRB(INDEX_UNSIGNED, DecodeReg(code.ABI_SCRATCH1), X28,
+              offsetof(A32JitState, halt_requested));
     // Conditional branch only gives +/- 1MB of branch distance
     FixupBranch zero = code.CBZ(DecodeReg(code.ABI_SCRATCH1));
     code.B(code.GetForceReturnFromRunCodeAddress());
@@ -1537,10 +1582,10 @@ void A32EmitA64::EmitTerminalImpl(IR::Term::CheckHalt terminal, IR::LocationDesc
 void A32EmitA64::EmitPatchJg(const IR::LocationDescriptor& target_desc, CodePtr target_code_ptr) {
     const CodePtr patch_location = code.GetCodePtr();
 
-    auto long_branch_gt = [this](CodePtr ptr){
+    auto long_branch_gt = [this](CodePtr ptr) {
         const s64 distance = reinterpret_cast<s64>(ptr) - reinterpret_cast<s64>(code.GetCodePtr());
 
-        if((distance >> 2) >= -0x40000 && (distance >> 2) <= 0x3FFFF) {
+        if ((distance >> 2) >= -0x40000 && (distance >> 2) <= 0x3FFFF) {
             code.B(CC_GT, ptr);
             return;
         }
@@ -1585,7 +1630,9 @@ void A32EmitA64::Unpatch(const IR::LocationDescriptor& location) {
     EmitA64::Unpatch(location);
     if (config.enable_fast_dispatch) {
         code.DisableWriting();
-        SCOPE_EXIT { code.EnableWriting(); };
+        SCOPE_EXIT {
+            code.EnableWriting();
+        };
 
         (*fast_dispatch_table_lookup)(location.Value()) = {};
     }

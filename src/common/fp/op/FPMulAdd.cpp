@@ -6,8 +6,8 @@
 #include "common/common_types.h"
 #include "common/fp/fpcr.h"
 #include "common/fp/fpsr.h"
-#include "common/fp/info.h"
 #include "common/fp/fused.h"
+#include "common/fp/info.h"
 #include "common/fp/op/FPMulAdd.h"
 #include "common/fp/process_exception.h"
 #include "common/fp/process_nan.h"
@@ -15,7 +15,7 @@
 
 namespace Dynarmic::FP {
 
-template<typename FPT>
+template <typename FPT>
 FPT FPMulAdd(FPT addend, FPT op1, FPT op2, FPCR fpcr, FPSR& fpsr) {
     const RoundingMode rounding = fpcr.RMode();
 

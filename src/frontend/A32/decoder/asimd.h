@@ -24,7 +24,8 @@ template <typename V>
 std::vector<ASIMDMatcher<V>> GetASIMDDecodeTable() {
     std::vector<ASIMDMatcher<V>> table = {
 
-#define INST(fn, name, bitstring) Decoder::detail::detail<ASIMDMatcher<V>>::GetMatcher(&V::fn, name, bitstring),
+#define INST(fn, name, bitstring)                                                                  \
+    Decoder::detail::detail<ASIMDMatcher<V>>::GetMatcher(&V::fn, name, bitstring),
 #include "asimd.inc"
 #undef INST
 
@@ -38,14 +39,17 @@ std::vector<ASIMDMatcher<V>> GetASIMDDecodeTable() {
     return table;
 }
 
-template<typename V>
+template <typename V>
 std::optional<std::reference_wrapper<const ASIMDMatcher<V>>> DecodeASIMD(u32 instruction) {
     static const auto table = GetASIMDDecodeTable<V>();
 
-    const auto matches_instruction = [instruction](const auto& matcher) { return matcher.Matches(instruction); };
+    const auto matches_instruction = [instruction](const auto& matcher) {
+        return matcher.Matches(instruction);
+    };
 
     auto iter = std::find_if(table.begin(), table.end(), matches_instruction);
-    return iter != table.end() ? std::optional<std::reference_wrapper<const ASIMDMatcher<V>>>(*iter) : std::nullopt;
+    return iter != table.end() ? std::optional<std::reference_wrapper<const ASIMDMatcher<V>>>(*iter)
+                               : std::nullopt;
 }
 
 } // namespace Dynarmic::A32

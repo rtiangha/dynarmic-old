@@ -8,7 +8,8 @@
 namespace Dynarmic::A32 {
 
 // CDP{2} <coproc_no>, #<opc1>, <CRd>, <CRn>, <CRm>, #<opc2>
-bool ArmTranslatorVisitor::arm_CDP(Cond cond, size_t opc1, CoprocReg CRn, CoprocReg CRd, size_t coproc_no, size_t opc2, CoprocReg CRm) {
+bool ArmTranslatorVisitor::arm_CDP(Cond cond, size_t opc1, CoprocReg CRn, CoprocReg CRd,
+                                   size_t coproc_no, size_t opc2, CoprocReg CRm) {
     if ((coproc_no & 0b1110) == 0b1010) {
         return arm_UDF();
     }
@@ -24,7 +25,8 @@ bool ArmTranslatorVisitor::arm_CDP(Cond cond, size_t opc1, CoprocReg CRn, Coproc
 // LDC{2}{L}<c> <coproc_no>, <CRd>, [<Rn>, #+/-<imm32>]{!}
 // LDC{2}{L}<c> <coproc_no>, <CRd>, [<Rn>], #+/-<imm32>
 // LDC{2}{L}<c> <coproc_no>, <CRd>, [<Rn>], <imm8>
-bool ArmTranslatorVisitor::arm_LDC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd, size_t coproc_no, Imm<8> imm8) {
+bool ArmTranslatorVisitor::arm_LDC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd,
+                                   size_t coproc_no, Imm<8> imm8) {
     if (!p && !u && !d && !w) {
         return arm_UDF();
     }
@@ -42,7 +44,8 @@ bool ArmTranslatorVisitor::arm_LDC(Cond cond, bool p, bool u, bool d, bool w, Re
         const bool wback = w;
         const bool has_option = !p && !w && u;
         const IR::U32 reg_n = ir.GetRegister(n);
-        const IR::U32 offset_address = add ? ir.Add(reg_n, ir.Imm32(imm32)) : ir.Sub(reg_n, ir.Imm32(imm32));
+        const IR::U32 offset_address =
+            add ? ir.Add(reg_n, ir.Imm32(imm32)) : ir.Sub(reg_n, ir.Imm32(imm32));
         const IR::U32 address = index ? offset_address : reg_n;
         ir.CoprocLoadWords(coproc_no, two, d, CRd, address, has_option, imm8.ZeroExtend<u8>());
         if (wback) {
@@ -53,7 +56,8 @@ bool ArmTranslatorVisitor::arm_LDC(Cond cond, bool p, bool u, bool d, bool w, Re
 }
 
 // MCR{2}<c> <coproc_no>, #<opc1>, <Rt>, <CRn>, <CRm>, #<opc2>
-bool ArmTranslatorVisitor::arm_MCR(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no, size_t opc2, CoprocReg CRm) {
+bool ArmTranslatorVisitor::arm_MCR(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no,
+                                   size_t opc2, CoprocReg CRm) {
     if ((coproc_no & 0b1110) == 0b1010) {
         return arm_UDF();
     }
@@ -71,7 +75,8 @@ bool ArmTranslatorVisitor::arm_MCR(Cond cond, size_t opc1, CoprocReg CRn, Reg t,
 }
 
 // MCRR{2}<c> <coproc_no>, #<opc>, <Rt>, <Rt2>, <CRm>
-bool ArmTranslatorVisitor::arm_MCRR(Cond cond, Reg t2, Reg t, size_t coproc_no, size_t opc, CoprocReg CRm) {
+bool ArmTranslatorVisitor::arm_MCRR(Cond cond, Reg t2, Reg t, size_t coproc_no, size_t opc,
+                                    CoprocReg CRm) {
     if ((coproc_no & 0b1110) == 0b1010) {
         return arm_UDF();
     }
@@ -89,7 +94,8 @@ bool ArmTranslatorVisitor::arm_MCRR(Cond cond, Reg t2, Reg t, size_t coproc_no, 
 }
 
 // MRC{2}<c> <coproc_no>, #<opc1>, <Rt>, <CRn>, <CRm>, #<opc2>
-bool ArmTranslatorVisitor::arm_MRC(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no, size_t opc2, CoprocReg CRm) {
+bool ArmTranslatorVisitor::arm_MRC(Cond cond, size_t opc1, CoprocReg CRn, Reg t, size_t coproc_no,
+                                   size_t opc2, CoprocReg CRm) {
     if ((coproc_no & 0b1110) == 0b1010) {
         return arm_UDF();
     }
@@ -109,7 +115,8 @@ bool ArmTranslatorVisitor::arm_MRC(Cond cond, size_t opc1, CoprocReg CRn, Reg t,
 }
 
 // MRRC{2}<c> <coproc_no>, #<opc>, <Rt>, <Rt2>, <CRm>
-bool ArmTranslatorVisitor::arm_MRRC(Cond cond, Reg t2, Reg t, size_t coproc_no, size_t opc, CoprocReg CRm) {
+bool ArmTranslatorVisitor::arm_MRRC(Cond cond, Reg t2, Reg t, size_t coproc_no, size_t opc,
+                                    CoprocReg CRm) {
     if ((coproc_no & 0b1110) == 0b1010) {
         return arm_UDF();
     }
@@ -131,7 +138,8 @@ bool ArmTranslatorVisitor::arm_MRRC(Cond cond, Reg t2, Reg t, size_t coproc_no, 
 // STC{2}{L}<c> <coproc>, <CRd>, [<Rn>, #+/-<imm32>]{!}
 // STC{2}{L}<c> <coproc>, <CRd>, [<Rn>], #+/-<imm32>
 // STC{2}{L}<c> <coproc>, <CRd>, [<Rn>], <imm8>
-bool ArmTranslatorVisitor::arm_STC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd, size_t coproc_no, Imm<8> imm8) {
+bool ArmTranslatorVisitor::arm_STC(Cond cond, bool p, bool u, bool d, bool w, Reg n, CoprocReg CRd,
+                                   size_t coproc_no, Imm<8> imm8) {
     if ((coproc_no & 0b1110) == 0b1010) {
         return arm_UDF();
     }
@@ -153,7 +161,8 @@ bool ArmTranslatorVisitor::arm_STC(Cond cond, bool p, bool u, bool d, bool w, Re
         const bool wback = w;
         const bool has_option = !p && !w && u;
         const IR::U32 reg_n = ir.GetRegister(n);
-        const IR::U32 offset_address = add ? ir.Add(reg_n, ir.Imm32(imm32)) : ir.Sub(reg_n, ir.Imm32(imm32));
+        const IR::U32 offset_address =
+            add ? ir.Add(reg_n, ir.Imm32(imm32)) : ir.Sub(reg_n, ir.Imm32(imm32));
         const IR::U32 address = index ? offset_address : reg_n;
         ir.CoprocStoreWords(coproc_no, two, d, CRd, address, has_option, imm8.ZeroExtend<u8>());
         if (wback) {

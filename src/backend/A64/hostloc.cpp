@@ -15,7 +15,8 @@ Arm64Gen::ARM64Reg HostLocToReg64(HostLoc loc) {
 
 Arm64Gen::ARM64Reg HostLocToFpr(HostLoc loc) {
     ASSERT(HostLocIsFPR(loc));
-    return EncodeRegToQuad(static_cast<Arm64Gen::ARM64Reg>(static_cast<int>(loc) - static_cast<int>(HostLoc::Q0)));
+    return EncodeRegToQuad(
+        static_cast<Arm64Gen::ARM64Reg>(static_cast<int>(loc) - static_cast<int>(HostLoc::Q0)));
 }
 
-} // namespace Dynarmic::BackendX64
+} // namespace Dynarmic::BackendA64

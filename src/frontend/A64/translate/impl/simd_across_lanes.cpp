@@ -7,10 +7,7 @@
 
 namespace Dynarmic::A64 {
 namespace {
-enum class Signedness {
-    Signed,
-    Unsigned
-};
+enum class Signedness { Signed, Unsigned };
 
 bool LongAdd(TranslatorVisitor& v, bool Q, Imm<2> size, Vec Vn, Vec Vd, Signedness sign) {
     if ((size == 0b10 && !Q) || size == 0b11) {

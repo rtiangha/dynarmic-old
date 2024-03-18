@@ -73,8 +73,8 @@ u32 GenRandomInst(u32 pc, bool is_last_inst) {
     static const struct InstructionGeneratorInfo {
         std::vector<InstructionGenerator> generators;
         std::vector<InstructionGenerator> invalid;
-    } instructions = []{
-        const std::vector<std::tuple<std::string, const char*>> list {
+    } instructions = [] {
+        const std::vector<std::tuple<std::string, const char*>> list{
 #define INST(fn, name, bitstring) {#fn, bitstring},
 #ifdef ARCHITECTURE_Aarch64
 #include "frontend/A32/decoder/arm_a64.inc"
@@ -90,26 +90,72 @@ u32 GenRandomInst(u32 pc, bool is_last_inst) {
         std::vector<InstructionGenerator> invalid;
 
         // List of instructions not to test
-        static constexpr std::array do_not_test {
+        static constexpr std::array do_not_test{
             // Translating load/stores
-            "arm_LDRBT", "arm_LDRBT", "arm_LDRHT", "arm_LDRHT", "arm_LDRSBT", "arm_LDRSBT", "arm_LDRSHT", "arm_LDRSHT", "arm_LDRT", "arm_LDRT",
-            "arm_STRBT", "arm_STRBT", "arm_STRHT", "arm_STRHT", "arm_STRT", "arm_STRT",
+            "arm_LDRBT",
+            "arm_LDRBT",
+            "arm_LDRHT",
+            "arm_LDRHT",
+            "arm_LDRSBT",
+            "arm_LDRSBT",
+            "arm_LDRSHT",
+            "arm_LDRSHT",
+            "arm_LDRT",
+            "arm_LDRT",
+            "arm_STRBT",
+            "arm_STRBT",
+            "arm_STRHT",
+            "arm_STRHT",
+            "arm_STRT",
+            "arm_STRT",
             // Exclusive load/stores
-            "arm_LDREXB", "arm_LDREXD", "arm_LDREXH", "arm_LDREX", "arm_LDAEXB", "arm_LDAEXD", "arm_LDAEXH", "arm_LDAEX",
-            "arm_STREXB", "arm_STREXD", "arm_STREXH", "arm_STREX", "arm_STLEXB", "arm_STLEXD", "arm_STLEXH", "arm_STLEX",
-            "arm_SWP", "arm_SWPB",
+            "arm_LDREXB",
+            "arm_LDREXD",
+            "arm_LDREXH",
+            "arm_LDREX",
+            "arm_LDAEXB",
+            "arm_LDAEXD",
+            "arm_LDAEXH",
+            "arm_LDAEX",
+            "arm_STREXB",
+            "arm_STREXD",
+            "arm_STREXH",
+            "arm_STREX",
+            "arm_STLEXB",
+            "arm_STLEXD",
+            "arm_STLEXH",
+            "arm_STLEX",
+            "arm_SWP",
+            "arm_SWPB",
             // Elevated load/store multiple instructions.
-            "arm_LDM_eret", "arm_LDM_usr",
+            "arm_LDM_eret",
+            "arm_LDM_usr",
             "arm_STM_usr",
             // Hint instructions
-            "arm_NOP", "arm_PLD_imm", "arm_PLD_reg", "arm_SEV",
-            "arm_WFE", "arm_WFI", "arm_YIELD",
+            "arm_NOP",
+            "arm_PLD_imm",
+            "arm_PLD_reg",
+            "arm_SEV",
+            "arm_WFE",
+            "arm_WFI",
+            "arm_YIELD",
             // E, T, J
-            "arm_BLX_reg", "arm_BLX_imm", "arm_BXJ", "arm_SETEND",
+            "arm_BLX_reg",
+            "arm_BLX_imm",
+            "arm_BXJ",
+            "arm_SETEND",
             // Coprocessor
-            "arm_CDP", "arm_LDC", "arm_MCR", "arm_MCRR", "arm_MRC", "arm_MRRC", "arm_STC",
+            "arm_CDP",
+            "arm_LDC",
+            "arm_MCR",
+            "arm_MCRR",
+            "arm_MRC",
+            "arm_MRRC",
+            "arm_STC",
             // System
-            "arm_CPS", "arm_RFE", "arm_SRS",
+            "arm_CPS",
+            "arm_RFE",
+            "arm_SRS",
             // Undefined
             "arm_UDF",
             // FPSCR is inaccurate
@@ -130,7 +176,8 @@ u32 GenRandomInst(u32 pc, bool is_last_inst) {
         const size_t index = RandInt<size_t>(0, instructions.generators.size() - 1);
         const u32 inst = instructions.generators[index].Generate();
 
-        if ((instructions.generators[index].Mask() & 0xF0000000) == 0 && (inst & 0xF0000000) == 0xF0000000) {
+        if ((instructions.generators[index].Mask() & 0xF0000000) == 0 &&
+            (inst & 0xF0000000) == 0xF0000000) {
             continue;
         }
 
@@ -214,29 +261,37 @@ static void RunTestInstance(Dynarmic::A32::Jit& jit, A32Unicorn<ArmTestEnv>& uni
         fmt::print("     unicorn  dynarmic\n");
         const auto uni_regs = uni.GetRegisters();
         for (size_t i = 0; i < regs.size(); ++i) {
-            fmt::print("{:3s}: {:08x} {:08x} {}\n", static_cast<A32::Reg>(i), uni_regs[i], jit.Regs()[i], uni_regs[i] != jit.Regs()[i] ? "*" : "");
+            fmt::print("{:3s}: {:08x} {:08x} {}\n", static_cast<A32::Reg>(i), uni_regs[i],
+                       jit.Regs()[i], uni_regs[i] != jit.Regs()[i] ? "*" : "");
         }
         const auto uni_ext_regs = uni.GetExtRegs();
         for (size_t i = 0; i < vecs.size(); ++i) {
-            fmt::print("s{:2d}: {:08x} {:08x} {}\n", static_cast<size_t>(i), uni_ext_regs[i], jit.ExtRegs()[i], uni_ext_regs[i] != jit.ExtRegs()[i] ? "*" : "");
+            fmt::print("s{:2d}: {:08x} {:08x} {}\n", static_cast<size_t>(i), uni_ext_regs[i],
+                       jit.ExtRegs()[i], uni_ext_regs[i] != jit.ExtRegs()[i] ? "*" : "");
         }
-        fmt::print("cpsr {:08x} {:08x} {}\n", uni.GetCpsr(), jit.Cpsr(), uni.GetCpsr() != jit.Cpsr() ? "*" : "");
-        fmt::print("fpsr {:08x} {:08x} {}\n", uni.GetFpscr(), jit.Fpscr(), (uni.GetFpscr() & 0xF0000000) != (jit.Fpscr() & 0xF0000000) ? "*" : "");
+        fmt::print("cpsr {:08x} {:08x} {}\n", uni.GetCpsr(), jit.Cpsr(),
+                   uni.GetCpsr() != jit.Cpsr() ? "*" : "");
+        fmt::print("fpsr {:08x} {:08x} {}\n", uni.GetFpscr(), jit.Fpscr(),
+                   (uni.GetFpscr() & 0xF0000000) != (jit.Fpscr() & 0xF0000000) ? "*" : "");
         fmt::print("\n");
 
         fmt::print("Modified memory:\n");
         fmt::print("                 uni dyn\n");
         auto uni_iter = uni_env.modified_memory.begin();
         auto jit_iter = jit_env.modified_memory.begin();
-        while (uni_iter != uni_env.modified_memory.end() || jit_iter != jit_env.modified_memory.end()) {
-            if (uni_iter == uni_env.modified_memory.end() || (jit_iter != jit_env.modified_memory.end() && uni_iter->first > jit_iter->first)) {
+        while (uni_iter != uni_env.modified_memory.end() ||
+               jit_iter != jit_env.modified_memory.end()) {
+            if (uni_iter == uni_env.modified_memory.end() ||
+                (jit_iter != jit_env.modified_memory.end() && uni_iter->first > jit_iter->first)) {
                 fmt::print("{:08x}:    {:02x} *\n", jit_iter->first, jit_iter->second);
                 jit_iter++;
-            } else if (jit_iter == jit_env.modified_memory.end() || jit_iter->first > uni_iter->first) {
+            } else if (jit_iter == jit_env.modified_memory.end() ||
+                       jit_iter->first > uni_iter->first) {
                 fmt::print("{:08x}: {:02x}    *\n", uni_iter->first, uni_iter->second);
                 uni_iter++;
             } else if (uni_iter->first == jit_iter->first) {
-                fmt::print("{:08x}: {:02x} {:02x} {}\n", uni_iter->first, uni_iter->second, jit_iter->second, uni_iter->second != jit_iter->second ? "*" : "");
+                fmt::print("{:08x}: {:02x} {:02x} {}\n", uni_iter->first, uni_iter->second,
+                           jit_iter->second, uni_iter->second != jit_iter->second ? "*" : "");
                 uni_iter++;
                 jit_iter++;
             }

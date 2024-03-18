@@ -50,37 +50,37 @@ constexpr FPUnpacked ToNormalized(bool sign, int exponent, u64 value) {
     return {sign, exponent, value};
 }
 
-template<typename FPT>
+template <typename FPT>
 std::tuple<FPType, bool, FPUnpacked> FPUnpackBase(FPT op, FPCR fpcr, FPSR& fpsr);
 
-template<typename FPT>
+template <typename FPT>
 std::tuple<FPType, bool, FPUnpacked> FPUnpack(FPT op, FPCR fpcr, FPSR& fpsr) {
     fpcr.AHP(false);
     return FPUnpackBase(op, fpcr, fpsr);
 }
 
-template<typename FPT>
+template <typename FPT>
 std::tuple<FPType, bool, FPUnpacked> FPUnpackCV(FPT op, FPCR fpcr, FPSR& fpsr) {
     fpcr.FZ16(false);
     return FPUnpackBase(op, fpcr, fpsr);
 }
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRoundBase(FPUnpacked op, FPCR fpcr, RoundingMode rounding, FPSR& fpsr);
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRound(FPUnpacked op, FPCR fpcr, RoundingMode rounding, FPSR& fpsr) {
     fpcr.AHP(false);
     return FPRoundBase<FPT>(op, fpcr, rounding, fpsr);
 }
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRoundCV(FPUnpacked op, FPCR fpcr, RoundingMode rounding, FPSR& fpsr) {
     fpcr.FZ16(false);
     return FPRoundBase<FPT>(op, fpcr, rounding, fpsr);
 }
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRound(FPUnpacked op, FPCR fpcr, FPSR& fpsr) {
     return FPRound<FPT>(op, fpcr, fpcr.RMode(), fpsr);
 }

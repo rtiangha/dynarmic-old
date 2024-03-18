@@ -7,7 +7,8 @@
 
 namespace Dynarmic::A64 {
 
-bool TranslatorVisitor::STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L, Imm<7> imm7, Reg Rt2, Reg Rn, Reg Rt) {
+bool TranslatorVisitor::STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L,
+                                    Imm<7> imm7, Reg Rt2, Reg Rn, Reg Rt) {
     if ((L == 0 && opc.Bit<0>() == 1) || opc == 0b11) {
         return UnallocatedEncoding();
     }
@@ -52,7 +53,8 @@ bool TranslatorVisitor::STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback, 
     }
     case IR::MemOp::LOAD: {
         const IR::U32U64 data1 = Mem(address, dbytes, IR::AccType::NORMAL);
-        const IR::U32U64 data2 = Mem(ir.Add(address, ir.Imm64(dbytes)), dbytes, IR::AccType::NORMAL);
+        const IR::U32U64 data2 =
+            Mem(ir.Add(address, ir.Imm64(dbytes)), dbytes, IR::AccType::NORMAL);
         if (signed_) {
             X(64, Rt, SignExtend(data1, 64));
             X(64, Rt2, SignExtend(data2, 64));
@@ -81,7 +83,8 @@ bool TranslatorVisitor::STP_LDP_gen(Imm<2> opc, bool not_postindex, bool wback, 
     return true;
 }
 
-bool TranslatorVisitor::STP_LDP_fpsimd(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L, Imm<7> imm7, Vec Vt2, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::STP_LDP_fpsimd(Imm<2> opc, bool not_postindex, bool wback, Imm<1> L,
+                                       Imm<7> imm7, Vec Vt2, Reg Rn, Vec Vt) {
     if (opc == 0b11) {
         return UnallocatedEncoding();
     }

@@ -36,24 +36,19 @@ class PSR final {
 public:
     /// Valid processor modes that may be indicated.
     enum class Mode : u32 {
-        User       = 0b10000,
-        FIQ        = 0b10001,
-        IRQ        = 0b10010,
+        User = 0b10000,
+        FIQ = 0b10001,
+        IRQ = 0b10010,
         Supervisor = 0b10011,
-        Monitor    = 0b10110,
-        Abort      = 0b10111,
+        Monitor = 0b10110,
+        Abort = 0b10111,
         Hypervisor = 0b11010,
-        Undefined  = 0b11011,
-        System     = 0b11111
+        Undefined = 0b11011,
+        System = 0b11111
     };
 
     /// Instruction sets that may be signified through a PSR.
-    enum class InstructionSet {
-        ARM,
-        Jazelle,
-        Thumb,
-        ThumbEE
-    };
+    enum class InstructionSet { ARM, Jazelle, Thumb, ThumbEE };
 
     PSR() = default;
     explicit PSR(u32 data) : value{data & mask} {}

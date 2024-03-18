@@ -45,7 +45,8 @@ EmitX64::EmitX64(BlockOfCode& code) : code(code) {
 
 EmitX64::~EmitX64() = default;
 
-std::optional<EmitX64::BlockDescriptor> EmitX64::GetBasicBlock(IR::LocationDescriptor descriptor) const {
+std::optional<EmitX64::BlockDescriptor> EmitX64::GetBasicBlock(
+    IR::LocationDescriptor descriptor) const {
     const auto iter = block_descriptors.find(descriptor);
     if (iter == block_descriptors.end()) {
         return std::nullopt;
@@ -53,8 +54,7 @@ std::optional<EmitX64::BlockDescriptor> EmitX64::GetBasicBlock(IR::LocationDescr
     return iter->second;
 }
 
-void EmitX64::EmitVoid(EmitContext&, IR::Inst*) {
-}
+void EmitX64::EmitVoid(EmitContext&, IR::Inst*) {}
 
 void EmitX64::EmitBreakpoint(EmitContext&, IR::Inst*) {
     code.int3();
@@ -67,13 +67,13 @@ void EmitX64::EmitIdentity(EmitContext& ctx, IR::Inst* inst) {
     }
 }
 
-void EmitX64::PushRSBHelper(Xbyak::Reg64 loc_desc_reg, Xbyak::Reg64 index_reg, IR::LocationDescriptor target) {
+void EmitX64::PushRSBHelper(Xbyak::Reg64 loc_desc_reg, Xbyak::Reg64 index_reg,
+                            IR::LocationDescriptor target) {
     using namespace Xbyak::util;
 
     const auto iter = block_descriptors.find(target);
-    CodePtr target_code_ptr = iter != block_descriptors.end()
-                            ? iter->second.entrypoint
-                            : code.GetReturnFromRunCodeAddress();
+    CodePtr target_code_ptr = iter != block_descriptors.end() ? iter->second.entrypoint
+                                                              : code.GetReturnFromRunCodeAddress();
 
     code.mov(index_reg.cvt32(), dword[r15 + code.GetJitStateInfo().offsetof_rsb_ptr]);
 
@@ -82,7 +82,8 @@ void EmitX64::PushRSBHelper(Xbyak::Reg64 loc_desc_reg, Xbyak::Reg64 index_reg, I
     patch_information[target].mov_rcx.emplace_back(code.getCurr());
     EmitPatchMovRcx(target_code_ptr);
 
-    code.mov(qword[r15 + index_reg * 8 + code.GetJitStateInfo().offsetof_rsb_location_descriptors], loc_desc_reg);
+    code.mov(qword[r15 + index_reg * 8 + code.GetJitStateInfo().offsetof_rsb_location_descriptors],
+             loc_desc_reg);
     code.mov(qword[r15 + index_reg * 8 + code.GetJitStateInfo().offsetof_rsb_codeptrs], rcx);
 
     code.add(index_reg.cvt32(), 1);
@@ -125,7 +126,7 @@ void EmitX64::EmitGetLowerFromOp(EmitContext&, IR::Inst*) {
 void EmitX64::EmitGetNZCVFromOp(EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
 
-    const int bitsize = [&]{
+    const int bitsize = [&] {
         switch (args[0].GetType()) {
         case IR::Type::U8:
             return 8;
@@ -182,7 +183,8 @@ void EmitX64::EmitNZCVFromPackedFlags(EmitContext& ctx, IR::Inst* inst) {
 
 void EmitX64::EmitAddCycles(size_t cycles) {
     ASSERT(cycles < std::numeric_limits<u32>::max());
-    code.sub(qword[r15 + code.GetJitStateInfo().offsetof_cycles_remaining], static_cast<u32>(cycles));
+    code.sub(qword[r15 + code.GetJitStateInfo().offsetof_cycles_remaining],
+             static_cast<u32>(cycles));
 }
 
 Xbyak::Label EmitX64::EmitCond(IR::Cond cond) {
@@ -194,44 +196,44 @@ Xbyak::Label EmitX64::EmitCond(IR::Cond cond) {
     // add al, 0x7F restores OF
 
     switch (cond) {
-    case IR::Cond::EQ: //z
+    case IR::Cond::EQ: // z
         code.sahf();
         code.jz(pass);
         break;
-    case IR::Cond::NE: //!z
+    case IR::Cond::NE: //! z
         code.sahf();
         code.jnz(pass);
         break;
-    case IR::Cond::CS: //c
+    case IR::Cond::CS: // c
         code.sahf();
         code.jc(pass);
         break;
-    case IR::Cond::CC: //!c
+    case IR::Cond::CC: //! c
         code.sahf();
         code.jnc(pass);
         break;
-    case IR::Cond::MI: //n
+    case IR::Cond::MI: // n
         code.sahf();
         code.js(pass);
         break;
-    case IR::Cond::PL: //!n
+    case IR::Cond::PL: //! n
         code.sahf();
         code.jns(pass);
         break;
-    case IR::Cond::VS: //v
+    case IR::Cond::VS: // v
         code.add(al, 0x7F);
         code.jo(pass);
         break;
-    case IR::Cond::VC: //!v
+    case IR::Cond::VC: //! v
         code.add(al, 0x7F);
         code.jno(pass);
         break;
-    case IR::Cond::HI: //c & !z
+    case IR::Cond::HI: // c & !z
         code.sahf();
         code.cmc();
         code.ja(pass);
         break;
-    case IR::Cond::LS: //!c | z
+    case IR::Cond::LS: //! c | z
         code.sahf();
         code.cmc();
         code.jna(pass);
@@ -264,7 +266,8 @@ Xbyak::Label EmitX64::EmitCond(IR::Cond cond) {
     return pass;
 }
 
-EmitX64::BlockDescriptor EmitX64::RegisterBlock(const IR::LocationDescriptor& descriptor, CodePtr entrypoint, size_t size) {
+EmitX64::BlockDescriptor EmitX64::RegisterBlock(const IR::LocationDescriptor& descriptor,
+                                                CodePtr entrypoint, size_t size) {
     PerfMapRegister(entrypoint, code.getCurr(), LocationDescriptorToFriendlyName(descriptor));
     Patch(descriptor, entrypoint);
 
@@ -273,7 +276,8 @@ EmitX64::BlockDescriptor EmitX64::RegisterBlock(const IR::LocationDescriptor& de
     return block_desc;
 }
 
-void EmitX64::EmitTerminal(IR::Terminal terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+void EmitX64::EmitTerminal(IR::Terminal terminal, IR::LocationDescriptor initial_location,
+                           bool is_single_step) {
     Common::VisitVariant<void>(terminal, [this, initial_location, is_single_step](auto x) {
         using T = std::decay_t<decltype(x)>;
         if constexpr (!std::is_same_v<T, IR::Term::Invalid>) {
@@ -319,9 +323,11 @@ void EmitX64::ClearCache() {
 
 void EmitX64::InvalidateBasicBlocks(const tsl::robin_set<IR::LocationDescriptor>& locations) {
     code.EnableWriting();
-    SCOPE_EXIT { code.DisableWriting(); };
+    SCOPE_EXIT {
+        code.DisableWriting();
+    };
 
-    for (const auto &descriptor : locations) {
+    for (const auto& descriptor : locations) {
         const auto it = block_descriptors.find(descriptor);
         if (it == block_descriptors.end()) {
             continue;

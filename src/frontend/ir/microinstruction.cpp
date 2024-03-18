@@ -13,13 +13,11 @@
 namespace Dynarmic::IR {
 
 bool Inst::IsArithmeticShift() const {
-    return op == Opcode::ArithmeticShiftRight32 ||
-           op == Opcode::ArithmeticShiftRight64;
+    return op == Opcode::ArithmeticShiftRight32 || op == Opcode::ArithmeticShiftRight64;
 }
 
 bool Inst::IsCircularShift() const {
-    return op == Opcode::RotateRight32 ||
-           op == Opcode::RotateRight64 ||
+    return op == Opcode::RotateRight32 || op == Opcode::RotateRight64 ||
            op == Opcode::RotateRightExtended;
 }
 
@@ -37,9 +35,7 @@ bool Inst::IsLogicalShift() const {
 }
 
 bool Inst::IsShift() const {
-    return IsArithmeticShift() ||
-           IsCircularShift()   ||
-           IsLogicalShift();
+    return IsArithmeticShift() || IsCircularShift() || IsLogicalShift();
 }
 
 bool Inst::IsBarrier() const {
@@ -257,19 +253,13 @@ bool Inst::WritesToFPCR() const {
 }
 
 bool Inst::ReadsFromFPSR() const {
-    return op == Opcode::A32GetFpscr                ||
-           op == Opcode::A32GetFpscrNZCV            ||
-           op == Opcode::A64GetFPSR                 ||
-           ReadsFromFPSRCumulativeExceptionBits()   ||
-           ReadsFromFPSRCumulativeSaturationBit();
+    return op == Opcode::A32GetFpscr || op == Opcode::A32GetFpscrNZCV || op == Opcode::A64GetFPSR ||
+           ReadsFromFPSRCumulativeExceptionBits() || ReadsFromFPSRCumulativeSaturationBit();
 }
 
 bool Inst::WritesToFPSR() const {
-    return op == Opcode::A32SetFpscr                ||
-           op == Opcode::A32SetFpscrNZCV            ||
-           op == Opcode::A64SetFPSR                 ||
-           WritesToFPSRCumulativeExceptionBits()    ||
-           WritesToFPSRCumulativeSaturationBit();
+    return op == Opcode::A32SetFpscr || op == Opcode::A32SetFpscrNZCV || op == Opcode::A64SetFPSR ||
+           WritesToFPSRCumulativeExceptionBits() || WritesToFPSRCumulativeSaturationBit();
 }
 
 bool Inst::ReadsFromFPSRCumulativeExceptionBits() const {
@@ -477,19 +467,14 @@ bool Inst::WritesToFPSRCumulativeSaturationBit() const {
 }
 
 bool Inst::CausesCPUException() const {
-    return op == Opcode::Breakpoint         ||
-           op == Opcode::A32CallSupervisor  ||
-           op == Opcode::A32ExceptionRaised ||
-           op == Opcode::A64CallSupervisor  ||
+    return op == Opcode::Breakpoint || op == Opcode::A32CallSupervisor ||
+           op == Opcode::A32ExceptionRaised || op == Opcode::A64CallSupervisor ||
            op == Opcode::A64ExceptionRaised;
 }
 
 bool Inst::AltersExclusiveState() const {
-    return op == Opcode::A32ClearExclusive ||
-           op == Opcode::A32SetExclusive   ||
-           op == Opcode::A64ClearExclusive ||
-           IsExclusiveMemoryRead()         ||
-           IsExclusiveMemoryWrite();
+    return op == Opcode::A32ClearExclusive || op == Opcode::A32SetExclusive ||
+           op == Opcode::A64ClearExclusive || IsExclusiveMemoryRead() || IsExclusiveMemoryWrite();
 }
 
 bool Inst::IsCoprocessorInstruction() const {
@@ -509,23 +494,14 @@ bool Inst::IsCoprocessorInstruction() const {
 }
 
 bool Inst::IsSetCheckBitOperation() const {
-    return op == Opcode::A32SetCheckBit ||
-           op == Opcode::A64SetCheckBit;
+    return op == Opcode::A32SetCheckBit || op == Opcode::A64SetCheckBit;
 }
 
 bool Inst::MayHaveSideEffects() const {
-    return op == Opcode::PushRSB                        ||
-           op == Opcode::A64DataCacheOperationRaised    ||
-           IsSetCheckBitOperation()                     ||
-           IsBarrier()                                  ||
-           CausesCPUException()                         ||
-           WritesToCoreRegister()                       ||
-           WritesToSystemRegister()                     ||
-           WritesToCPSR()                               ||
-           WritesToFPCR()                               ||
-           WritesToFPSR()                               ||
-           AltersExclusiveState()                       ||
-           IsMemoryWrite()                              ||
+    return op == Opcode::PushRSB || op == Opcode::A64DataCacheOperationRaised ||
+           IsSetCheckBitOperation() || IsBarrier() || CausesCPUException() ||
+           WritesToCoreRegister() || WritesToSystemRegister() || WritesToCPSR() || WritesToFPCR() ||
+           WritesToFPSR() || AltersExclusiveState() || IsMemoryWrite() ||
            IsCoprocessorInstruction();
 }
 
@@ -566,7 +542,8 @@ bool Inst::MayGetNZCVFromOp() const {
 }
 
 bool Inst::AreAllArgsImmediates() const {
-    return std::all_of(args.begin(), args.begin() + NumArgs(), [](const auto& value){ return value.IsImmediate(); });
+    return std::all_of(args.begin(), args.begin() + NumArgs(),
+                       [](const auto& value) { return value.IsImmediate(); });
 }
 
 bool Inst::HasAssociatedPseudoOperation() const {
@@ -612,15 +589,20 @@ size_t Inst::NumArgs() const {
 }
 
 Value Inst::GetArg(size_t index) const {
-    ASSERT_MSG(index < GetNumArgsOf(op), "Inst::GetArg: index {} >= number of arguments of {} ({})", index, op, GetNumArgsOf(op));
-    ASSERT_MSG(!args[index].IsEmpty() || GetArgTypeOf(op, index) == IR::Type::Opaque, "Inst::GetArg: index {} is empty", index, args[index].GetType());
+    ASSERT_MSG(index < GetNumArgsOf(op), "Inst::GetArg: index {} >= number of arguments of {} ({})",
+               index, op, GetNumArgsOf(op));
+    ASSERT_MSG(!args[index].IsEmpty() || GetArgTypeOf(op, index) == IR::Type::Opaque,
+               "Inst::GetArg: index {} is empty", index, args[index].GetType());
 
     return args[index];
 }
 
 void Inst::SetArg(size_t index, Value value) {
-    ASSERT_MSG(index < GetNumArgsOf(op), "Inst::SetArg: index {} >= number of arguments of {} ({})", index, op, GetNumArgsOf(op));
-    ASSERT_MSG(AreTypesCompatible(value.GetType(), GetArgTypeOf(op, index)), "Inst::SetArg: type {} of argument {} not compatible with operation {} ({})", value.GetType(), index, op, GetArgTypeOf(op, index));
+    ASSERT_MSG(index < GetNumArgsOf(op), "Inst::SetArg: index {} >= number of arguments of {} ({})",
+               index, op, GetNumArgsOf(op));
+    ASSERT_MSG(AreTypesCompatible(value.GetType(), GetArgTypeOf(op, index)),
+               "Inst::SetArg: type {} of argument {} not compatible with operation {} ({})",
+               value.GetType(), index, op, GetArgTypeOf(op, index));
 
     if (!args[index].IsImmediate()) {
         UndoUse(args[index]);
@@ -661,7 +643,7 @@ void Inst::ReplaceUsesWith(Value replacement) {
 void Inst::Use(const Value& value) {
     value.GetInst()->use_count++;
 
-    switch (op){
+    switch (op) {
     case Opcode::GetCarryFromOp:
         ASSERT_MSG(!value.GetInst()->carry_inst, "Only one of each type of pseudo-op allowed");
         value.GetInst()->carry_inst = this;
@@ -676,7 +658,8 @@ void Inst::Use(const Value& value) {
         break;
     case Opcode::GetNZCVFromOp:
         ASSERT_MSG(!value.GetInst()->nzcv_inst, "Only one of each type of pseudo-op allowed");
-        ASSERT_MSG(value.GetInst()->MayGetNZCVFromOp(), "This value doesn't support the GetNZCVFromOp pseduo-op");
+        ASSERT_MSG(value.GetInst()->MayGetNZCVFromOp(),
+                   "This value doesn't support the GetNZCVFromOp pseduo-op");
         value.GetInst()->nzcv_inst = this;
         break;
     case Opcode::GetUpperFromOp:
@@ -695,7 +678,7 @@ void Inst::Use(const Value& value) {
 void Inst::UndoUse(const Value& value) {
     value.GetInst()->use_count--;
 
-    switch (op){
+    switch (op) {
     case Opcode::GetCarryFromOp:
         ASSERT(value.GetInst()->carry_inst->GetOpcode() == Opcode::GetCarryFromOp);
         value.GetInst()->carry_inst = nullptr;

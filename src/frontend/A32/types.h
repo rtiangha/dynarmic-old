@@ -8,8 +8,8 @@
 #include <string>
 #include <utility>
 
-#include <fmt/format.h>
 #include <dynarmic/A32/coprocessor_util.h>
+#include <fmt/format.h>
 
 #include "common/assert.h"
 #include "common/common_types.h"
@@ -20,7 +20,22 @@ namespace Dynarmic::A32 {
 using Cond = IR::Cond;
 
 enum class Reg {
-    R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15,
+    R0,
+    R1,
+    R2,
+    R3,
+    R4,
+    R5,
+    R6,
+    R7,
+    R8,
+    R9,
+    R10,
+    R11,
+    R12,
+    R13,
+    R14,
+    R15,
     SP = R13,
     LR = R14,
     PC = R15,
@@ -28,16 +43,86 @@ enum class Reg {
 };
 
 enum class ExtReg {
-    S0, S1, S2, S3, S4, S5, S6, S7,
-    S8, S9, S10, S11, S12, S13, S14, S15,
-    S16, S17, S18, S19, S20, S21, S22, S23,
-    S24, S25, S26, S27, S28, S29, S30, S31,
-    D0, D1, D2, D3, D4, D5, D6, D7,
-    D8, D9, D10, D11, D12, D13, D14, D15,
-    D16, D17, D18, D19, D20, D21, D22, D23,
-    D24, D25, D26, D27, D28, D29, D30, D31,
-    Q0, Q1, Q2, Q3, Q4, Q5, Q6, Q7,
-    Q8, Q9, Q10, Q11, Q12, Q13, Q14, Q15,
+    S0,
+    S1,
+    S2,
+    S3,
+    S4,
+    S5,
+    S6,
+    S7,
+    S8,
+    S9,
+    S10,
+    S11,
+    S12,
+    S13,
+    S14,
+    S15,
+    S16,
+    S17,
+    S18,
+    S19,
+    S20,
+    S21,
+    S22,
+    S23,
+    S24,
+    S25,
+    S26,
+    S27,
+    S28,
+    S29,
+    S30,
+    S31,
+    D0,
+    D1,
+    D2,
+    D3,
+    D4,
+    D5,
+    D6,
+    D7,
+    D8,
+    D9,
+    D10,
+    D11,
+    D12,
+    D13,
+    D14,
+    D15,
+    D16,
+    D17,
+    D18,
+    D19,
+    D20,
+    D21,
+    D22,
+    D23,
+    D24,
+    D25,
+    D26,
+    D27,
+    D28,
+    D29,
+    D30,
+    D31,
+    Q0,
+    Q1,
+    Q2,
+    Q3,
+    Q4,
+    Q5,
+    Q6,
+    Q7,
+    Q8,
+    Q9,
+    Q10,
+    Q11,
+    Q12,
+    Q13,
+    Q14,
+    Q15,
 };
 
 using RegList = u16;
@@ -134,33 +219,33 @@ inline ExtReg ToVector(bool Q, size_t base, bool bit) {
 
 } // namespace Dynarmic::A32
 
-template<>
+template <>
 struct fmt::formatter<Dynarmic::A32::Reg> : fmt::formatter<const char*> {
-    template<typename FormatContext>
+    template <typename FormatContext>
     auto format(Dynarmic::A32::Reg reg, FormatContext& ctx) const {
         return formatter<const char*>::format(Dynarmic::A32::RegToString(reg), ctx);
     }
 };
 
-template<>
+template <>
 struct fmt::formatter<Dynarmic::A32::ExtReg> : fmt::formatter<const char*> {
-    template<typename FormatContext>
+    template <typename FormatContext>
     auto format(Dynarmic::A32::ExtReg reg, FormatContext& ctx) const {
         return formatter<const char*>::format(Dynarmic::A32::ExtRegToString(reg), ctx);
     }
 };
 
-template<>
+template <>
 struct fmt::formatter<Dynarmic::A32::CoprocReg> : fmt::formatter<const char*> {
-    template<typename FormatContext>
+    template <typename FormatContext>
     auto format(Dynarmic::A32::CoprocReg reg, FormatContext& ctx) const {
         return formatter<const char*>::format(Dynarmic::A32::CoprocRegToString(reg), ctx);
     }
 };
 
-template<>
+template <>
 struct fmt::formatter<Dynarmic::A32::RegList> : fmt::formatter<std::string> {
-    template<typename FormatContext>
+    template <typename FormatContext>
     auto format(Dynarmic::A32::RegList reg_list, FormatContext& ctx) const {
         return formatter<std::string>::format(Dynarmic::A32::RegListToString(reg_list), ctx);
     }

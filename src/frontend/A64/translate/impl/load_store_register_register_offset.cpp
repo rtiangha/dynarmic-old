@@ -7,7 +7,9 @@
 
 namespace Dynarmic::A64 {
 
-static bool RegSharedDecodeAndOperation(TranslatorVisitor& v, size_t scale, u8 shift, Imm<2> size, Imm<1> opc_1, Imm<1> opc_0, Reg Rm, Imm<3> option, Reg Rn, Reg Rt) {
+static bool RegSharedDecodeAndOperation(TranslatorVisitor& v, size_t scale, u8 shift, Imm<2> size,
+                                        Imm<1> opc_1, Imm<1> opc_0, Reg Rm, Imm<3> option, Reg Rn,
+                                        Reg Rt) {
     // Shared Decode
 
     const auto acctype = IR::AccType::NORMAL;
@@ -73,7 +75,8 @@ static bool RegSharedDecodeAndOperation(TranslatorVisitor& v, size_t scale, u8 s
     return true;
 }
 
-bool TranslatorVisitor::STRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn, Reg Rt) {
+bool TranslatorVisitor::STRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn,
+                                 Reg Rt) {
     const Imm<1> opc_0{0};
     const size_t scale = size.ZeroExtend<size_t>();
     const u8 shift = S ? static_cast<u8>(scale) : 0;
@@ -83,7 +86,8 @@ bool TranslatorVisitor::STRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> optio
     return RegSharedDecodeAndOperation(*this, scale, shift, size, opc_1, opc_0, Rm, option, Rn, Rt);
 }
 
-bool TranslatorVisitor::LDRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn, Reg Rt) {
+bool TranslatorVisitor::LDRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn,
+                                 Reg Rt) {
     const Imm<1> opc_0{1};
     const size_t scale = size.ZeroExtend<size_t>();
     const u8 shift = S ? static_cast<u8>(scale) : 0;
@@ -93,7 +97,8 @@ bool TranslatorVisitor::LDRx_reg(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> optio
     return RegSharedDecodeAndOperation(*this, scale, shift, size, opc_1, opc_0, Rm, option, Rn, Rt);
 }
 
-static bool VecSharedDecodeAndOperation(TranslatorVisitor& v, size_t scale, u8 shift, Imm<1> opc_0, Reg Rm, Imm<3> option, Reg Rn, Vec Vt) {
+static bool VecSharedDecodeAndOperation(TranslatorVisitor& v, size_t scale, u8 shift, Imm<1> opc_0,
+                                        Reg Rm, Imm<3> option, Reg Rn, Vec Vt) {
     // Shared Decode
 
     const auto acctype = IR::AccType::VEC;
@@ -131,7 +136,8 @@ static bool VecSharedDecodeAndOperation(TranslatorVisitor& v, size_t scale, u8 s
     return true;
 }
 
-bool TranslatorVisitor::STR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::STR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S,
+                                       Reg Rn, Vec Vt) {
     const Imm<1> opc_0{0};
     const size_t scale = concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {
@@ -144,7 +150,8 @@ bool TranslatorVisitor::STR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3>
     return VecSharedDecodeAndOperation(*this, scale, shift, opc_0, Rm, option, Rn, Vt);
 }
 
-bool TranslatorVisitor::LDR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S, Reg Rn, Vec Vt) {
+bool TranslatorVisitor::LDR_reg_fpsimd(Imm<2> size, Imm<1> opc_1, Reg Rm, Imm<3> option, bool S,
+                                       Reg Rn, Vec Vt) {
     const Imm<1> opc_0{1};
     const size_t scale = concatenate(opc_1, size).ZeroExtend<size_t>();
     if (scale > 4) {

@@ -96,7 +96,9 @@ class RegAlloc final {
 public:
     using ArgumentInfo = std::array<Argument, IR::max_arg_count>;
 
-    explicit RegAlloc(BlockOfCode& code, size_t num_spills, std::function<Xbyak::Address(HostLoc)> spill_to_addr, std::vector<HostLoc> gpr_order, std::vector<HostLoc> xmm_order);
+    explicit RegAlloc(BlockOfCode& code, size_t num_spills,
+                      std::function<Xbyak::Address(HostLoc)> spill_to_addr,
+                      std::vector<HostLoc> gpr_order, std::vector<HostLoc> xmm_order);
 
     ArgumentInfo GetArgumentInfo(IR::Inst* inst);
 

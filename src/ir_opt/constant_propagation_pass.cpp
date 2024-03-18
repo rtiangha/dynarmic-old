@@ -7,8 +7,8 @@
 
 #include "common/assert.h"
 #include "common/bit_util.h"
-#include "common/safe_ops.h"
 #include "common/common_types.h"
+#include "common/safe_ops.h"
 #include "frontend/ir/basic_block.h"
 #include "frontend/ir/ir_emitter.h"
 #include "frontend/ir/opcodes.h"
@@ -51,7 +51,8 @@ bool FoldCommutative(IR::Inst& inst, bool is_32_bit, ImmFn imm_fn) {
     if (is_lhs_immediate && !is_rhs_immediate) {
         const IR::Inst* rhs_inst = rhs.GetInstRecursive();
         if (rhs_inst->GetOpcode() == inst.GetOpcode() && rhs_inst->GetArg(1).IsImmediate()) {
-            const u64 combined = imm_fn(lhs.GetImmediateAsU64(), rhs_inst->GetArg(1).GetImmediateAsU64());
+            const u64 combined =
+                imm_fn(lhs.GetImmediateAsU64(), rhs_inst->GetArg(1).GetImmediateAsU64());
             inst.SetArg(0, rhs_inst->GetArg(0));
             inst.SetArg(1, Value(is_32_bit, combined));
         } else {
@@ -64,7 +65,8 @@ bool FoldCommutative(IR::Inst& inst, bool is_32_bit, ImmFn imm_fn) {
     if (!is_lhs_immediate && is_rhs_immediate) {
         const IR::Inst* lhs_inst = lhs.GetInstRecursive();
         if (lhs_inst->GetOpcode() == inst.GetOpcode() && lhs_inst->GetArg(1).IsImmediate()) {
-            const u64 combined = imm_fn(rhs.GetImmediateAsU64(), lhs_inst->GetArg(1).GetImmediateAsU64());
+            const u64 combined =
+                imm_fn(rhs.GetImmediateAsU64(), lhs_inst->GetArg(1).GetImmediateAsU64());
             inst.SetArg(0, lhs_inst->GetArg(0));
             inst.SetArg(1, Value(is_32_bit, combined));
         }
@@ -92,8 +94,10 @@ void FoldAdd(IR::Inst& inst, bool is_32_bit) {
 
     if (!lhs.IsImmediate() && rhs.IsImmediate()) {
         const IR::Inst* lhs_inst = lhs.GetInstRecursive();
-        if (lhs_inst->GetOpcode() == inst.GetOpcode() && lhs_inst->GetArg(1).IsImmediate() && lhs_inst->GetArg(2).IsImmediate()) {
-            const u64 combined = rhs.GetImmediateAsU64() + lhs_inst->GetArg(1).GetImmediateAsU64() + lhs_inst->GetArg(2).GetU1();
+        if (lhs_inst->GetOpcode() == inst.GetOpcode() && lhs_inst->GetArg(1).IsImmediate() &&
+            lhs_inst->GetArg(2).IsImmediate()) {
+            const u64 combined = rhs.GetImmediateAsU64() + lhs_inst->GetArg(1).GetImmediateAsU64() +
+                                 lhs_inst->GetArg(2).GetU1();
             inst.SetArg(0, lhs_inst->GetArg(0));
             inst.SetArg(1, Value(is_32_bit, combined));
             return;
@@ -151,7 +155,8 @@ void FoldByteReverse(IR::Inst& inst, Op op) {
 
 // Folds division operations based on the following:
 //
-// 1. x / 0 -> 0 (NOTE: This is an ARM-specific behavior defined in the architecture reference manual)
+// 1. x / 0 -> 0 (NOTE: This is an ARM-specific behavior defined in the architecture reference
+// manual)
 // 2. imm_x / imm_y -> result
 // 3. x / 1 -> x
 //
@@ -395,82 +400,110 @@ void ConstantPropagation(IR::Block& block) {
             break;
         case Op::LogicalShiftLeft32:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, true, Safe::LogicalShiftLeft<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(
+                    inst, true,
+                    Safe::LogicalShiftLeft<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU8()));
             }
             break;
         case Op::LogicalShiftLeft64:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, false, Safe::LogicalShiftLeft<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(
+                    inst, false,
+                    Safe::LogicalShiftLeft<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU8()));
             }
             break;
         case Op::LogicalShiftRight32:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, true, Safe::LogicalShiftRight<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(
+                    inst, true,
+                    Safe::LogicalShiftRight<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU8()));
             }
             break;
         case Op::LogicalShiftRight64:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, false, Safe::LogicalShiftRight<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(
+                    inst, false,
+                    Safe::LogicalShiftRight<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU8()));
             }
             break;
         case Op::ArithmeticShiftRight32:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, true, Safe::ArithmeticShiftRight<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(inst, true,
+                                Safe::ArithmeticShiftRight<u32>(inst.GetArg(0).GetU32(),
+                                                                inst.GetArg(1).GetU8()));
             }
             break;
         case Op::ArithmeticShiftRight64:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, false, Safe::ArithmeticShiftRight<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(inst, false,
+                                Safe::ArithmeticShiftRight<u64>(inst.GetArg(0).GetU64(),
+                                                                inst.GetArg(1).GetU8()));
             }
             break;
         case Op::RotateRight32:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, true, Common::RotateRight<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(
+                    inst, true,
+                    Common::RotateRight<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU8()));
             }
             break;
         case Op::RotateRight64:
             if (FoldShifts(inst)) {
-                ReplaceUsesWith(inst, false, Common::RotateRight<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU8()));
+                ReplaceUsesWith(
+                    inst, false,
+                    Common::RotateRight<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU8()));
             }
             break;
         case Op::LogicalShiftLeftMasked32:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, true, inst.GetArg(0).GetU32() << (inst.GetArg(1).GetU32() & 0x1f));
+                ReplaceUsesWith(inst, true,
+                                inst.GetArg(0).GetU32() << (inst.GetArg(1).GetU32() & 0x1f));
             }
             break;
         case Op::LogicalShiftLeftMasked64:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, false, inst.GetArg(0).GetU64() << (inst.GetArg(1).GetU64() & 0x3f));
+                ReplaceUsesWith(inst, false,
+                                inst.GetArg(0).GetU64() << (inst.GetArg(1).GetU64() & 0x3f));
             }
             break;
         case Op::LogicalShiftRightMasked32:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, true, inst.GetArg(0).GetU32() >> (inst.GetArg(1).GetU32() & 0x1f));
+                ReplaceUsesWith(inst, true,
+                                inst.GetArg(0).GetU32() >> (inst.GetArg(1).GetU32() & 0x1f));
             }
             break;
         case Op::LogicalShiftRightMasked64:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, false, inst.GetArg(0).GetU64() >> (inst.GetArg(1).GetU64() & 0x3f));
+                ReplaceUsesWith(inst, false,
+                                inst.GetArg(0).GetU64() >> (inst.GetArg(1).GetU64() & 0x3f));
             }
             break;
         case Op::ArithmeticShiftRightMasked32:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, true, static_cast<s32>(inst.GetArg(0).GetU32()) >> (inst.GetArg(1).GetU32() & 0x1f));
+                ReplaceUsesWith(inst, true,
+                                static_cast<s32>(inst.GetArg(0).GetU32()) >>
+                                    (inst.GetArg(1).GetU32() & 0x1f));
             }
             break;
         case Op::ArithmeticShiftRightMasked64:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, false, static_cast<s64>(inst.GetArg(0).GetU64()) >> (inst.GetArg(1).GetU64() & 0x3f));
+                ReplaceUsesWith(inst, false,
+                                static_cast<s64>(inst.GetArg(0).GetU64()) >>
+                                    (inst.GetArg(1).GetU64() & 0x3f));
             }
             break;
         case Op::RotateRightMasked32:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, true, Common::RotateRight<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU32()));
+                ReplaceUsesWith(
+                    inst, true,
+                    Common::RotateRight<u32>(inst.GetArg(0).GetU32(), inst.GetArg(1).GetU32()));
             }
             break;
         case Op::RotateRightMasked64:
             if (inst.AreAllArgsImmediates()) {
-                ReplaceUsesWith(inst, false, Common::RotateRight<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU64()));
+                ReplaceUsesWith(
+                    inst, false,
+                    Common::RotateRight<u64>(inst.GetArg(0).GetU64(), inst.GetArg(1).GetU64()));
             }
             break;
         case Op::Add32:

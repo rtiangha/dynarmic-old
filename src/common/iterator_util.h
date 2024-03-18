@@ -10,7 +10,7 @@
 namespace Dynarmic::Common {
 namespace detail {
 
-template<typename T>
+template <typename T>
 struct ReverseAdapter {
     T& iterable;
 
@@ -27,7 +27,7 @@ struct ReverseAdapter {
 
 } // namespace detail
 
-template<typename T>
+template <typename T>
 constexpr detail::ReverseAdapter<T> Reverse(T&& iterable) {
     return detail::ReverseAdapter<T>{iterable};
 }

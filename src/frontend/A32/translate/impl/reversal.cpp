@@ -20,16 +20,22 @@ bool ArmTranslatorVisitor::arm_RBIT(Cond cond, Reg d, Reg m) {
     const IR::U32 swapped = ir.ByteReverseWord(ir.GetRegister(m));
 
     // ((x & 0xF0F0F0F0) >> 4) | ((x & 0x0F0F0F0F) << 4)
-    const IR::U32 first_lsr = ir.LogicalShiftRight(ir.And(swapped, ir.Imm32(0xF0F0F0F0)), ir.Imm8(4));
-    const IR::U32 first_lsl = ir.LogicalShiftLeft(ir.And(swapped, ir.Imm32(0x0F0F0F0F)), ir.Imm8(4));
+    const IR::U32 first_lsr =
+        ir.LogicalShiftRight(ir.And(swapped, ir.Imm32(0xF0F0F0F0)), ir.Imm8(4));
+    const IR::U32 first_lsl =
+        ir.LogicalShiftLeft(ir.And(swapped, ir.Imm32(0x0F0F0F0F)), ir.Imm8(4));
     const IR::U32 corrected = ir.Or(first_lsl, first_lsr);
 
     // ((x & 0x88888888) >> 3) | ((x & 0x44444444) >> 1) |
     // ((x & 0x22222222) << 1) | ((x & 0x11111111) << 3)
-    const IR::U32 second_lsr = ir.LogicalShiftRight(ir.And(corrected, ir.Imm32(0x88888888)), ir.Imm8(3));
-    const IR::U32 third_lsr = ir.LogicalShiftRight(ir.And(corrected, ir.Imm32(0x44444444)), ir.Imm8(1));
-    const IR::U32 second_lsl = ir.LogicalShiftLeft(ir.And(corrected, ir.Imm32(0x22222222)), ir.Imm8(1));
-    const IR::U32 third_lsl = ir.LogicalShiftLeft(ir.And(corrected, ir.Imm32(0x11111111)), ir.Imm8(3));
+    const IR::U32 second_lsr =
+        ir.LogicalShiftRight(ir.And(corrected, ir.Imm32(0x88888888)), ir.Imm8(3));
+    const IR::U32 third_lsr =
+        ir.LogicalShiftRight(ir.And(corrected, ir.Imm32(0x44444444)), ir.Imm8(1));
+    const IR::U32 second_lsl =
+        ir.LogicalShiftLeft(ir.And(corrected, ir.Imm32(0x22222222)), ir.Imm8(1));
+    const IR::U32 third_lsl =
+        ir.LogicalShiftLeft(ir.And(corrected, ir.Imm32(0x11111111)), ir.Imm8(3));
 
     const IR::U32 result = ir.Or(ir.Or(ir.Or(second_lsr, third_lsr), second_lsl), third_lsl);
 
@@ -63,8 +69,10 @@ bool ArmTranslatorVisitor::arm_REV16(Cond cond, Reg d, Reg m) {
     }
 
     const auto reg_m = ir.GetRegister(m);
-    const auto lo = ir.And(ir.LogicalShiftRight(reg_m, ir.Imm8(8), ir.Imm1(0)).result, ir.Imm32(0x00FF00FF));
-    const auto hi = ir.And(ir.LogicalShiftLeft(reg_m, ir.Imm8(8), ir.Imm1(0)).result, ir.Imm32(0xFF00FF00));
+    const auto lo =
+        ir.And(ir.LogicalShiftRight(reg_m, ir.Imm8(8), ir.Imm1(0)).result, ir.Imm32(0x00FF00FF));
+    const auto hi =
+        ir.And(ir.LogicalShiftLeft(reg_m, ir.Imm8(8), ir.Imm1(0)).result, ir.Imm32(0xFF00FF00));
     const auto result = ir.Or(lo, hi);
 
     ir.SetRegister(d, result);

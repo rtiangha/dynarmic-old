@@ -16,7 +16,8 @@ namespace Dynarmic::Backend::X64 {
 using namespace Xbyak::util;
 namespace CRC32 = Common::Crypto::CRC32;
 
-static void EmitCRC32Castagnoli(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst, const int data_size) {
+static void EmitCRC32Castagnoli(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst,
+                                const int data_size) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
 
     if (code.HasSSE42()) {

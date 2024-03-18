@@ -305,7 +305,9 @@ template <typename T>
 using remove_const_t = typename std::remove_const<T>::type;
 template <typename T>
 using remove_cvref_t = typename std::remove_cv<remove_reference_t<T>>::type;
-template <typename T> struct type_identity { using type = T; };
+template <typename T> struct type_identity {
+  using type = T;
+};
 template <typename T> using type_identity_t = typename type_identity<T>::type;
 template <typename T>
 using underlying_t = typename std::underlying_type<T>::type;
@@ -1675,7 +1677,9 @@ FMT_CONSTEXPR auto copy_str(R&& rng, OutputIt out) -> OutputIt {
 
 #if FMT_GCC_VERSION && FMT_GCC_VERSION < 500
 // A workaround for gcc 4.8 to make void_t work in a SFINAE context.
-template <typename... Ts> struct void_t_impl { using type = void; };
+template <typename... Ts> struct void_t_impl {
+  using type = void;
+};
 template <typename... Ts>
 using void_t = typename detail::void_t_impl<Ts...>::type;
 #else
@@ -3134,7 +3138,9 @@ FMT_FORMAT_AS(std::basic_string<Char>, basic_string_view<Char>);
 FMT_FORMAT_AS(std::nullptr_t, const void*);
 FMT_FORMAT_AS(detail::std_string_view<Char>, basic_string_view<Char>);
 
-template <typename Char> struct basic_runtime { basic_string_view<Char> str; };
+template <typename Char> struct basic_runtime {
+  basic_string_view<Char> str;
+};
 
 /** A compile-time format string. */
 template <typename Char, typename... Args> class basic_format_string {

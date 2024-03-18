@@ -54,7 +54,9 @@ void PerfMapRegister(const void* start, const void* end, std::string_view friend
         }
     }
 
-    const std::string line = fmt::format("{:016x} {:016x} {:s}\n", reinterpret_cast<u64>(start), reinterpret_cast<u64>(end) - reinterpret_cast<u64>(start), friendly_name);
+    const std::string line =
+        fmt::format("{:016x} {:016x} {:s}\n", reinterpret_cast<u64>(start),
+                    reinterpret_cast<u64>(end) - reinterpret_cast<u64>(start), friendly_name);
     std::fwrite(line.data(), sizeof *line.data(), line.size(), file);
 }
 } // namespace detail

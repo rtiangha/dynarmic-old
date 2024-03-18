@@ -24,7 +24,8 @@ enum class Reg;
  */
 class IREmitter : public IR::IREmitter {
 public:
-    explicit IREmitter(IR::Block& block, LocationDescriptor descriptor) : IR::IREmitter(block), current_location(descriptor) {}
+    explicit IREmitter(IR::Block& block, LocationDescriptor descriptor)
+        : IR::IREmitter(block), current_location(descriptor) {}
 
     LocationDescriptor current_location;
 
@@ -86,15 +87,22 @@ public:
     IR::U32 ExclusiveWriteMemory8(const IR::U32& vaddr, const IR::U8& value);
     IR::U32 ExclusiveWriteMemory16(const IR::U32& vaddr, const IR::U16& value);
     IR::U32 ExclusiveWriteMemory32(const IR::U32& vaddr, const IR::U32& value);
-    IR::U32 ExclusiveWriteMemory64(const IR::U32& vaddr, const IR::U32& value_lo, const IR::U32& value_hi);
+    IR::U32 ExclusiveWriteMemory64(const IR::U32& vaddr, const IR::U32& value_lo,
+                                   const IR::U32& value_hi);
 
-    void CoprocInternalOperation(size_t coproc_no, bool two, size_t opc1, CoprocReg CRd, CoprocReg CRn, CoprocReg CRm, size_t opc2);
-    void CoprocSendOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn, CoprocReg CRm, size_t opc2, const IR::U32& word);
-    void CoprocSendTwoWords(size_t coproc_no, bool two, size_t opc, CoprocReg CRm, const IR::U32& word1, const IR::U32& word2);
-    IR::U32 CoprocGetOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn, CoprocReg CRm, size_t opc2);
+    void CoprocInternalOperation(size_t coproc_no, bool two, size_t opc1, CoprocReg CRd,
+                                 CoprocReg CRn, CoprocReg CRm, size_t opc2);
+    void CoprocSendOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn, CoprocReg CRm,
+                           size_t opc2, const IR::U32& word);
+    void CoprocSendTwoWords(size_t coproc_no, bool two, size_t opc, CoprocReg CRm,
+                            const IR::U32& word1, const IR::U32& word2);
+    IR::U32 CoprocGetOneWord(size_t coproc_no, bool two, size_t opc1, CoprocReg CRn, CoprocReg CRm,
+                             size_t opc2);
     IR::U64 CoprocGetTwoWords(size_t coproc_no, bool two, size_t opc, CoprocReg CRm);
-    void CoprocLoadWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd, const IR::U32& address, bool has_option, u8 option);
-    void CoprocStoreWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd, const IR::U32& address, bool has_option, u8 option);
+    void CoprocLoadWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd,
+                         const IR::U32& address, bool has_option, u8 option);
+    void CoprocStoreWords(size_t coproc_no, bool two, bool long_transfer, CoprocReg CRd,
+                          const IR::U32& address, bool has_option, u8 option);
 };
 
 } // namespace Dynarmic::A32

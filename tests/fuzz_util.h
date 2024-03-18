@@ -21,9 +21,15 @@ public:
     explicit InstructionGenerator(const char* format);
 
     u32 Generate() const;
-    u32 Bits() const { return bits; }
-    u32 Mask() const { return mask; }
-    bool Match(u32 inst) const { return (inst & mask) == bits; }
+    u32 Bits() const {
+        return bits;
+    }
+    u32 Mask() const {
+        return mask;
+    }
+    bool Match(u32 inst) const {
+        return (inst & mask) == bits;
+    }
 
 private:
     u32 bits = 0;

@@ -19,13 +19,15 @@ class BlockOfCode;
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4324) // Structure was padded due to alignment specifier
+#pragma warning(disable : 4324) // Structure was padded due to alignment specifier
 #endif
 
 struct A64JitState {
     using ProgramCounterType = u64;
 
-    A64JitState() { ResetRSB(); }
+    A64JitState() {
+        ResetRSB();
+    }
 
     std::array<u64, 31> reg{};
     u64 sp = 0;
@@ -80,7 +82,8 @@ struct A64JitState {
     void SetFpsr(u32 value);
 
     u64 GetUniqueHash() const noexcept {
-        const u64 fpcr_u64 = static_cast<u64>(fpcr & A64::LocationDescriptor::fpcr_mask) << A64::LocationDescriptor::fpcr_shift;
+        const u64 fpcr_u64 = static_cast<u64>(fpcr & A64::LocationDescriptor::fpcr_mask)
+                             << A64::LocationDescriptor::fpcr_shift;
         const u64 pc_u64 = pc & A64::LocationDescriptor::pc_mask;
         return pc_u64 | fpcr_u64;
     }

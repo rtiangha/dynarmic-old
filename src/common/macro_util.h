@@ -6,7 +6,7 @@
 #pragma once
 
 #define CONCATENATE_TOKENS(x, y) CONCATENATE_TOKENS_IMPL(x, y)
-#define CONCATENATE_TOKENS_IMPL(x, y) x ## y
+#define CONCATENATE_TOKENS_IMPL(x, y) x##y
 
 #ifdef __COUNTER__
 #define ANONYMOUS_VARIABLE(str) CONCATENATE_TOKENS(str, __COUNTER__)

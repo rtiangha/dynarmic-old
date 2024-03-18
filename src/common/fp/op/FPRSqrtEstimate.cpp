@@ -16,7 +16,7 @@
 
 namespace Dynarmic::FP {
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRSqrtEstimate(FPT op, FPCR fpcr, FPSR& fpsr) {
     const auto [type, sign, value] = FPUnpack<FPT>(op, fpcr, fpsr);
 
@@ -41,12 +41,15 @@ FPT FPRSqrtEstimate(FPT op, FPCR fpcr, FPSR& fpsr) {
     const int result_exponent = (-(value.exponent + 1)) >> 1;
     const bool was_exponent_odd = (value.exponent) % 2 == 0;
 
-    const u64 scaled = Safe::LogicalShiftRight(value.mantissa, normalized_point_position - (was_exponent_odd ? 7 : 8));
+    const u64 scaled = Safe::LogicalShiftRight(value.mantissa, normalized_point_position -
+                                                                   (was_exponent_odd ? 7 : 8));
     const u64 estimate = Common::RecipSqrtEstimate(scaled);
 
     const FPT bits_exponent = static_cast<FPT>(result_exponent + FPInfo<FPT>::exponent_bias);
-    const FPT bits_mantissa = static_cast<FPT>(estimate << (FPInfo<FPT>::explicit_mantissa_width - 8));
-    return (bits_exponent << FPInfo<FPT>::explicit_mantissa_width) | (bits_mantissa & FPInfo<FPT>::mantissa_mask);
+    const FPT bits_mantissa =
+        static_cast<FPT>(estimate << (FPInfo<FPT>::explicit_mantissa_width - 8));
+    return (bits_exponent << FPInfo<FPT>::explicit_mantissa_width) |
+           (bits_mantissa & FPInfo<FPT>::mantissa_mask);
 }
 
 template u16 FPRSqrtEstimate<u16>(u16 op, FPCR fpcr, FPSR& fpsr);

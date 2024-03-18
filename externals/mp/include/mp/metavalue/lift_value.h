@@ -10,7 +10,7 @@
 namespace mp {
 
 /// Lifts a value into a type (a metavalue)
-template<auto V>
+template <auto V>
 using lift_value = std::integral_constant<decltype(V), V>;
 
 } // namespace mp

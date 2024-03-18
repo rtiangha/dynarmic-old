@@ -13,7 +13,7 @@
 namespace mp {
 
 /// Get element I from list L
-template<std::size_t I, class L>
+template <std::size_t I, class L>
 using get = std::tuple_element_t<I, apply<std::tuple, L>>;
 
 } // namespace mp

@@ -24,7 +24,7 @@ enum class Op {
     Sub,
 };
 
-template<Op op, size_t size>
+template <Op op, size_t size>
 void EmitSignedSaturatedOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
     const auto overflow_inst = inst->GetAssociatedPseudoOperation(IR::Opcode::GetOverflowFromOp);
 
@@ -35,8 +35,7 @@ void EmitSignedSaturatedOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) 
 
     if constexpr (op == Op::Add) {
         code.fp_emitter.SQADD(size, result, result, addend);
-    }
-    else {
+    } else {
         code.fp_emitter.SQSUB(size, result, result, addend);
     }
 
@@ -112,7 +111,8 @@ void EmitA64::EmitSignedSaturation(EmitContext& ctx, IR::Inst* inst) {
     const ARM64Reg overflow = DecodeReg(ctx.reg_alloc.ScratchGpr());
     const ARM64Reg tmp = DecodeReg(ctx.reg_alloc.ScratchGpr());
 
-    // overflow now contains a value between 0 and mask if it was originally between {negative,positive}_saturated_value.
+    // overflow now contains a value between 0 and mask if it was originally between
+    // {negative,positive}_saturated_value.
     code.ADDI2R(overflow, reg_a, negative_saturated_value, overflow);
 
     // Put the appropriate saturated value in result

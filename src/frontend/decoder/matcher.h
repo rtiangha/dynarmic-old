@@ -24,10 +24,10 @@ namespace Dynarmic::Decoder {
 template <typename Visitor, typename OpcodeType>
 class Matcher {
 public:
-    using opcode_type         = OpcodeType;
-    using visitor_type        = Visitor;
+    using opcode_type = OpcodeType;
+    using visitor_type = Visitor;
     using handler_return_type = typename Visitor::instruction_return_type;
-    using handler_function    = std::function<handler_return_type(Visitor&, opcode_type)>;
+    using handler_function = std::function<handler_return_type(Visitor&, opcode_type)>;
 
     Matcher(const char* const name, opcode_type mask, opcode_type expected, handler_function func)
         : name{name}, mask{mask}, expected{expected}, fn{std::move(func)} {}

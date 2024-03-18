@@ -22,8 +22,8 @@ namespace impl {
 template <typename FunctionType, FunctionType mfp>
 struct ThunkBuilder;
 
-template <typename C, typename R, typename... Args, R(C::*mfp)(Args...)>
-struct ThunkBuilder<R(C::*)(Args...), mfp> {
+template <typename C, typename R, typename... Args, R (C::*mfp)(Args...)>
+struct ThunkBuilder<R (C::*)(Args...), mfp> {
     static R Thunk(C* this_, Args... args) {
         return (this_->*mfp)(std::forward<Args>(args)...);
     }
@@ -31,18 +31,19 @@ struct ThunkBuilder<R(C::*)(Args...), mfp> {
 
 } // namespace impl
 
-template<auto mfp>
+template <auto mfp>
 ArgCallback DevirtualizeGeneric(mp::class_type<decltype(mfp)>* this_) {
-    return ArgCallback{&impl::ThunkBuilder<decltype(mfp), mfp>::Thunk, reinterpret_cast<u64>(this_)};
+    return ArgCallback{&impl::ThunkBuilder<decltype(mfp), mfp>::Thunk,
+                       reinterpret_cast<u64>(this_)};
 }
 
-template<auto mfp>
+template <auto mfp>
 ArgCallback DevirtualizeWindows(mp::class_type<decltype(mfp)>* this_) {
     static_assert(sizeof(mfp) == 8);
     return ArgCallback{Common::BitCast<u64>(mfp), reinterpret_cast<u64>(this_)};
 }
 
-template<auto mfp>
+template <auto mfp>
 ArgCallback DevirtualizeItanium(mp::class_type<decltype(mfp)>* this_) {
     struct MemberFunctionPointer {
         /// For a non-virtual function, this is a simple function pointer.
@@ -64,7 +65,7 @@ ArgCallback DevirtualizeItanium(mp::class_type<decltype(mfp)>* this_) {
     return ArgCallback{fn_ptr, this_ptr};
 }
 
-template<auto mfp>
+template <auto mfp>
 ArgCallback Devirtualize(mp::class_type<decltype(mfp)>* this_) {
 #if defined(__APPLE__) || defined(linux) || defined(__linux) || defined(__linux__)
     return DevirtualizeItanium<mfp>(this_);

@@ -10,11 +10,11 @@
 namespace mp {
 
 /// Logical conjunction of metavalues Vs without short-circuiting or type presevation.
-template<class... Vs>
+template <class... Vs>
 using logic_and = bool_value<(true && ... && Vs::value)>;
 
 /// Logical conjunction of metavalues Vs without short-circuiting or type presevation.
-template<class... Vs>
+template <class... Vs>
 constexpr bool logic_and_v = (true && ... && Vs::value);
 
 } // namespace mp

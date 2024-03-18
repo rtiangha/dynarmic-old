@@ -34,7 +34,8 @@ inline size_t ToFastLookupIndex(u32 instruction) {
 template <typename Visitor>
 DecodeTable<Visitor> GetDecodeTable() {
     std::vector<Matcher<Visitor>> list = {
-#define INST(fn, name, bitstring) Decoder::detail::detail<Matcher<Visitor>>::GetMatcher(&Visitor::fn, name, bitstring),
+#define INST(fn, name, bitstring)                                                                  \
+    Decoder::detail::detail<Matcher<Visitor>>::GetMatcher(&Visitor::fn, name, bitstring),
 #include "a64.inc"
 #undef INST
     };
@@ -45,7 +46,7 @@ DecodeTable<Visitor> GetDecodeTable() {
     });
 
     // Exceptions to the above rule of thumb.
-    const std::set<std::string> comes_first {
+    const std::set<std::string> comes_first{
         "MOVI, MVNI, ORR, BIC (vector, immediate)",
         "FMOV (vector, immediate)",
         "Unallocated SIMD modified immediate",
@@ -68,15 +69,19 @@ DecodeTable<Visitor> GetDecodeTable() {
     return table;
 }
 
-template<typename Visitor>
+template <typename Visitor>
 std::optional<std::reference_wrapper<const Matcher<Visitor>>> Decode(u32 instruction) {
     static const auto table = GetDecodeTable<Visitor>();
 
-    const auto matches_instruction = [instruction](const auto& matcher) { return matcher.Matches(instruction); };
+    const auto matches_instruction = [instruction](const auto& matcher) {
+        return matcher.Matches(instruction);
+    };
 
     const auto& subtable = table[detail::ToFastLookupIndex(instruction)];
     auto iter = std::find_if(subtable.begin(), subtable.end(), matches_instruction);
-    return iter != subtable.end() ? std::optional<std::reference_wrapper<const Matcher<Visitor>>>(*iter) : std::nullopt;
+    return iter != subtable.end()
+               ? std::optional<std::reference_wrapper<const Matcher<Visitor>>>(*iter)
+               : std::nullopt;
 }
 
 } // namespace Dynarmic::A64

@@ -18,17 +18,18 @@ void ConstantPool::EmitPatchLDR(Arm64Gen::ARM64Reg Rt, u64 lower, u64 upper) {
     const auto constant = std::make_tuple(lower, upper);
     auto iter = constant_info.find(constant);
     if (iter == constant_info.end()) {
-        struct PatchInfo p = { code.GetCodePtr(), Rt, constant };
+        struct PatchInfo p = {code.GetCodePtr(), Rt, constant};
         patch_info.emplace_back(p);
         code.BRK(0);
         return;
     }
 
-    const s32 offset = reinterpret_cast<size_t>(iter->second) - reinterpret_cast<size_t>(code.GetCodePtr());
+    const s32 offset =
+        reinterpret_cast<size_t>(iter->second) - reinterpret_cast<size_t>(code.GetCodePtr());
 
     if (!(offset >= -0x40000 && offset <= 0x3FFFF)) {
         constant_info.erase(constant);
-        struct PatchInfo p = { code.GetCodePtr(), Rt, constant };
+        struct PatchInfo p = {code.GetCodePtr(), Rt, constant};
         patch_info.emplace_back(p);
         code.BRK(0x42);
         return;
@@ -49,7 +50,8 @@ void ConstantPool::PatchPool() {
         }
         code.SetCodePtr(patch.ptr);
 
-        const s32 offset = reinterpret_cast<size_t>(iter->second) - reinterpret_cast<size_t>(code.GetCodePtr());
+        const s32 offset =
+            reinterpret_cast<size_t>(iter->second) - reinterpret_cast<size_t>(code.GetCodePtr());
         DEBUG_ASSERT((offset & 3) == 0);
         code.LDR(patch.Rt, offset / 4);
     }
@@ -57,7 +59,7 @@ void ConstantPool::PatchPool() {
     code.SetCodePtr(pool_ptr);
 }
 
-void  ConstantPool::Clear() {
+void ConstantPool::Clear() {
     constant_info.clear();
     patch_info.clear();
 }

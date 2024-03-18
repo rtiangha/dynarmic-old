@@ -49,7 +49,7 @@ constexpr format_arg_store<wformat_context, Args...> make_wformat_args(
 
 inline namespace literals {
 #if FMT_USE_USER_DEFINED_LITERALS && !FMT_USE_NONTYPE_TEMPLATE_ARGS
-constexpr detail::udl_arg<wchar_t> operator"" _a(const wchar_t* s, size_t) {
+constexpr detail::udl_arg<wchar_t> operator"" _a(const wchar_t * s, size_t) {
   return {s};
 }
 #endif
@@ -152,11 +152,11 @@ inline auto vformat_to(
   return detail::get_iterator(buf);
 }
 
-template <
-    typename OutputIt, typename Locale, typename S, typename... Args,
-    typename Char = char_t<S>,
-    bool enable = detail::is_output_iterator<OutputIt, Char>::value&&
-        detail::is_locale<Locale>::value&& detail::is_exotic_char<Char>::value>
+template <typename OutputIt, typename Locale, typename S, typename... Args,
+          typename Char = char_t<S>,
+          bool enable = detail::is_output_iterator<OutputIt, Char>::value &&
+                        detail::is_locale<Locale>::value &&
+                        detail::is_exotic_char<Char>::value>
 inline auto format_to(OutputIt out, const Locale& loc, const S& format_str,
                       Args&&... args) ->
     typename std::enable_if<enable, OutputIt>::type {

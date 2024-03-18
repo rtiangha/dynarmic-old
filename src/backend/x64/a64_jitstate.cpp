@@ -59,7 +59,7 @@ void A64JitState::SetFpcr(u32 value) {
     guest_MXCSR |= 0x00001f80; // Mask all exceptions
 
     // RMode
-    const std::array<u32, 4> MXCSR_RMode {0x0, 0x4000, 0x2000, 0x6000};
+    const std::array<u32, 4> MXCSR_RMode{0x0, 0x4000, 0x2000, 0x6000};
     guest_MXCSR |= MXCSR_RMode[(value >> 22) & 0x3];
 
     if (Common::Bit<24>(value)) {
@@ -78,8 +78,8 @@ void A64JitState::SetFpcr(u32 value) {
  * UE   bit 4   Underflow Flag
  * OE   bit 3   Overflow Flag
  * ZE   bit 2   Divide By Zero Flag
- * DE   bit 1   Denormal Flag                                 // Appears to only be set when MXCSR.DAZ = 0
- * IE   bit 0   Invalid Operation Flag
+ * DE   bit 1   Denormal Flag                                 // Appears to only be set when
+ * MXCSR.DAZ = 0 IE   bit 0   Invalid Operation Flag
  *
  * A64 FPSR cumulative exception bits
  * ----------------------------------
@@ -94,8 +94,8 @@ void A64JitState::SetFpcr(u32 value) {
 
 u32 A64JitState::GetFpsr() const {
     u32 fpsr = 0;
-    fpsr |= (guest_MXCSR & 0b0000000000001);       // IOC = IE
-    fpsr |= (guest_MXCSR & 0b0000000111100) >> 1;  // IXC, UFC, OFC, DZC = PE, UE, OE, ZE
+    fpsr |= (guest_MXCSR & 0b0000000000001);      // IOC = IE
+    fpsr |= (guest_MXCSR & 0b0000000111100) >> 1; // IXC, UFC, OFC, DZC = PE, UE, OE, ZE
     fpsr |= fpsr_exc;
     fpsr |= (fpsr_qc == 0 ? 0 : 1) << 27;
     return fpsr;

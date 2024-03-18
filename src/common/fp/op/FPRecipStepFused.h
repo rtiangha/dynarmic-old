@@ -10,7 +10,7 @@ namespace Dynarmic::FP {
 class FPCR;
 class FPSR;
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRecipStepFused(FPT op1, FPT op2, FPCR fpcr, FPSR& fpsr);
 
 } // namespace Dynarmic::FP

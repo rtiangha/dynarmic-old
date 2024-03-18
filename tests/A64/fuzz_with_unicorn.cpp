@@ -59,8 +59,8 @@ static u32 GenRandomInst(u64 pc, bool is_last_inst) {
     static const struct InstructionGeneratorInfo {
         std::vector<InstructionGenerator> generators;
         std::vector<InstructionGenerator> invalid;
-    } instructions = []{
-        const std::vector<std::tuple<std::string, const char*>> list {
+    } instructions = [] {
+        const std::vector<std::tuple<std::string, const char*>> list{
 #define INST(fn, name, bitstring) {#fn, bitstring},
 #include "frontend/A64/decoder/a64.inc"
 #undef INST
@@ -70,15 +70,25 @@ static u32 GenRandomInst(u64 pc, bool is_last_inst) {
         std::vector<InstructionGenerator> invalid;
 
         // List of instructions not to test
-        const std::vector<std::string> do_not_test {
+        const std::vector<std::string> do_not_test{
             // Unimplemented in QEMU
             "STLLR",
             // Unimplemented in QEMU
             "LDLAR",
-            // Dynarmic and QEMU currently differ on how the exclusive monitor's address range works.
-            "STXR", "STLXR", "STXP", "STLXP", "LDXR", "LDAXR", "LDXP", "LDAXP",
+            // Dynarmic and QEMU currently differ on how the exclusive monitor's address range
+            // works.
+            "STXR",
+            "STLXR",
+            "STXP",
+            "STLXP",
+            "LDXR",
+            "LDAXR",
+            "LDXP",
+            "LDAXP",
             // Behaviour differs from QEMU
-            "MSR_reg", "MSR_imm", "MRS",
+            "MSR_reg",
+            "MSR_imm",
+            "MRS",
         };
 
         for (const auto& [fn, bitstring] : list) {
@@ -98,7 +108,8 @@ static u32 GenRandomInst(u64 pc, bool is_last_inst) {
         const size_t index = RandInt<size_t>(0, instructions.generators.size() - 1);
         const u32 inst = instructions.generators[index].Generate();
 
-        if (std::any_of(instructions.invalid.begin(), instructions.invalid.end(), [inst](const auto& invalid) { return invalid.Match(inst); })) {
+        if (std::any_of(instructions.invalid.begin(), instructions.invalid.end(),
+                        [inst](const auto& invalid) { return invalid.Match(inst); })) {
             continue;
         }
         if (ShouldTestInst(inst, pc, is_last_inst)) {
@@ -108,16 +119,15 @@ static u32 GenRandomInst(u64 pc, bool is_last_inst) {
 }
 
 static u32 GenFloatInst(u64 pc, bool is_last_inst) {
-    static const std::vector<InstructionGenerator> instruction_generators = []{
-        const std::vector<std::tuple<std::string, std::string, const char*>> list {
+    static const std::vector<InstructionGenerator> instruction_generators = [] {
+        const std::vector<std::tuple<std::string, std::string, const char*>> list{
 #define INST(fn, name, bitstring) {#fn, #name, bitstring},
 #include "frontend/A64/decoder/a64.inc"
 #undef INST
         };
 
         // List of instructions not to test
-        const std::vector<std::string> do_not_test {
-        };
+        const std::vector<std::string> do_not_test{};
 
         std::vector<InstructionGenerator> result;
 
@@ -154,9 +164,11 @@ static Dynarmic::A64::UserConfig GetUserConfig(A64TestEnv& jit_env) {
     return jit_user_config;
 }
 
-static void RunTestInstance(Dynarmic::A64::Jit& jit, A64Unicorn& uni, A64TestEnv& jit_env, A64TestEnv& uni_env,
-                            const A64Unicorn::RegisterArray& regs, const A64Unicorn::VectorArray& vecs, const size_t instructions_start,
-                            const std::vector<u32>& instructions, const u32 pstate, const u32 fpcr) {
+static void RunTestInstance(Dynarmic::A64::Jit& jit, A64Unicorn& uni, A64TestEnv& jit_env,
+                            A64TestEnv& uni_env, const A64Unicorn::RegisterArray& regs,
+                            const A64Unicorn::VectorArray& vecs, const size_t instructions_start,
+                            const std::vector<u32>& instructions, const u32 pstate,
+                            const u32 fpcr) {
     jit_env.code_mem = instructions;
     uni_env.code_mem = instructions;
     jit_env.code_mem.emplace_back(0x14000000); // B .
@@ -222,31 +234,41 @@ static void RunTestInstance(Dynarmic::A64::Jit& jit, A64Unicorn& uni, A64TestEnv
         fmt::print("     unicorn          dynarmic\n");
         const auto uni_regs = uni.GetRegisters();
         for (size_t i = 0; i < regs.size(); ++i) {
-            fmt::print("{:3s}: {:016x} {:016x} {}\n", static_cast<A64::Reg>(i), uni_regs[i], jit.GetRegisters()[i], uni_regs[i] != jit.GetRegisters()[i] ? "*" : "");
+            fmt::print("{:3s}: {:016x} {:016x} {}\n", static_cast<A64::Reg>(i), uni_regs[i],
+                       jit.GetRegisters()[i], uni_regs[i] != jit.GetRegisters()[i] ? "*" : "");
         }
         const auto uni_vecs = uni.GetVectors();
         for (size_t i = 0; i < vecs.size(); ++i) {
-            fmt::print("{:3s}: {} {} {}\n", static_cast<A64::Vec>(i), uni_vecs[i], jit.GetVectors()[i], uni_vecs[i] != jit.GetVectors()[i] ? "*" : "");
+            fmt::print("{:3s}: {} {} {}\n", static_cast<A64::Vec>(i), uni_vecs[i],
+                       jit.GetVectors()[i], uni_vecs[i] != jit.GetVectors()[i] ? "*" : "");
         }
-        fmt::print("sp : {:016x} {:016x} {}\n", uni.GetSP(), jit.GetSP(), uni.GetSP() != jit.GetSP() ? "*" : "");
-        fmt::print("pc : {:016x} {:016x} {}\n", uni.GetPC(), jit.GetPC(), uni.GetPC() != jit.GetPC() ? "*" : "");
-        fmt::print("p  : {:08x} {:08x} {}\n", uni.GetPstate(), jit.GetPstate(), (uni.GetPstate() & 0xF0000000) != (jit.GetPstate() & 0xF0000000) ? "*" : "");
-        fmt::print("qc : {:08x} {:08x} {}\n", uni.GetFpsr(), jit.GetFpsr(), FP::FPSR{uni.GetFpsr()}.QC() != FP::FPSR{jit.GetFpsr()}.QC() ? "*" : "");
+        fmt::print("sp : {:016x} {:016x} {}\n", uni.GetSP(), jit.GetSP(),
+                   uni.GetSP() != jit.GetSP() ? "*" : "");
+        fmt::print("pc : {:016x} {:016x} {}\n", uni.GetPC(), jit.GetPC(),
+                   uni.GetPC() != jit.GetPC() ? "*" : "");
+        fmt::print("p  : {:08x} {:08x} {}\n", uni.GetPstate(), jit.GetPstate(),
+                   (uni.GetPstate() & 0xF0000000) != (jit.GetPstate() & 0xF0000000) ? "*" : "");
+        fmt::print("qc : {:08x} {:08x} {}\n", uni.GetFpsr(), jit.GetFpsr(),
+                   FP::FPSR{uni.GetFpsr()}.QC() != FP::FPSR{jit.GetFpsr()}.QC() ? "*" : "");
         fmt::print("\n");
 
         fmt::print("Modified memory:\n");
         fmt::print("                 uni dyn\n");
         auto uni_iter = uni_env.modified_memory.begin();
         auto jit_iter = jit_env.modified_memory.begin();
-        while (uni_iter != uni_env.modified_memory.end() || jit_iter != jit_env.modified_memory.end()) {
-            if (uni_iter == uni_env.modified_memory.end() || (jit_iter != jit_env.modified_memory.end() && uni_iter->first > jit_iter->first)) {
+        while (uni_iter != uni_env.modified_memory.end() ||
+               jit_iter != jit_env.modified_memory.end()) {
+            if (uni_iter == uni_env.modified_memory.end() ||
+                (jit_iter != jit_env.modified_memory.end() && uni_iter->first > jit_iter->first)) {
                 fmt::print("{:016x}:    {:02x} *\n", jit_iter->first, jit_iter->second);
                 jit_iter++;
-            } else if (jit_iter == jit_env.modified_memory.end() || jit_iter->first > uni_iter->first) {
+            } else if (jit_iter == jit_env.modified_memory.end() ||
+                       jit_iter->first > uni_iter->first) {
                 fmt::print("{:016x}: {:02x}    *\n", uni_iter->first, uni_iter->second);
                 uni_iter++;
             } else if (uni_iter->first == jit_iter->first) {
-                fmt::print("{:016x}: {:02x} {:02x} {}\n", uni_iter->first, uni_iter->second, jit_iter->second, uni_iter->second != jit_iter->second ? "*" : "");
+                fmt::print("{:016x}: {:02x} {:02x} {}\n", uni_iter->first, uni_iter->second,
+                           jit_iter->second, uni_iter->second != jit_iter->second ? "*" : "");
                 uni_iter++;
                 jit_iter++;
             }
@@ -302,7 +324,7 @@ TEST_CASE("A64: Single random instruction", "[a64]") {
     std::vector<u32> instructions(1);
 
     for (size_t iteration = 0; iteration < 100000; ++iteration) {
-        std::generate(regs.begin(), regs.end(), []{ return RandInt<u64>(0, ~u64(0)); });
+        std::generate(regs.begin(), regs.end(), [] { return RandInt<u64>(0, ~u64(0)); });
         std::generate(vecs.begin(), vecs.end(), RandomVector);
 
         instructions[0] = GenRandomInst(0, true);
@@ -313,7 +335,8 @@ TEST_CASE("A64: Single random instruction", "[a64]") {
 
         INFO("Instruction: 0x" << std::hex << instructions[0]);
 
-        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate, fpcr);
+        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate,
+                        fpcr);
     }
 }
 
@@ -324,7 +347,7 @@ TEST_CASE("A64: Floating point instructions", "[a64]") {
     Dynarmic::A64::Jit jit{GetUserConfig(jit_env)};
     A64Unicorn uni{uni_env};
 
-    static constexpr std::array<u64, 80> float_numbers {
+    static constexpr std::array<u64, 80> float_numbers{
         0x00000000, // positive zero
         0x00000001, // smallest positive denormal
         0x00000076, //
@@ -368,34 +391,10 @@ TEST_CASE("A64: Floating point instructions", "[a64]") {
         0xffd9ba98, //
         0xffffffff, // last negative QNaN
         // some random numbers follow
-        0x4f3495cb,
-        0xe73a5134,
-        0x7c994e9e,
-        0x6164bd6c,
-        0x09503366,
-        0xbf5a97c9,
-        0xe6ff1a14,
-        0x77f31e2f,
-        0xaab4d7d8,
-        0x0966320b,
-        0xb26bddee,
-        0xb5c8e5d3,
-        0x317285d3,
-        0x3c9623b1,
-        0x51fd2c7c,
-        0x7b906a6c,
-        0x3f800000,
-        0x3dcccccd,
-        0x3f000000,
-        0x42280000,
-        0x3eaaaaab,
-        0xc1200000,
-        0xbf800000,
-        0xbf8147ae,
-        0x3f8147ae,
-        0x415df525,
-        0xc79b271e,
-        0x460e8c84,
+        0x4f3495cb, 0xe73a5134, 0x7c994e9e, 0x6164bd6c, 0x09503366, 0xbf5a97c9, 0xe6ff1a14,
+        0x77f31e2f, 0xaab4d7d8, 0x0966320b, 0xb26bddee, 0xb5c8e5d3, 0x317285d3, 0x3c9623b1,
+        0x51fd2c7c, 0x7b906a6c, 0x3f800000, 0x3dcccccd, 0x3f000000, 0x42280000, 0x3eaaaaab,
+        0xc1200000, 0xbf800000, 0xbf8147ae, 0x3f8147ae, 0x415df525, 0xc79b271e, 0x460e8c84,
         // some 64-bit-float upper-halves
         0x7ff00000, // +SNaN / +Inf
         0x7ff0abcd, // +SNaN
@@ -409,11 +408,11 @@ TEST_CASE("A64: Floating point instructions", "[a64]") {
         0xbff00000, // Number near -1.0
     };
 
-    const auto gen_float = [&]{
+    const auto gen_float = [&] {
         return float_numbers[RandInt<size_t>(0, float_numbers.size() - 1)];
     };
 
-    const auto gen_vector = [&]{
+    const auto gen_vector = [&] {
         u64 upper = (gen_float() << 32) | gen_float();
         u64 lower = (gen_float() << 32) | gen_float();
         return Vector{lower, upper};
@@ -435,7 +434,8 @@ TEST_CASE("A64: Floating point instructions", "[a64]") {
 
         INFO("Instruction: 0x" << std::hex << instructions[0]);
 
-        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate, fpcr);
+        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate,
+                        fpcr);
     }
 }
 
@@ -470,10 +470,10 @@ TEST_CASE("A64: Small random block", "[a64]") {
         INFO("Instruction 4: 0x" << std::hex << instructions[3]);
         INFO("Instruction 5: 0x" << std::hex << instructions[4]);
 
-        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate, fpcr);
+        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate,
+                        fpcr);
     }
 }
-
 
 TEST_CASE("A64: Large random block", "[a64]") {
     A64TestEnv jit_env{};
@@ -500,6 +500,7 @@ TEST_CASE("A64: Large random block", "[a64]") {
         const u32 pstate = RandInt<u32>(0, 0xF) << 28;
         const u32 fpcr = RandomFpcr();
 
-        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate, fpcr);
+        RunTestInstance(jit, uni, jit_env, uni_env, regs, vecs, start_address, instructions, pstate,
+                        fpcr);
     }
 }

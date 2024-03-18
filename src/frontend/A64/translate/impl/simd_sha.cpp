@@ -12,7 +12,7 @@ IR::U32 SHAchoose(IREmitter& ir, IR::U32 x, IR::U32 y, IR::U32 z) {
 }
 
 IR::U32 SHAmajority(IREmitter& ir, IR::U32 x, IR::U32 y, IR::U32 z) {
-    return ir.Or(ir.And(x, y), ir.And(ir.Or(x, y), z)) ;
+    return ir.Or(ir.And(x, y), ir.And(ir.Or(x, y), z));
 }
 
 IR::U32 SHAparity(IREmitter& ir, IR::U32 x, IR::U32 y, IR::U32 z) {
@@ -63,10 +63,7 @@ IR::U32 SHAhashSIGMA1(IREmitter& ir, IR::U32 x) {
     return ir.Eor(tmp1, ir.Eor(tmp2, tmp3));
 }
 
-enum class SHA256HashPart {
-    Part1,
-    Part2
-};
+enum class SHA256HashPart { Part1, Part2 };
 
 IR::U128 SHA256hash(IREmitter& ir, IR::U128 x, IR::U128 y, IR::U128 w, SHA256HashPart part) {
     for (size_t i = 0; i < 4; i++) {
@@ -152,11 +149,13 @@ bool TranslatorVisitor::SHA1SU1(Vec Vn, Vec Vd) {
     const IR::U128 n = ir.GetQ(Vn);
 
     // Shuffle down the whole vector and zero out the top 32 bits
-    const IR::U128 shuffled_n = ir.VectorSetElement(32, ir.VectorShuffleWords(n, 0b00111001), 3, ir.Imm32(0));
+    const IR::U128 shuffled_n =
+        ir.VectorSetElement(32, ir.VectorShuffleWords(n, 0b00111001), 3, ir.Imm32(0));
     const IR::U128 t = ir.VectorEor(d, shuffled_n);
     const IR::U128 rotated_t = ir.VectorRotateLeft(32, t, 1);
 
-    const IR::U32 low_rotated_t = ir.RotateRight(ir.VectorGetElement(32, rotated_t, 0), ir.Imm8(31));
+    const IR::U32 low_rotated_t =
+        ir.RotateRight(ir.VectorGetElement(32, rotated_t, 0), ir.Imm8(31));
     const IR::U32 high_t = ir.VectorGetElement(32, rotated_t, 3);
     const IR::U128 result = ir.VectorSetElement(32, rotated_t, 3, ir.Eor(low_rotated_t, high_t));
 
@@ -247,13 +246,15 @@ bool TranslatorVisitor::SHA256SU1(Vec Vm, Vec Vn, Vec Vd) {
 }
 
 bool TranslatorVisitor::SHA256H(Vec Vm, Vec Vn, Vec Vd) {
-    const IR::U128 result = SHA256hash(ir, ir.GetQ(Vd), ir.GetQ(Vn), ir.GetQ(Vm), SHA256HashPart::Part1);
+    const IR::U128 result =
+        SHA256hash(ir, ir.GetQ(Vd), ir.GetQ(Vn), ir.GetQ(Vm), SHA256HashPart::Part1);
     ir.SetQ(Vd, result);
     return true;
 }
 
 bool TranslatorVisitor::SHA256H2(Vec Vm, Vec Vn, Vec Vd) {
-    const IR::U128 result = SHA256hash(ir, ir.GetQ(Vn), ir.GetQ(Vd), ir.GetQ(Vm), SHA256HashPart::Part2);
+    const IR::U128 result =
+        SHA256hash(ir, ir.GetQ(Vn), ir.GetQ(Vd), ir.GetQ(Vm), SHA256HashPart::Part2);
     ir.SetQ(Vd, result);
     return true;
 }

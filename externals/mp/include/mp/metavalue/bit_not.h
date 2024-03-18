@@ -10,11 +10,11 @@
 namespace mp {
 
 /// Bitwise not of metavalue V
-template<class V>
+template <class V>
 using bit_not = lift_value<~V::value>;
 
 /// Bitwise not of metavalue V
-template<class V>
+template <class V>
 constexpr auto bit_not_v = ~V::value;
 
 } // namespace mp

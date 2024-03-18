@@ -18,7 +18,7 @@
 
 namespace Dynarmic::FP {
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRecipEstimate(FPT op, FPCR fpcr, FPSR& fpsr) {
     FPType type;
     bool sign;
@@ -39,7 +39,7 @@ FPT FPRecipEstimate(FPT op, FPCR fpcr, FPSR& fpsr) {
     }
 
     if (value.exponent < FPInfo<FPT>::exponent_min - 2) {
-        const bool overflow_to_inf = [&]{
+        const bool overflow_to_inf = [&] {
             switch (fpcr.RMode()) {
             case RoundingMode::ToNearest_TieEven:
                 return true;
@@ -67,7 +67,8 @@ FPT FPRecipEstimate(FPT op, FPCR fpcr, FPSR& fpsr) {
     }
 
     const u64 scaled = value.mantissa >> (normalized_point_position - 8);
-    u64 estimate = static_cast<u64>(Common::RecipEstimate(scaled)) << (FPInfo<FPT>::explicit_mantissa_width - 8);
+    u64 estimate = static_cast<u64>(Common::RecipEstimate(scaled))
+                   << (FPInfo<FPT>::explicit_mantissa_width - 8);
     int result_exponent = -(value.exponent + 1);
     if (result_exponent < FPInfo<FPT>::exponent_min) {
         switch (result_exponent) {
@@ -88,7 +89,8 @@ FPT FPRecipEstimate(FPT op, FPCR fpcr, FPSR& fpsr) {
     const FPT bits_sign = FPInfo<FPT>::Zero(sign);
     const FPT bits_exponent = static_cast<FPT>(result_exponent + FPInfo<FPT>::exponent_bias);
     const FPT bits_mantissa = static_cast<FPT>(estimate);
-    return FPT((bits_exponent << FPInfo<FPT>::explicit_mantissa_width) | (bits_mantissa & FPInfo<FPT>::mantissa_mask) | bits_sign);
+    return FPT((bits_exponent << FPInfo<FPT>::explicit_mantissa_width) |
+               (bits_mantissa & FPInfo<FPT>::mantissa_mask) | bits_sign);
 }
 
 template u16 FPRecipEstimate<u16>(u16 op, FPCR fpcr, FPSR& fpsr);

@@ -10,11 +10,11 @@
 namespace mp {
 
 /// Sum of metavalues Vs
-template<class... Vs>
+template <class... Vs>
 using sum = lift_value<(Vs::value + ...)>;
 
 /// Sum of metavalues Vs
-template<class... Vs>
+template <class... Vs>
 constexpr auto sum_v = (Vs::value + ...);
 
 } // namespace mp

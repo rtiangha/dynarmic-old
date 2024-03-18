@@ -32,7 +32,9 @@ namespace Dynarmic::A32 {
 
 using namespace Backend::X64;
 
-static RunCodeCallbacks GenRunCodeCallbacks(A32::UserCallbacks* cb, CodePtr (*LookupBlock)(void* lookup_block_arg), void* arg) {
+static RunCodeCallbacks GenRunCodeCallbacks(A32::UserCallbacks* cb,
+                                            CodePtr (*LookupBlock)(void* lookup_block_arg),
+                                            void* arg) {
     return RunCodeCallbacks{
         std::make_unique<ArgCallback>(LookupBlock, reinterpret_cast<u64>(arg)),
         std::make_unique<ArgCallback>(Devirtualize<&A32::UserCallbacks::AddTicks>(cb)),
@@ -53,11 +55,9 @@ static std::function<void(BlockOfCode&)> GenRCP(const A32::UserConfig& conf) {
 
 struct Jit::Impl {
     Impl(Jit* jit, A32::UserConfig conf)
-            : block_of_code(GenRunCodeCallbacks(conf.callbacks, &GetCurrentBlockThunk, this), JitStateInfo{jit_state}, GenRCP(conf))
-            , emitter(block_of_code, conf, jit)
-            , conf(std::move(conf))
-            , jit_interface(jit)
-    {}
+        : block_of_code(GenRunCodeCallbacks(conf.callbacks, &GetCurrentBlockThunk, this),
+                        JitStateInfo{jit_state}, GenRCP(conf)),
+          emitter(block_of_code, conf, jit), conf(std::move(conf)), jit_interface(jit) {}
 
     A32JitState jit_state;
     BlockOfCode block_of_code;
@@ -71,7 +71,7 @@ struct Jit::Impl {
     bool invalidate_entire_cache = false;
 
     void Execute() {
-        const CodePtr current_codeptr = [this]{
+        const CodePtr current_codeptr = [this] {
             // RSB optimization
             const u32 new_rsb_ptr = (jit_state.rsb_ptr - 1) & A32JitState::RSBPtrMask;
             if (jit_state.GetUniqueHash() == jit_state.rsb_location_descriptors[new_rsb_ptr]) {
@@ -91,8 +91,10 @@ struct Jit::Impl {
 
     std::string Disassemble(const IR::LocationDescriptor& descriptor) {
         auto block = GetBasicBlock(descriptor);
-        std::string result = fmt::format("address: {}\nsize: {} bytes\n", block.entrypoint, block.size);
-        result += Common::DisassembleX64(block.entrypoint, reinterpret_cast<const char*>(block.entrypoint) + block.size);
+        std::string result =
+            fmt::format("address: {}\nsize: {} bytes\n", block.entrypoint, block.size);
+        result += Common::DisassembleX64(
+            block.entrypoint, reinterpret_cast<const char*>(block.entrypoint) + block.size);
         return result;
     }
 
@@ -144,7 +146,8 @@ private:
     }
 
     CodePtr GetCurrentSingleStep() {
-        return GetBasicBlock(A32::LocationDescriptor{GetCurrentLocation()}.SetSingleStepping(true)).entrypoint;
+        return GetBasicBlock(A32::LocationDescriptor{GetCurrentLocation()}.SetSingleStepping(true))
+            .entrypoint;
     }
 
     A32EmitX64::BlockDescriptor GetBasicBlock(IR::LocationDescriptor descriptor) {
@@ -158,7 +161,10 @@ private:
             PerformCacheInvalidation();
         }
 
-        IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, [this](u32 vaddr) { return conf.callbacks->MemoryReadCode(vaddr); }, {conf.define_unpredictable_behaviour, conf.hook_hint_instructions});
+        IR::Block ir_block =
+            A32::Translate(A32::LocationDescriptor{descriptor},
+                           [this](u32 vaddr) { return conf.callbacks->MemoryReadCode(vaddr); },
+                           {conf.define_unpredictable_behaviour, conf.hook_hint_instructions});
         if (conf.enable_optimizations) {
             Optimization::A32GetSetElimination(ir_block);
             Optimization::DeadCodeElimination(ir_block);
@@ -178,7 +184,9 @@ Jit::~Jit() = default;
 void Jit::Run() {
     ASSERT(!is_executing);
     is_executing = true;
-    SCOPE_EXIT { this->is_executing = false; };
+    SCOPE_EXIT {
+        this->is_executing = false;
+    };
 
     impl->jit_state.halt_requested = false;
 
@@ -190,7 +198,9 @@ void Jit::Run() {
 void Jit::Step() {
     ASSERT(!is_executing);
     is_executing = true;
-    SCOPE_EXIT { this->is_executing = false; };
+    SCOPE_EXIT {
+        this->is_executing = false;
+    };
 
     impl->jit_state.halt_requested = true;
 
@@ -205,7 +215,8 @@ void Jit::ClearCache() {
 }
 
 void Jit::InvalidateCacheRange(std::uint32_t start_address, std::size_t length) {
-    impl->invalid_cache_ranges.add(boost::icl::discrete_interval<u32>::closed(start_address, static_cast<u32>(start_address + length - 1)));
+    impl->invalid_cache_ranges.add(boost::icl::discrete_interval<u32>::closed(
+        start_address, static_cast<u32>(start_address + length - 1)));
     impl->RequestCacheInvalidation();
 }
 
@@ -260,7 +271,9 @@ struct Context::Impl {
     size_t invalid_cache_generation;
 };
 
-Context::Context() : impl(std::make_unique<Context::Impl>()) { impl->jit_state.ResetRSB(); }
+Context::Context() : impl(std::make_unique<Context::Impl>()) {
+    impl->jit_state.ResetRSB();
+}
 Context::~Context() = default;
 Context::Context(const Context& ctx) : impl(std::make_unique<Context::Impl>(*ctx.impl)) {}
 Context::Context(Context&& ctx) noexcept : impl(std::move(ctx.impl)) {}
@@ -311,7 +324,8 @@ void Jit::LoadContext(const Context& ctx) {
 }
 
 std::string Jit::Disassemble() const {
-    return Common::DisassembleX64(impl->block_of_code.GetCodeBegin(), impl->block_of_code.getCurr());
+    return Common::DisassembleX64(impl->block_of_code.GetCodeBegin(),
+                                  impl->block_of_code.getCurr());
 }
 
 } // namespace Dynarmic::A32

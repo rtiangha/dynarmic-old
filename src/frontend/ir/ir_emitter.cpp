@@ -140,25 +140,29 @@ NZCV IREmitter::NZCVFrom(const Value& value) {
     return Inst<NZCV>(Opcode::GetNZCVFromOp, value);
 }
 
-ResultAndCarry<U32> IREmitter::LogicalShiftLeft(const U32& value_in, const U8& shift_amount, const U1& carry_in) {
+ResultAndCarry<U32> IREmitter::LogicalShiftLeft(const U32& value_in, const U8& shift_amount,
+                                                const U1& carry_in) {
     const auto result = Inst<U32>(Opcode::LogicalShiftLeft32, value_in, shift_amount, carry_in);
     const auto carry_out = Inst<U1>(Opcode::GetCarryFromOp, result);
     return {result, carry_out};
 }
 
-ResultAndCarry<U32> IREmitter::LogicalShiftRight(const U32& value_in, const U8& shift_amount, const U1& carry_in) {
+ResultAndCarry<U32> IREmitter::LogicalShiftRight(const U32& value_in, const U8& shift_amount,
+                                                 const U1& carry_in) {
     const auto result = Inst<U32>(Opcode::LogicalShiftRight32, value_in, shift_amount, carry_in);
     const auto carry_out = Inst<U1>(Opcode::GetCarryFromOp, result);
     return {result, carry_out};
 }
 
-ResultAndCarry<U32> IREmitter::ArithmeticShiftRight(const U32& value_in, const U8& shift_amount, const U1& carry_in) {
+ResultAndCarry<U32> IREmitter::ArithmeticShiftRight(const U32& value_in, const U8& shift_amount,
+                                                    const U1& carry_in) {
     const auto result = Inst<U32>(Opcode::ArithmeticShiftRight32, value_in, shift_amount, carry_in);
     const auto carry_out = Inst<U1>(Opcode::GetCarryFromOp, result);
     return {result, carry_out};
 }
 
-ResultAndCarry<U32> IREmitter::RotateRight(const U32& value_in, const U8& shift_amount, const U1& carry_in) {
+ResultAndCarry<U32> IREmitter::RotateRight(const U32& value_in, const U8& shift_amount,
+                                           const U1& carry_in) {
     const auto result = Inst<U32>(Opcode::RotateRight32, value_in, shift_amount, carry_in);
     const auto carry_out = Inst<U1>(Opcode::GetCarryFromOp, result);
     return {result, carry_out};
@@ -238,7 +242,8 @@ U32U64 IREmitter::RotateRightMasked(const U32U64& value_in, const U32U64& shift_
     }
 }
 
-ResultAndCarryAndOverflow<U32> IREmitter::AddWithCarry(const U32& a, const U32& b, const U1& carry_in) {
+ResultAndCarryAndOverflow<U32> IREmitter::AddWithCarry(const U32& a, const U32& b,
+                                                       const U1& carry_in) {
     const auto result = Inst<U32>(Opcode::Add32, a, b, carry_in);
     const auto carry_out = Inst<U1>(Opcode::GetCarryFromOp, result);
     const auto overflow = Inst<U1>(Opcode::GetOverflowFromOp, result);
@@ -263,7 +268,8 @@ U32U64 IREmitter::Add(const U32U64& a, const U32U64& b) {
     }
 }
 
-ResultAndCarryAndOverflow<U32> IREmitter::SubWithCarry(const U32& a, const U32& b, const U1& carry_in) {
+ResultAndCarryAndOverflow<U32> IREmitter::SubWithCarry(const U32& a, const U32& b,
+                                                       const U1& carry_in) {
     // This is equivalent to AddWithCarry(a, Not(b), carry_in).
     const auto result = Inst<U32>(Opcode::Sub32, a, b, carry_in);
     const auto carry_out = Inst<U1>(Opcode::GetCarryFromOp, result);
@@ -544,7 +550,8 @@ ResultAndOverflow<UAny> IREmitter::SignedSaturatedAdd(const UAny& a, const UAny&
     return {result, overflow};
 }
 
-ResultAndOverflow<UAny> IREmitter::SignedSaturatedDoublingMultiplyReturnHigh(const UAny& a, const UAny& b) {
+ResultAndOverflow<UAny> IREmitter::SignedSaturatedDoublingMultiplyReturnHigh(const UAny& a,
+                                                                             const UAny& b) {
     ASSERT(a.GetType() == b.GetType());
     const auto result = [&]() -> IR::UAny {
         switch (a.GetType()) {
@@ -583,7 +590,8 @@ ResultAndOverflow<UAny> IREmitter::SignedSaturatedSub(const UAny& a, const UAny&
 
 ResultAndOverflow<U32> IREmitter::SignedSaturation(const U32& a, size_t bit_size_to_saturate_to) {
     ASSERT(bit_size_to_saturate_to >= 1 && bit_size_to_saturate_to <= 32);
-    const auto result = Inst<U32>(Opcode::SignedSaturation, a, Imm8(static_cast<u8>(bit_size_to_saturate_to)));
+    const auto result =
+        Inst<U32>(Opcode::SignedSaturation, a, Imm8(static_cast<u8>(bit_size_to_saturate_to)));
     const auto overflow = Inst<U1>(Opcode::GetOverflowFromOp, result);
     return {result, overflow};
 }
@@ -630,7 +638,8 @@ ResultAndOverflow<UAny> IREmitter::UnsignedSaturatedSub(const UAny& a, const UAn
 
 ResultAndOverflow<U32> IREmitter::UnsignedSaturation(const U32& a, size_t bit_size_to_saturate_to) {
     ASSERT(bit_size_to_saturate_to <= 31);
-    const auto result = Inst<U32>(Opcode::UnsignedSaturation, a, Imm8(static_cast<u8>(bit_size_to_saturate_to)));
+    const auto result =
+        Inst<U32>(Opcode::UnsignedSaturation, a, Imm8(static_cast<u8>(bit_size_to_saturate_to)));
     const auto overflow = Inst<U1>(Opcode::GetOverflowFromOp, result);
     return {result, overflow};
 }
@@ -1617,7 +1626,8 @@ U128 IREmitter::VectorSignedSaturatedAbs(size_t esize, const U128& a) {
     UNREACHABLE();
 }
 
-U128 IREmitter::VectorSignedSaturatedAccumulateUnsigned(size_t esize, const U128& a, const U128& b) {
+U128 IREmitter::VectorSignedSaturatedAccumulateUnsigned(size_t esize, const U128& a,
+                                                        const U128& b) {
     switch (esize) {
     case 8:
         return Inst<U128>(Opcode::VectorSignedSaturatedAccumulateUnsigned8, a, b);
@@ -1631,7 +1641,8 @@ U128 IREmitter::VectorSignedSaturatedAccumulateUnsigned(size_t esize, const U128
     UNREACHABLE();
 }
 
-UpperAndLower IREmitter::VectorSignedSaturatedDoublingMultiply(size_t esize, const U128& a, const U128& b) {
+UpperAndLower IREmitter::VectorSignedSaturatedDoublingMultiply(size_t esize, const U128& a,
+                                                               const U128& b) {
     const Value multiply = [&] {
         switch (esize) {
         case 16:
@@ -1649,7 +1660,8 @@ UpperAndLower IREmitter::VectorSignedSaturatedDoublingMultiply(size_t esize, con
     };
 }
 
-U128 IREmitter::VectorSignedSaturatedDoublingMultiplyLong(size_t esize, const U128& a, const U128& b) {
+U128 IREmitter::VectorSignedSaturatedDoublingMultiplyLong(size_t esize, const U128& a,
+                                                          const U128& b) {
     switch (esize) {
     case 16:
         return Inst<U128>(Opcode::VectorSignedSaturatedDoublingMultiplyLong16, a, b);
@@ -1769,7 +1781,8 @@ U128 IREmitter::VectorUnsignedRecipSqrtEstimate(const U128& a) {
     return Inst<U128>(Opcode::VectorUnsignedRecipSqrtEstimate, a);
 }
 
-U128 IREmitter::VectorUnsignedSaturatedAccumulateSigned(size_t esize, const U128& a, const U128& b) {
+U128 IREmitter::VectorUnsignedSaturatedAccumulateSigned(size_t esize, const U128& a,
+                                                        const U128& b) {
     switch (esize) {
     case 8:
         return Inst<U128>(Opcode::VectorUnsignedSaturatedAccumulateSigned8, a, b);
@@ -1858,7 +1871,8 @@ U32U64 IREmitter::FPAdd(const U32U64& a, const U32U64& b, bool fpcr_controlled) 
     }
 }
 
-NZCV IREmitter::FPCompare(const U32U64& a, const U32U64& b, bool exc_on_qnan, bool fpcr_controlled) {
+NZCV IREmitter::FPCompare(const U32U64& a, const U32U64& b, bool exc_on_qnan,
+                          bool fpcr_controlled) {
     ASSERT(fpcr_controlled);
     ASSERT(a.GetType() == b.GetType());
 
@@ -1958,7 +1972,8 @@ U32U64 IREmitter::FPMul(const U32U64& a, const U32U64& b, bool fpcr_controlled) 
     }
 }
 
-U16U32U64 IREmitter::FPMulAdd(const U16U32U64& a, const U16U32U64& b, const U16U32U64& c, bool fpcr_controlled) {
+U16U32U64 IREmitter::FPMulAdd(const U16U32U64& a, const U16U32U64& b, const U16U32U64& c,
+                              bool fpcr_controlled) {
     ASSERT(fpcr_controlled);
     ASSERT(a.GetType() == b.GetType());
 
@@ -2314,24 +2329,30 @@ U128 IREmitter::FPVectorEqual(size_t esize, const U128& a, const U128& b) {
     UNREACHABLE();
 }
 
-U128 IREmitter::FPVectorFromSignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding) {
+U128 IREmitter::FPVectorFromSignedFixed(size_t esize, const U128& a, size_t fbits,
+                                        FP::RoundingMode rounding) {
     ASSERT(fbits <= esize);
     switch (esize) {
     case 32:
-        return Inst<U128>(Opcode::FPVectorFromSignedFixed32, a, Imm8(static_cast<u8>(fbits)), Imm8(static_cast<u8>(rounding)));
+        return Inst<U128>(Opcode::FPVectorFromSignedFixed32, a, Imm8(static_cast<u8>(fbits)),
+                          Imm8(static_cast<u8>(rounding)));
     case 64:
-        return Inst<U128>(Opcode::FPVectorFromSignedFixed64, a, Imm8(static_cast<u8>(fbits)), Imm8(static_cast<u8>(rounding)));
+        return Inst<U128>(Opcode::FPVectorFromSignedFixed64, a, Imm8(static_cast<u8>(fbits)),
+                          Imm8(static_cast<u8>(rounding)));
     }
     UNREACHABLE();
 }
 
-U128 IREmitter::FPVectorFromUnsignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding) {
+U128 IREmitter::FPVectorFromUnsignedFixed(size_t esize, const U128& a, size_t fbits,
+                                          FP::RoundingMode rounding) {
     ASSERT(fbits <= esize);
     switch (esize) {
     case 32:
-        return Inst<U128>(Opcode::FPVectorFromUnsignedFixed32, a, Imm8(static_cast<u8>(fbits)), Imm8(static_cast<u8>(rounding)));
+        return Inst<U128>(Opcode::FPVectorFromUnsignedFixed32, a, Imm8(static_cast<u8>(fbits)),
+                          Imm8(static_cast<u8>(rounding)));
     case 64:
-        return Inst<U128>(Opcode::FPVectorFromUnsignedFixed64, a, Imm8(static_cast<u8>(fbits)), Imm8(static_cast<u8>(rounding)));
+        return Inst<U128>(Opcode::FPVectorFromUnsignedFixed64, a, Imm8(static_cast<u8>(fbits)),
+                          Imm8(static_cast<u8>(rounding)));
     }
     UNREACHABLE();
 }
@@ -2464,7 +2485,8 @@ U128 IREmitter::FPVectorRecipStepFused(size_t esize, const U128& a, const U128& 
     UNREACHABLE();
 }
 
-U128 IREmitter::FPVectorRoundInt(size_t esize, const U128& operand, FP::RoundingMode rounding, bool exact) {
+U128 IREmitter::FPVectorRoundInt(size_t esize, const U128& operand, FP::RoundingMode rounding,
+                                 bool exact) {
     const IR::U8 rounding_imm = Imm8(static_cast<u8>(rounding));
     const IR::U1 exact_imm = Imm1(exact);
 
@@ -2523,7 +2545,8 @@ U128 IREmitter::FPVectorSub(size_t esize, const U128& a, const U128& b) {
     UNREACHABLE();
 }
 
-U128 IREmitter::FPVectorToSignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding) {
+U128 IREmitter::FPVectorToSignedFixed(size_t esize, const U128& a, size_t fbits,
+                                      FP::RoundingMode rounding) {
     ASSERT(fbits <= esize);
 
     const U8 fbits_imm = Imm8(static_cast<u8>(fbits));
@@ -2541,7 +2564,8 @@ U128 IREmitter::FPVectorToSignedFixed(size_t esize, const U128& a, size_t fbits,
     UNREACHABLE();
 }
 
-U128 IREmitter::FPVectorToUnsignedFixed(size_t esize, const U128& a, size_t fbits, FP::RoundingMode rounding) {
+U128 IREmitter::FPVectorToUnsignedFixed(size_t esize, const U128& a, size_t fbits,
+                                        FP::RoundingMode rounding) {
     ASSERT(fbits <= esize);
 
     const U8 fbits_imm = Imm8(static_cast<u8>(fbits));

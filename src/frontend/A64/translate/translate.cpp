@@ -12,7 +12,8 @@
 
 namespace Dynarmic::A64 {
 
-IR::Block Translate(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code, TranslationOptions options) {
+IR::Block Translate(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code,
+                    TranslationOptions options) {
     const bool single_step = descriptor.SingleStepping();
 
     IR::Block block{descriptor};

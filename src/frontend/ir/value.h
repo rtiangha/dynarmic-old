@@ -14,12 +14,12 @@
 namespace Dynarmic::A32 {
 enum class ExtReg;
 enum class Reg;
-}
+} // namespace Dynarmic::A32
 
 namespace Dynarmic::A64 {
 enum class Reg;
 enum class Vec;
-}
+} // namespace Dynarmic::A64
 
 namespace Dynarmic::IR {
 

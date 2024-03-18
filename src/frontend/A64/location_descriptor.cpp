@@ -8,7 +8,8 @@
 namespace Dynarmic::A64 {
 
 std::string ToString(const LocationDescriptor& descriptor) {
-    return fmt::format("{{{}, {}{}}}", descriptor.PC(), descriptor.FPCR().Value(), descriptor.SingleStepping() ? ", step" : "");
+    return fmt::format("{{{}, {}{}}}", descriptor.PC(), descriptor.FPCR().Value(),
+                       descriptor.SingleStepping() ? ", step" : "");
 }
 
 } // namespace Dynarmic::A64

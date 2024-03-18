@@ -446,7 +446,7 @@ TEST(buffered_file_test, fileno_no_retry) {
 
 struct test_mock {
   static test_mock* instance;
-} * test_mock::instance;
+}* test_mock::instance;
 
 TEST(scoped_mock, scope) {
   {

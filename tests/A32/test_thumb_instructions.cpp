@@ -26,7 +26,7 @@ TEST_CASE("thumb: lsls r0, r1, #2", "[thumb]") {
 
     jit.Regs()[0] = 1;
     jit.Regs()[1] = 2;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x00000030); // Thumb, User-mode
 
     test_env.ticks_left = 1;
@@ -48,7 +48,7 @@ TEST_CASE("thumb: lsls r0, r1, #31", "[thumb]") {
 
     jit.Regs()[0] = 1;
     jit.Regs()[1] = 0xFFFFFFFF;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x00000030); // Thumb, User-mode
 
     test_env.ticks_left = 1;
@@ -69,7 +69,7 @@ TEST_CASE("thumb: revsh r4, r3", "[thumb]") {
     };
 
     jit.Regs()[3] = 0x12345678;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x00000030); // Thumb, User-mode
 
     test_env.ticks_left = 1;
@@ -90,7 +90,7 @@ TEST_CASE("thumb: ldr r3, [r3, #28]", "[thumb]") {
     };
 
     jit.Regs()[3] = 0x12345678;
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x00000030); // Thumb, User-mode
 
     test_env.ticks_left = 1;
@@ -109,7 +109,7 @@ TEST_CASE("thumb: blx +#67712", "[thumb]") {
         0xE7FE          // b +#0
     };
 
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x00000030); // Thumb, User-mode
 
     test_env.ticks_left = 1;
@@ -128,7 +128,7 @@ TEST_CASE("thumb: bl +#234584", "[thumb]") {
         0xE7FE          // b +#0
     };
 
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x00000030); // Thumb, User-mode
 
     test_env.ticks_left = 1;
@@ -147,7 +147,7 @@ TEST_CASE("thumb: bl -#42", "[thumb]") {
         0xE7FE          // b +#0
     };
 
-    jit.Regs()[15] = 0; // PC = 0
+    jit.Regs()[15] = 0;      // PC = 0
     jit.SetCpsr(0x00000030); // Thumb, User-mode
 
     test_env.ticks_left = 1;

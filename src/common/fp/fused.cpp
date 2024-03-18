@@ -12,14 +12,17 @@ namespace Dynarmic::FP {
 constexpr size_t product_point_position = normalized_point_position * 2;
 
 static FPUnpacked ReduceMantissa(bool sign, int exponent, const u128& mantissa) {
-    constexpr int point_position_correction = normalized_point_position - (product_point_position - 64);
-    // We round-to-odd here when reducing the bitwidth of the mantissa so that subsequent roundings are accurate.
-    return {sign, exponent + point_position_correction, mantissa.upper | static_cast<u64>(mantissa.lower != 0)};
+    constexpr int point_position_correction =
+        normalized_point_position - (product_point_position - 64);
+    // We round-to-odd here when reducing the bitwidth of the mantissa so that subsequent roundings
+    // are accurate.
+    return {sign, exponent + point_position_correction,
+            mantissa.upper | static_cast<u64>(mantissa.lower != 0)};
 }
 
 FPUnpacked FusedMulAdd(FPUnpacked addend, FPUnpacked op1, FPUnpacked op2) {
     const bool product_sign = op1.sign != op2.sign;
-    const auto [product_exponent, product_value] = [op1, op2]{
+    const auto [product_exponent, product_value] = [op1, op2] {
         int exponent = op1.exponent + op2.exponent;
         u128 value = Multiply64To128(op1.mantissa, op2.mantissa);
         if (value.Bit<product_point_position + 1>()) {
@@ -44,12 +47,16 @@ FPUnpacked FusedMulAdd(FPUnpacked addend, FPUnpacked op1, FPUnpacked op2) {
 
         if (exp_diff <= 0) {
             // addend > product
-            const u64 result = addend.mantissa + StickyLogicalShiftRight(product_value, normalized_point_position - exp_diff).lower;
+            const u64 result =
+                addend.mantissa +
+                StickyLogicalShiftRight(product_value, normalized_point_position - exp_diff).lower;
             return FPUnpacked{addend.sign, addend.exponent, result};
         }
 
         // addend < product
-        const u128 result = product_value + StickyLogicalShiftRight(addend.mantissa, exp_diff - normalized_point_position);
+        const u128 result =
+            product_value +
+            StickyLogicalShiftRight(addend.mantissa, exp_diff - normalized_point_position);
         return ReduceMantissa(product_sign, product_exponent, result);
     }
 

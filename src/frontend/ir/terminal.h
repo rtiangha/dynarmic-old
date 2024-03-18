@@ -75,25 +75,18 @@ struct If;
 struct CheckBit;
 struct CheckHalt;
 /// A Terminal is the terminal instruction in a MicroBlock.
-using Terminal = boost::variant<
-        Invalid,
-        Interpret,
-        ReturnToDispatch,
-        LinkBlock,
-        LinkBlockFast,
-        PopRSBHint,
-        FastDispatchHint,
-        boost::recursive_wrapper<If>,
-        boost::recursive_wrapper<CheckBit>,
-        boost::recursive_wrapper<CheckHalt>
->;
+using Terminal =
+    boost::variant<Invalid, Interpret, ReturnToDispatch, LinkBlock, LinkBlockFast, PopRSBHint,
+                   FastDispatchHint, boost::recursive_wrapper<If>,
+                   boost::recursive_wrapper<CheckBit>, boost::recursive_wrapper<CheckHalt>>;
 
 /**
  * This terminal instruction conditionally executes one terminal or another depending
  * on the run-time state of the ARM flags.
  */
 struct If {
-    If(Cond if_, Terminal then_, Terminal else_) : if_(if_), then_(std::move(then_)), else_(std::move(else_)) {}
+    If(Cond if_, Terminal then_, Terminal else_)
+        : if_(if_), then_(std::move(then_)), else_(std::move(else_)) {}
     Cond if_;
     Terminal then_;
     Terminal else_;

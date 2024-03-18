@@ -141,7 +141,7 @@ bool ArmTranslatorVisitor::arm_LDAEXD(Cond cond, Reg n, Reg t) {
     const auto lo = ir.ReadMemory32(address); // AccType::Ordered
     ir.SetRegister(t, lo);
     const auto hi = ir.ReadMemory32(ir.Add(address, ir.Imm32(4))); // AccType::Ordered
-    ir.SetRegister(t+1, hi);
+    ir.SetRegister(t + 1, hi);
     return true;
 }
 
@@ -232,7 +232,7 @@ bool ArmTranslatorVisitor::arm_STLEXD(Cond cond, Reg n, Reg d, Reg t) {
         return UnpredictableInstruction();
     }
 
-    if (d == n || d == t || d == t+1) {
+    if (d == n || d == t || d == t + 1) {
         return UnpredictableInstruction();
     }
 
@@ -340,7 +340,7 @@ bool ArmTranslatorVisitor::arm_LDREXD(Cond cond, Reg n, Reg t) {
     const auto lo = ir.ReadMemory32(address);
     ir.SetRegister(t, lo);
     const auto hi = ir.ReadMemory32(ir.Add(address, ir.Imm32(4)));
-    ir.SetRegister(t+1, hi);
+    ir.SetRegister(t + 1, hi);
     return true;
 }
 
@@ -408,7 +408,7 @@ bool ArmTranslatorVisitor::arm_STREXD(Cond cond, Reg n, Reg d, Reg t) {
         return UnpredictableInstruction();
     }
 
-    if (d == n || d == t || d == t+1) {
+    if (d == n || d == t || d == t + 1) {
         return UnpredictableInstruction();
     }
 

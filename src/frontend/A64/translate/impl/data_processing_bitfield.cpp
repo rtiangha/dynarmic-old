@@ -55,9 +55,11 @@ bool TranslatorVisitor::BFM(bool sf, bool N, Imm<6> immr, Imm<6> imms, Reg Rn, R
     const auto dst = X(datasize, Rd);
     const auto src = X(datasize, Rn);
 
-    const auto bot = ir.Or(ir.And(dst, I(datasize, ~masks->wmask)), ir.And(ir.RotateRight(src, ir.Imm8(R)), I(datasize, masks->wmask)));
+    const auto bot = ir.Or(ir.And(dst, I(datasize, ~masks->wmask)),
+                           ir.And(ir.RotateRight(src, ir.Imm8(R)), I(datasize, masks->wmask)));
 
-    X(datasize, Rd, ir.Or(ir.And(dst, I(datasize, ~masks->tmask)), ir.And(bot, I(datasize, masks->tmask))));
+    X(datasize, Rd,
+      ir.Or(ir.And(dst, I(datasize, ~masks->tmask)), ir.And(bot, I(datasize, masks->tmask))));
     return true;
 }
 

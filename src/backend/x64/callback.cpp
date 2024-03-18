@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: 0BSD
  */
 
-#include "backend/x64/callback.h"
 #include "backend/x64/block_of_code.h"
+#include "backend/x64/callback.h"
 
 namespace Dynarmic::Backend::X64 {
 
@@ -15,7 +15,8 @@ void SimpleCallback::EmitCall(BlockOfCode& code, std::function<void(RegList)> l)
     code.CallFunction(fn);
 }
 
-void SimpleCallback::EmitCallWithReturnPointer(BlockOfCode& code, std::function<void(Xbyak::Reg64, RegList)> l) const {
+void SimpleCallback::EmitCallWithReturnPointer(BlockOfCode& code,
+                                               std::function<void(Xbyak::Reg64, RegList)> l) const {
     l(code.ABI_PARAM1, {code.ABI_PARAM2, code.ABI_PARAM3, code.ABI_PARAM4});
     code.CallFunction(fn);
 }
@@ -26,7 +27,8 @@ void ArgCallback::EmitCall(BlockOfCode& code, std::function<void(RegList)> l) co
     code.CallFunction(fn);
 }
 
-void ArgCallback::EmitCallWithReturnPointer(BlockOfCode& code, std::function<void(Xbyak::Reg64, RegList)> l) const {
+void ArgCallback::EmitCallWithReturnPointer(BlockOfCode& code,
+                                            std::function<void(Xbyak::Reg64, RegList)> l) const {
 #if defined(WIN32) && !defined(__MINGW64__)
     l(code.ABI_PARAM2, {code.ABI_PARAM3, code.ABI_PARAM4});
     code.mov(code.ABI_PARAM1, arg);

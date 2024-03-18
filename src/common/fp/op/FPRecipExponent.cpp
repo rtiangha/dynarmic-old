@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: 0BSD
  */
 
-#include "common/common_types.h"
 #include "common/bit_util.h"
+#include "common/common_types.h"
 #include "common/fp/fpcr.h"
 #include "common/fp/fpsr.h"
 #include "common/fp/info.h"
@@ -46,7 +46,8 @@ FPT FPRecipExponent(FPT op, FPCR fpcr, FPSR& fpsr) {
 
     // Infinities and normals
     const FPT negated_exponent = FPT(~exponent);
-    const FPT adjusted_exponent = FPT(negated_exponent << FPInfo<FPT>::explicit_mantissa_width) & FPInfo<FPT>::exponent_mask;
+    const FPT adjusted_exponent =
+        FPT(negated_exponent << FPInfo<FPT>::explicit_mantissa_width) & FPInfo<FPT>::exponent_mask;
     return FPT(sign_bits | adjusted_exponent);
 }
 

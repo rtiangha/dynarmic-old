@@ -10,7 +10,7 @@
 namespace mp {
 
 /// Casts a metavalue from one type to another
-template<class T, class V>
+template <class T, class V>
 using value_cast = std::integral_constant<T, static_cast<T>(V::value)>;
 
 } // namespace mp

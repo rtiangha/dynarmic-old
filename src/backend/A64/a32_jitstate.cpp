@@ -88,7 +88,7 @@ void A32JitState::SetCpsr(u32 cpsr) {
     upper_location_descriptor |= Common::Bit<9>(cpsr) ? 2 : 0;
     upper_location_descriptor |= Common::Bit<5>(cpsr) ? 1 : 0;
     // IT state
-    upper_location_descriptor |= (cpsr >>  0) & 0b11111100'00000000;
+    upper_location_descriptor |= (cpsr >> 0) & 0b11111100'00000000;
     upper_location_descriptor |= (cpsr >> 17) & 0b00000011'00000000;
 
     // Other flags

@@ -22,12 +22,16 @@ constexpr u32 END_ADDRESS = ~u32(0);
 
 template <class TestEnvironment>
 A32Unicorn<TestEnvironment>::A32Unicorn(TestEnvironment& testenv) : testenv{testenv} {
-    constexpr uc_mode open_mode = std::is_same_v<TestEnvironment, ArmTestEnv> ? UC_MODE_ARM : UC_MODE_THUMB;
+    constexpr uc_mode open_mode =
+        std::is_same_v<TestEnvironment, ArmTestEnv> ? UC_MODE_ARM : UC_MODE_THUMB;
 
     CHECKED(uc_open(UC_ARCH_ARM, open_mode, &uc));
-    CHECKED(uc_hook_add(uc, &intr_hook, UC_HOOK_INTR, (void*)InterruptHook, this, BEGIN_ADDRESS, END_ADDRESS));
-    CHECKED(uc_hook_add(uc, &mem_invalid_hook, UC_HOOK_MEM_INVALID, (void*)UnmappedMemoryHook, this, BEGIN_ADDRESS, END_ADDRESS));
-    CHECKED(uc_hook_add(uc, &mem_write_prot_hook, UC_HOOK_MEM_WRITE, (void*)MemoryWriteHook, this, BEGIN_ADDRESS, END_ADDRESS));
+    CHECKED(uc_hook_add(uc, &intr_hook, UC_HOOK_INTR, (void*)InterruptHook, this, BEGIN_ADDRESS,
+                        END_ADDRESS));
+    CHECKED(uc_hook_add(uc, &mem_invalid_hook, UC_HOOK_MEM_INVALID, (void*)UnmappedMemoryHook, this,
+                        BEGIN_ADDRESS, END_ADDRESS));
+    CHECKED(uc_hook_add(uc, &mem_write_prot_hook, UC_HOOK_MEM_WRITE, (void*)MemoryWriteHook, this,
+                        BEGIN_ADDRESS, END_ADDRESS));
 }
 
 template <class TestEnvironment>
@@ -80,8 +84,9 @@ void A32Unicorn<TestEnvironment>::SetSP(u32 value) {
 }
 
 constexpr std::array<int, Unicorn::A32::num_gprs> gpr_ids{
-    UC_ARM_REG_R0, UC_ARM_REG_R1, UC_ARM_REG_R2, UC_ARM_REG_R3, UC_ARM_REG_R4, UC_ARM_REG_R5, UC_ARM_REG_R6, UC_ARM_REG_R7,
-    UC_ARM_REG_R8, UC_ARM_REG_R9, UC_ARM_REG_R10, UC_ARM_REG_R11, UC_ARM_REG_R12, UC_ARM_REG_R13, UC_ARM_REG_R14, UC_ARM_REG_R15,
+    UC_ARM_REG_R0,  UC_ARM_REG_R1,  UC_ARM_REG_R2,  UC_ARM_REG_R3,  UC_ARM_REG_R4,  UC_ARM_REG_R5,
+    UC_ARM_REG_R6,  UC_ARM_REG_R7,  UC_ARM_REG_R8,  UC_ARM_REG_R9,  UC_ARM_REG_R10, UC_ARM_REG_R11,
+    UC_ARM_REG_R12, UC_ARM_REG_R13, UC_ARM_REG_R14, UC_ARM_REG_R15,
 };
 
 template <class TestEnvironment>
@@ -93,7 +98,8 @@ Unicorn::A32::RegisterArray A32Unicorn<TestEnvironment>::GetRegisters() const {
     }
 
     CHECKED(uc_reg_read_batch(uc, const_cast<int*>(gpr_ids.data()),
-                              reinterpret_cast<void**>(ptrs.data()), static_cast<int>(Unicorn::A32::num_gprs)));
+                              reinterpret_cast<void**>(ptrs.data()),
+                              static_cast<int>(Unicorn::A32::num_gprs)));
     return regs;
 }
 
@@ -105,17 +111,22 @@ void A32Unicorn<TestEnvironment>::SetRegisters(const RegisterArray& value) {
     }
 
     CHECKED(uc_reg_write_batch(uc, const_cast<int*>(gpr_ids.data()),
-                               reinterpret_cast<void**>(const_cast<u32**>(ptrs.data())), static_cast<int>(ptrs.size())));
+                               reinterpret_cast<void**>(const_cast<u32**>(ptrs.data())),
+                               static_cast<int>(ptrs.size())));
 }
 
-using DoubleExtRegPtrArray = std::array<Unicorn::A32::ExtRegArray::pointer, Unicorn::A32::num_ext_regs/2>;
-using DoubleExtRegConstPtrArray = std::array<Unicorn::A32::ExtRegArray::const_pointer, Unicorn::A32::num_ext_regs/2>;
+using DoubleExtRegPtrArray =
+    std::array<Unicorn::A32::ExtRegArray::pointer, Unicorn::A32::num_ext_regs / 2>;
+using DoubleExtRegConstPtrArray =
+    std::array<Unicorn::A32::ExtRegArray::const_pointer, Unicorn::A32::num_ext_regs / 2>;
 
-constexpr std::array<int, Unicorn::A32::num_ext_regs/2> double_ext_reg_ids{
-    UC_ARM_REG_D0, UC_ARM_REG_D1, UC_ARM_REG_D2, UC_ARM_REG_D3, UC_ARM_REG_D4, UC_ARM_REG_D5, UC_ARM_REG_D6, UC_ARM_REG_D7,
-    UC_ARM_REG_D8, UC_ARM_REG_D9, UC_ARM_REG_D10, UC_ARM_REG_D11, UC_ARM_REG_D12, UC_ARM_REG_D13, UC_ARM_REG_D14, UC_ARM_REG_D15,
-    UC_ARM_REG_D16, UC_ARM_REG_D17, UC_ARM_REG_D18, UC_ARM_REG_D19, UC_ARM_REG_D20, UC_ARM_REG_D21, UC_ARM_REG_D22, UC_ARM_REG_D23,
-    UC_ARM_REG_D24, UC_ARM_REG_D25, UC_ARM_REG_D26, UC_ARM_REG_D27, UC_ARM_REG_D28, UC_ARM_REG_D29, UC_ARM_REG_D30, UC_ARM_REG_D31,
+constexpr std::array<int, Unicorn::A32::num_ext_regs / 2> double_ext_reg_ids{
+    UC_ARM_REG_D0,  UC_ARM_REG_D1,  UC_ARM_REG_D2,  UC_ARM_REG_D3,  UC_ARM_REG_D4,  UC_ARM_REG_D5,
+    UC_ARM_REG_D6,  UC_ARM_REG_D7,  UC_ARM_REG_D8,  UC_ARM_REG_D9,  UC_ARM_REG_D10, UC_ARM_REG_D11,
+    UC_ARM_REG_D12, UC_ARM_REG_D13, UC_ARM_REG_D14, UC_ARM_REG_D15, UC_ARM_REG_D16, UC_ARM_REG_D17,
+    UC_ARM_REG_D18, UC_ARM_REG_D19, UC_ARM_REG_D20, UC_ARM_REG_D21, UC_ARM_REG_D22, UC_ARM_REG_D23,
+    UC_ARM_REG_D24, UC_ARM_REG_D25, UC_ARM_REG_D26, UC_ARM_REG_D27, UC_ARM_REG_D28, UC_ARM_REG_D29,
+    UC_ARM_REG_D30, UC_ARM_REG_D31,
 };
 
 template <class TestEnvironment>
@@ -123,10 +134,11 @@ Unicorn::A32::ExtRegArray A32Unicorn<TestEnvironment>::GetExtRegs() const {
     Unicorn::A32::ExtRegArray ext_regs{};
     DoubleExtRegPtrArray ptrs;
     for (size_t i = 0; i < ptrs.size(); ++i)
-        ptrs[i] = &ext_regs[i*2];
+        ptrs[i] = &ext_regs[i * 2];
 
     CHECKED(uc_reg_read_batch(uc, const_cast<int*>(double_ext_reg_ids.data()),
-                              reinterpret_cast<void**>(ptrs.data()), static_cast<int>(ptrs.size())));
+                              reinterpret_cast<void**>(ptrs.data()),
+                              static_cast<int>(ptrs.size())));
 
     return ext_regs;
 }
@@ -135,11 +147,12 @@ template <class TestEnvironment>
 void A32Unicorn<TestEnvironment>::SetExtRegs(const ExtRegArray& value) {
     DoubleExtRegConstPtrArray ptrs;
     for (size_t i = 0; i < ptrs.size(); ++i) {
-        ptrs[i] = &value[i*2];
+        ptrs[i] = &value[i * 2];
     }
 
     CHECKED(uc_reg_write_batch(uc, const_cast<int*>(double_ext_reg_ids.data()),
-                               reinterpret_cast<void* const *>(const_cast<u32**>(ptrs.data())), static_cast<int>(ptrs.size())));
+                               reinterpret_cast<void* const*>(const_cast<u32**>(ptrs.data())),
+                               static_cast<int>(ptrs.size())));
 }
 
 template <class TestEnvironment>
@@ -199,18 +212,20 @@ void A32Unicorn<TestEnvironment>::DumpMemoryInformation() {
     CHECKED(uc_mem_regions(uc, &regions, &count));
 
     for (u32 i = 0; i < count; ++i) {
-        printf("region: start 0x%08x end 0x%08x perms 0x%08x\n", static_cast<u32>(regions[i].begin), static_cast<u32>(regions[i].end), regions[i].perms);
+        printf("region: start 0x%08x end 0x%08x perms 0x%08x\n", static_cast<u32>(regions[i].begin),
+               static_cast<u32>(regions[i].end), regions[i].perms);
     }
 
     CHECKED(uc_free(regions));
 }
 
 template <class TestEnvironment>
-void A32Unicorn<TestEnvironment>::InterruptHook(uc_engine* /*uc*/, u32 int_number, void* user_data) {
+void A32Unicorn<TestEnvironment>::InterruptHook(uc_engine* /*uc*/, u32 int_number,
+                                                void* user_data) {
     auto* this_ = static_cast<A32Unicorn*>(user_data);
 
     u32 esr = 0;
-    //CHECKED(uc_reg_read(uc, UC_ARM_REG_ESR, &esr));
+    // CHECKED(uc_reg_read(uc, UC_ARM_REG_ESR, &esr));
 
     auto ec = esr >> 26;
     auto iss = esr & 0xFFFFFF;
@@ -220,20 +235,25 @@ void A32Unicorn<TestEnvironment>::InterruptHook(uc_engine* /*uc*/, u32 int_numbe
         this_->testenv.CallSVC(iss);
         break;
     default:
-        this_->testenv.interrupts.emplace_back(fmt::format("Unhandled interrupt: int_number: {:#x}, esr: {:#x} (ec: {:#x}, iss: {:#x})", int_number, esr, ec, iss));
+        this_->testenv.interrupts.emplace_back(fmt::format(
+            "Unhandled interrupt: int_number: {:#x}, esr: {:#x} (ec: {:#x}, iss: {:#x})",
+            int_number, esr, ec, iss));
         break;
     }
 }
 
 template <class TestEnvironment>
-bool A32Unicorn<TestEnvironment>::UnmappedMemoryHook(uc_engine* uc, uc_mem_type /*type*/, u32 start_address, int size, u64 /*value*/, void* user_data) {
+bool A32Unicorn<TestEnvironment>::UnmappedMemoryHook(uc_engine* uc, uc_mem_type /*type*/,
+                                                     u32 start_address, int size, u64 /*value*/,
+                                                     void* user_data) {
     auto* this_ = static_cast<A32Unicorn*>(user_data);
 
     const auto generate_page = [&](u32 base_address) {
         // printf("generate_page(%x)\n", base_address);
 
         const u32 permissions = [&]() -> u32 {
-            if (base_address < this_->testenv.code_mem.size() * sizeof(typename TestEnvironment::InstructionType)) {
+            if (base_address < this_->testenv.code_mem.size() *
+                                   sizeof(typename TestEnvironment::InstructionType)) {
                 return UC_PROT_READ | UC_PROT_EXEC;
             }
             return UC_PROT_READ;
@@ -244,7 +264,8 @@ bool A32Unicorn<TestEnvironment>::UnmappedMemoryHook(uc_engine* uc, uc_mem_type 
         for (size_t i = 0; i < page->data.size(); ++i)
             page->data[i] = this_->testenv.MemoryRead8(static_cast<u32>(base_address + i));
 
-        uc_err err = uc_mem_map_ptr(uc, base_address, page->data.size(), permissions, page->data.data());
+        uc_err err =
+            uc_mem_map_ptr(uc, base_address, page->data.size(), permissions, page->data.data());
         if (err == UC_ERR_MAP)
             return; // page already exists
         CHECKED(err);
@@ -265,13 +286,16 @@ bool A32Unicorn<TestEnvironment>::UnmappedMemoryHook(uc_engine* uc, uc_mem_type 
     do {
         generate_page(current_address);
         current_address += 0x1000;
-    } while (is_in_range(current_address, start_address_page, end_address) && current_address != start_address_page);
+    } while (is_in_range(current_address, start_address_page, end_address) &&
+             current_address != start_address_page);
 
     return true;
 }
 
 template <class TestEnvironment>
-bool A32Unicorn<TestEnvironment>::MemoryWriteHook(uc_engine* /*uc*/, uc_mem_type /*type*/, u32 start_address, int size, u64 value, void* user_data) {
+bool A32Unicorn<TestEnvironment>::MemoryWriteHook(uc_engine* /*uc*/, uc_mem_type /*type*/,
+                                                  u32 start_address, int size, u64 value,
+                                                  void* user_data) {
     auto* this_ = static_cast<A32Unicorn*>(user_data);
 
     switch (size) {

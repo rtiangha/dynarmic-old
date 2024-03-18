@@ -15,9 +15,9 @@
 #include "common/assert.h"
 
 #ifdef _WIN32
-    #include <windows.h>
+#include <windows.h>
 #else
-    #include <sys/mman.h>
+#include <sys/mman.h>
 #endif
 
 #ifdef __APPLE__
@@ -26,7 +26,7 @@
 
 namespace Dynarmic::BackendA64 {
 
-const Arm64Gen::ARM64Reg BlockOfCode::ABI_RETURN  = Arm64Gen::ARM64Reg::X0;
+const Arm64Gen::ARM64Reg BlockOfCode::ABI_RETURN = Arm64Gen::ARM64Reg::X0;
 const Arm64Gen::ARM64Reg BlockOfCode::ABI_RETURN2 = Arm64Gen::ARM64Reg::X1;
 
 const Arm64Gen::ARM64Reg BlockOfCode::ABI_PARAM1 = Arm64Gen::ARM64Reg::X0;
@@ -40,10 +40,10 @@ const Arm64Gen::ARM64Reg BlockOfCode::ABI_PARAM8 = Arm64Gen::ARM64Reg::X7;
 
 const Arm64Gen::ARM64Reg BlockOfCode::ABI_SCRATCH1 = Arm64Gen::ARM64Reg::X30;
 
-const std::array<Arm64Gen::ARM64Reg, 8> BlockOfCode::ABI_PARAMS = {BlockOfCode::ABI_PARAM1, BlockOfCode::ABI_PARAM2,
-                                                         BlockOfCode::ABI_PARAM3, BlockOfCode::ABI_PARAM4,
-                                                         BlockOfCode::ABI_PARAM5, BlockOfCode::ABI_PARAM6,
-                                                         BlockOfCode::ABI_PARAM7, BlockOfCode::ABI_PARAM8};
+const std::array<Arm64Gen::ARM64Reg, 8> BlockOfCode::ABI_PARAMS = {
+    BlockOfCode::ABI_PARAM1, BlockOfCode::ABI_PARAM2, BlockOfCode::ABI_PARAM3,
+    BlockOfCode::ABI_PARAM4, BlockOfCode::ABI_PARAM5, BlockOfCode::ABI_PARAM6,
+    BlockOfCode::ABI_PARAM7, BlockOfCode::ABI_PARAM8};
 
 namespace {
 
@@ -51,10 +51,12 @@ constexpr size_t TOTAL_CODE_SIZE = 128 * 1024 * 1024;
 constexpr size_t FAR_CODE_OFFSET = 100 * 1024 * 1024;
 
 #ifdef DYNARMIC_ENABLE_NO_EXECUTE_SUPPORT
-void ProtectMemory([[maybe_unused]] const void* base, [[maybe_unused]] size_t size, bool is_executable) {
+void ProtectMemory([[maybe_unused]] const void* base, [[maybe_unused]] size_t size,
+                   bool is_executable) {
 #if defined(_WIN32)
     DWORD oldProtect = 0;
-    VirtualProtect(const_cast<void*>(base), size, is_executable ? PAGE_EXECUTE_READ : PAGE_READWRITE, &oldProtect);
+    VirtualProtect(const_cast<void*>(base), size,
+                   is_executable ? PAGE_EXECUTE_READ : PAGE_READWRITE, &oldProtect);
 #elif defined(__APPLE__)
     pthread_jit_write_protect_np(is_executable);
 #else
@@ -70,10 +72,7 @@ void ProtectMemory([[maybe_unused]] const void* base, [[maybe_unused]] size_t si
 } // anonymous namespace
 
 BlockOfCode::BlockOfCode(RunCodeCallbacks cb, JitStateInfo jsi)
-        : fp_emitter(this)
-        , cb(std::move(cb))
-        , jsi(jsi)
-        , constant_pool(*this) {
+    : fp_emitter(this), cb(std::move(cb)), jsi(jsi), constant_pool(*this) {
     AllocCodeSpace(TOTAL_CODE_SIZE);
     EnableWriting();
     GenRunCode();
@@ -152,7 +151,7 @@ void BlockOfCode::ForceReturnFromRunCode(bool fpscr_already_exited) {
 }
 
 void BlockOfCode::GenRunCode() {
-    const u8* loop, *enter_fpscr_then_loop;
+    const u8 *loop, *enter_fpscr_then_loop;
 
     AlignCode16();
     run_code = reinterpret_cast<RunCodeFuncType>(GetWritableCodePtr());
@@ -179,9 +178,9 @@ void BlockOfCode::GenRunCode() {
     ABI_PushCalleeSaveRegistersAndAdjustStack(*this);
 
     MOV(Arm64Gen::X28, ABI_PARAM1);
-    
+
     MOVI2R(Arm64Gen::X26, 1);
-    STR(Arm64Gen::INDEX_UNSIGNED, Arm64Gen::X26, Arm64Gen::X28, jsi.offsetof_cycles_to_run);    
+    STR(Arm64Gen::INDEX_UNSIGNED, Arm64Gen::X26, Arm64Gen::X28, jsi.offsetof_cycles_to_run);
 
     SwitchFpscrOnEntry();
     BR(ABI_PARAM2);
@@ -190,27 +189,28 @@ void BlockOfCode::GenRunCode() {
     SwitchFpscrOnEntry();
     loop = GetCodePtr();
     cb.LookupBlock->EmitCall(*this);
-    BR(ABI_RETURN);    
+    BR(ABI_RETURN);
 
     // Return from run code variants
-    const auto emit_return_from_run_code = [this, &loop, &enter_fpscr_then_loop](bool fpscr_already_exited, bool force_return){
-        if (!force_return) {
-            CMP(Arm64Gen::X26, Arm64Gen::ZR);
-            B(CC_GT, fpscr_already_exited ? enter_fpscr_then_loop : loop);
-        }
+    const auto emit_return_from_run_code =
+        [this, &loop, &enter_fpscr_then_loop](bool fpscr_already_exited, bool force_return) {
+            if (!force_return) {
+                CMP(Arm64Gen::X26, Arm64Gen::ZR);
+                B(CC_GT, fpscr_already_exited ? enter_fpscr_then_loop : loop);
+            }
 
-        if (!fpscr_already_exited) {
-            SwitchFpscrOnExit();
-        }
+            if (!fpscr_already_exited) {
+                SwitchFpscrOnExit();
+            }
 
-        cb.AddTicks->EmitCall(*this, [this](RegList param) {
-            LDR(Arm64Gen::INDEX_UNSIGNED, param[0], Arm64Gen::X28, jsi.offsetof_cycles_to_run);
-            SUB(param[0], param[0], Arm64Gen::X26);
-        });
+            cb.AddTicks->EmitCall(*this, [this](RegList param) {
+                LDR(Arm64Gen::INDEX_UNSIGNED, param[0], Arm64Gen::X28, jsi.offsetof_cycles_to_run);
+                SUB(param[0], param[0], Arm64Gen::X26);
+            });
 
-        ABI_PopCalleeSaveRegistersAndAdjustStack(*this);
-        RET();
-    };
+            ABI_PopCalleeSaveRegistersAndAdjustStack(*this);
+            RET();
+        };
 
     return_from_run_code[0] = AlignCode16();
     emit_return_from_run_code(false, false);
@@ -230,11 +230,11 @@ void BlockOfCode::GenRunCode() {
 void BlockOfCode::SwitchFpscrOnEntry() {
     MRS(ABI_SCRATCH1, Arm64Gen::FIELD_FPCR);
     STR(Arm64Gen::INDEX_UNSIGNED, ABI_SCRATCH1, Arm64Gen::X28, jsi.offsetof_save_host_FPCR);
-    
+
     LDR(Arm64Gen::INDEX_UNSIGNED, ABI_SCRATCH1, Arm64Gen::X28, jsi.offsetof_guest_fpcr);
     _MSR(Arm64Gen::FIELD_FPCR, ABI_SCRATCH1);
     LDR(Arm64Gen::INDEX_UNSIGNED, ABI_SCRATCH1, Arm64Gen::X28, jsi.offsetof_guest_fpsr);
-    _MSR(Arm64Gen::FIELD_FPSR, ABI_SCRATCH1);    
+    _MSR(Arm64Gen::FIELD_FPSR, ABI_SCRATCH1);
 }
 
 void BlockOfCode::SwitchFpscrOnExit() {
@@ -301,13 +301,13 @@ std::size_t BlockOfCode::GetRegionSize() const {
     return total_region_size;
 }
 
-void* BlockOfCode::AllocateFromCodeSpace(size_t alloc_size) {    
+void* BlockOfCode::AllocateFromCodeSpace(size_t alloc_size) {
     ASSERT_MSG(GetSpaceLeft() >= alloc_size, "ERR_CODE_IS_TOO_BIG");
 
     void* ret = GetWritableCodePtr();
     region_size += alloc_size;
     SetCodePtr(GetCodePtr() + alloc_size);
-    memset(ret, 0, alloc_size);    
+    memset(ret, 0, alloc_size);
     return ret;
 }
 
@@ -324,13 +324,13 @@ void BlockOfCode::EnsurePatchLocationSize(CodePtr begin, size_t size) {
     }
 }
 
-//bool BlockOfCode::DoesCpuSupport(Xbyak::util::Cpu::Type type) const {
-//#ifdef DYNARMIC_ENABLE_CPU_FEATURE_DETECTION
-//    return cpu_info.has(type);
-//#else
-//    (void)type;
-//    return false;
-//#endif
-//}
+// bool BlockOfCode::DoesCpuSupport(Xbyak::util::Cpu::Type type) const {
+// #ifdef DYNARMIC_ENABLE_CPU_FEATURE_DETECTION
+//     return cpu_info.has(type);
+// #else
+//     (void)type;
+//     return false;
+// #endif
+// }
 
 } // namespace Dynarmic::BackendA64

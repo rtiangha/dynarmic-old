@@ -47,7 +47,9 @@ struct EmitContext {
     void EraseInstruction(IR::Inst* inst);
 
     virtual FP::FPCR FPCR() const = 0;
-    virtual bool AccurateNaN() const { return true; }
+    virtual bool AccurateNaN() const {
+        return true;
+    }
 
     RegAlloc& reg_alloc;
     IR::Block& block;
@@ -56,8 +58,8 @@ struct EmitContext {
 class EmitX64 {
 public:
     struct BlockDescriptor {
-        CodePtr entrypoint;  // Entrypoint of emitted code
-        size_t size;         // Length in bytes of emitted code
+        CodePtr entrypoint; // Entrypoint of emitted code
+        size_t size;        // Length in bytes of emitted code
     };
 
     explicit EmitX64(BlockOfCode& code);
@@ -86,20 +88,32 @@ protected:
     virtual std::string LocationDescriptorToFriendlyName(const IR::LocationDescriptor&) const = 0;
     void EmitAddCycles(size_t cycles);
     Xbyak::Label EmitCond(IR::Cond cond);
-    BlockDescriptor RegisterBlock(const IR::LocationDescriptor& location_descriptor, CodePtr entrypoint, size_t size);
-    void PushRSBHelper(Xbyak::Reg64 loc_desc_reg, Xbyak::Reg64 index_reg, IR::LocationDescriptor target);
+    BlockDescriptor RegisterBlock(const IR::LocationDescriptor& location_descriptor,
+                                  CodePtr entrypoint, size_t size);
+    void PushRSBHelper(Xbyak::Reg64 loc_desc_reg, Xbyak::Reg64 index_reg,
+                       IR::LocationDescriptor target);
 
     // Terminal instruction emitters
-    void EmitTerminal(IR::Terminal terminal, IR::LocationDescriptor initial_location, bool is_single_step);
-    virtual void EmitTerminalImpl(IR::Term::Interpret terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::ReturnToDispatch terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::PopRSBHint terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::FastDispatchHint terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::CheckBit terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
-    virtual void EmitTerminalImpl(IR::Term::CheckHalt terminal, IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    void EmitTerminal(IR::Terminal terminal, IR::LocationDescriptor initial_location,
+                      bool is_single_step);
+    virtual void EmitTerminalImpl(IR::Term::Interpret terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::ReturnToDispatch terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::LinkBlock terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::LinkBlockFast terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::PopRSBHint terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::FastDispatchHint terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location,
+                                  bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::CheckBit terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
+    virtual void EmitTerminalImpl(IR::Term::CheckHalt terminal,
+                                  IR::LocationDescriptor initial_location, bool is_single_step) = 0;
 
     // Patching
     struct PatchInformation {
@@ -109,8 +123,10 @@ protected:
     };
     void Patch(const IR::LocationDescriptor& target_desc, CodePtr target_code_ptr);
     virtual void Unpatch(const IR::LocationDescriptor& target_desc);
-    virtual void EmitPatchJg(const IR::LocationDescriptor& target_desc, CodePtr target_code_ptr = nullptr) = 0;
-    virtual void EmitPatchJmp(const IR::LocationDescriptor& target_desc, CodePtr target_code_ptr = nullptr) = 0;
+    virtual void EmitPatchJg(const IR::LocationDescriptor& target_desc,
+                             CodePtr target_code_ptr = nullptr) = 0;
+    virtual void EmitPatchJmp(const IR::LocationDescriptor& target_desc,
+                              CodePtr target_code_ptr = nullptr) = 0;
     virtual void EmitPatchMovRcx(CodePtr target_code_ptr = nullptr) = 0;
 
     // State

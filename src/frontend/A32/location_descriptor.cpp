@@ -8,12 +8,9 @@
 namespace Dynarmic::A32 {
 
 std::string ToString(const LocationDescriptor& descriptor) {
-    return fmt::format("{{{:08x},{},{},{:08x}{}}}",
-                       descriptor.PC(),
-                       descriptor.TFlag() ? "T" : "!T",
-                       descriptor.EFlag() ? "E" : "!E",
-                       descriptor.FPSCR().Value(),
-                       descriptor.SingleStepping() ? ",step" : "");
+    return fmt::format("{{{:08x},{},{},{:08x}{}}}", descriptor.PC(),
+                       descriptor.TFlag() ? "T" : "!T", descriptor.EFlag() ? "E" : "!E",
+                       descriptor.FPSCR().Value(), descriptor.SingleStepping() ? ",step" : "");
 }
 
 } // namespace Dynarmic::A32

@@ -27,7 +27,7 @@ enum class Op {
     Sub,
 };
 
-template<Op op, size_t size>
+template <Op op, size_t size>
 void EmitSignedSaturatedOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
     const auto overflow_inst = inst->GetAssociatedPseudoOperation(IR::Opcode::GetOverflowFromOp);
 
@@ -37,7 +37,8 @@ void EmitSignedSaturatedOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) 
     Xbyak::Reg addend = ctx.reg_alloc.UseGpr(args[1]).changeBit(size);
     Xbyak::Reg overflow = ctx.reg_alloc.ScratchGpr().changeBit(size);
 
-    constexpr u64 int_max = static_cast<u64>(std::numeric_limits<mp::signed_integer_of_size<size>>::max());
+    constexpr u64 int_max =
+        static_cast<u64>(std::numeric_limits<mp::signed_integer_of_size<size>>::max());
     if constexpr (size < 64) {
         code.xor_(overflow.cvt32(), overflow.cvt32());
         code.bt(result.cvt32(), size - 1);
@@ -72,7 +73,7 @@ void EmitSignedSaturatedOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) 
     ctx.reg_alloc.DefineValue(inst, result);
 }
 
-template<Op op, size_t size>
+template <Op op, size_t size>
 void EmitUnsignedSaturatedOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
     const auto overflow_inst = inst->GetAssociatedPseudoOperation(IR::Opcode::GetOverflowFromOp);
 
@@ -81,7 +82,8 @@ void EmitUnsignedSaturatedOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst
     Xbyak::Reg op_result = ctx.reg_alloc.UseScratchGpr(args[0]).changeBit(size);
     Xbyak::Reg addend = ctx.reg_alloc.UseScratchGpr(args[1]).changeBit(size);
 
-    constexpr u64 boundary = op == Op::Add ? std::numeric_limits<mp::unsigned_integer_of_size<size>>::max() : 0;
+    constexpr u64 boundary =
+        op == Op::Add ? std::numeric_limits<mp::unsigned_integer_of_size<size>>::max() : 0;
 
     if constexpr (op == Op::Add) {
         code.add(op_result, addend);
@@ -224,7 +226,8 @@ void EmitX64::EmitSignedSaturation(EmitContext& ctx, IR::Inst* inst) {
     const Xbyak::Reg32 reg_a = ctx.reg_alloc.UseGpr(args[0]).cvt32();
     const Xbyak::Reg32 overflow = ctx.reg_alloc.ScratchGpr().cvt32();
 
-    // overflow now contains a value between 0 and mask if it was originally between {negative,positive}_saturated_value.
+    // overflow now contains a value between 0 and mask if it was originally between
+    // {negative,positive}_saturated_value.
     code.lea(overflow, code.ptr[reg_a.cvt64() + negative_saturated_value]);
 
     // Put the appropriate saturated value in result

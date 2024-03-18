@@ -26,7 +26,8 @@ template <typename V>
 std::vector<ArmMatcher<V>> GetArmDecodeTable() {
     std::vector<ArmMatcher<V>> table = {
 
-#define INST(fn, name, bitstring) Decoder::detail::detail<ArmMatcher<V>>::GetMatcher(&V::fn, name, bitstring),
+#define INST(fn, name, bitstring)                                                                  \
+    Decoder::detail::detail<ArmMatcher<V>>::GetMatcher(&V::fn, name, bitstring),
 #ifdef ARCHITECTURE_Aarch64
 #include "arm_a64.inc"
 #else
@@ -44,14 +45,17 @@ std::vector<ArmMatcher<V>> GetArmDecodeTable() {
     return table;
 }
 
-template<typename V>
+template <typename V>
 std::optional<std::reference_wrapper<const ArmMatcher<V>>> DecodeArm(u32 instruction) {
     static const auto table = GetArmDecodeTable<V>();
 
-    const auto matches_instruction = [instruction](const auto& matcher) { return matcher.Matches(instruction); };
+    const auto matches_instruction = [instruction](const auto& matcher) {
+        return matcher.Matches(instruction);
+    };
 
     auto iter = std::find_if(table.begin(), table.end(), matches_instruction);
-    return iter != table.end() ? std::optional<std::reference_wrapper<const ArmMatcher<V>>>(*iter) : std::nullopt;
+    return iter != table.end() ? std::optional<std::reference_wrapper<const ArmMatcher<V>>>(*iter)
+                               : std::nullopt;
 }
 
 } // namespace Dynarmic::A32

@@ -20,16 +20,20 @@ class Coprocessor;
 enum class Exception {
     /// An UndefinedFault occured due to executing instruction with an unallocated encoding
     UndefinedInstruction,
-    /// An unpredictable instruction is to be executed. Implementation-defined behaviour should now happen.
+    /// An unpredictable instruction is to be executed. Implementation-defined behaviour should now
+    /// happen.
     /// This behaviour is up to the user of this library to define.
     UnpredictableInstruction,
-    /// A SEV instruction was executed. The event register of all PEs should be set. (Hint instruction.)
+    /// A SEV instruction was executed. The event register of all PEs should be set. (Hint
+    /// instruction.)
     SendEvent,
-    /// A SEVL instruction was executed. The event register of the current PE should be set. (Hint instruction.)
+    /// A SEVL instruction was executed. The event register of the current PE should be set. (Hint
+    /// instruction.)
     SendEventLocal,
     /// A WFI instruction was executed. You may now enter a low-power state. (Hint instruction.)
     WaitForInterrupt,
-    /// A WFE instruction was executed. You may now enter a low-power state if the event register is clear. (Hint instruction.)
+    /// A WFE instruction was executed. You may now enter a low-power state if the event register is
+    /// clear. (Hint instruction.)
     WaitForEvent,
     /// A YIELD instruction was executed. (Hint instruction.)
     Yield,
@@ -47,7 +51,9 @@ struct UserCallbacks {
 
     // All reads through this callback are 4-byte aligned.
     // Memory must be interpreted as little endian.
-    virtual std::uint32_t MemoryReadCode(VAddr vaddr) { return MemoryRead32(vaddr); }
+    virtual std::uint32_t MemoryReadCode(VAddr vaddr) {
+        return MemoryRead32(vaddr);
+    }
 
     // Reads through these callbacks may not be aligned.
     // Memory must be interpreted as if ENDIANSTATE == 0, endianness will be corrected by the JIT.
@@ -66,7 +72,9 @@ struct UserCallbacks {
     // return the same value at any point in time for this vaddr. The JIT may use this information
     // in optimizations.
     // A conservative implementation that always returns false is safe.
-    virtual bool IsReadOnlyMemory(VAddr /* vaddr */) { return false; }
+    virtual bool IsReadOnlyMemory(VAddr /* vaddr */) {
+        return false;
+    }
 
     /// The interpreter must execute exactly num_instructions starting from PC.
     virtual void InterpreterFallback(VAddr pc, size_t num_instructions) = 0;

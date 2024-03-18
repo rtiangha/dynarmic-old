@@ -70,8 +70,7 @@ void FPThreeOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst, Function fn)
 
     if constexpr (std::is_member_function_pointer_v<Function>) {
         (code.fp_emitter.*fn)(result, result, operand);
-    }
-    else {
+    } else {
         fn(result, result, operand);
     }
 
@@ -79,14 +78,14 @@ void FPThreeOp(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst, Function fn)
 }
 } // anonymous namespace
 
-//void EmitA64::EmitFPAbs16(EmitContext& ctx, IR::Inst* inst) {
-//    auto args = ctx.reg_alloc.GetArgumentInfo(inst);
-//    const ARM64Reg result = ctx.reg_alloc.UseScratchXmm(args[0]);
+// void EmitA64::EmitFPAbs16(EmitContext& ctx, IR::Inst* inst) {
+//     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
+//     const ARM64Reg result = ctx.reg_alloc.UseScratchXmm(args[0]);
 //
-//    code.pand(result, code.MConst(xword, f16_non_sign_mask));
+//     code.pand(result, code.MConst(xword, f16_non_sign_mask));
 //
-//    ctx.reg_alloc.DefineValue(inst, result);
-//}
+//     ctx.reg_alloc.DefineValue(inst, result);
+// }
 
 void EmitA64::EmitFPAbs32(EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
@@ -106,14 +105,14 @@ void EmitA64::EmitFPAbs64(EmitContext& ctx, IR::Inst* inst) {
     ctx.reg_alloc.DefineValue(inst, result);
 }
 
-//void EmitA64::EmitFPNeg16(EmitContext& ctx, IR::Inst* inst) {
-//    auto args = ctx.reg_alloc.GetArgumentInfo(inst);
-//    const ARM64Reg result = ctx.reg_alloc.UseScratchXmm(args[0]);
+// void EmitA64::EmitFPNeg16(EmitContext& ctx, IR::Inst* inst) {
+//     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
+//     const ARM64Reg result = ctx.reg_alloc.UseScratchXmm(args[0]);
 //
-//    code.pxor(result, code.MConst(xword, f16_negative_zero));
+//     code.pxor(result, code.MConst(xword, f16_negative_zero));
 //
-//    ctx.reg_alloc.DefineValue(inst, result);
-//}
+//     ctx.reg_alloc.DefineValue(inst, result);
+// }
 
 void EmitA64::EmitFPNeg32(EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
@@ -134,27 +133,33 @@ void EmitA64::EmitFPNeg64(EmitContext& ctx, IR::Inst* inst) {
 }
 
 void EmitA64::EmitFPAdd32(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<32, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FADD);
+    FPThreeOp<32, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FADD);
 }
 
 void EmitA64::EmitFPAdd64(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<64, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FADD);
+    FPThreeOp<64, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FADD);
 }
 
 void EmitA64::EmitFPDiv32(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<32, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FDIV);
+    FPThreeOp<32, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FDIV);
 }
 
 void EmitA64::EmitFPDiv64(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<64, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FDIV);
+    FPThreeOp<64, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FDIV);
 }
 
 void EmitA64::EmitFPMul32(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<32, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FMUL);
+    FPThreeOp<32, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FMUL);
 }
 
 void EmitA64::EmitFPMul64(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<64, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FMUL);
+    FPThreeOp<64, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FMUL);
 }
 void EmitA64::EmitFPSqrt32(EmitContext& ctx, IR::Inst* inst) {
     FPTwoOp<32>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FSQRT);
@@ -165,16 +170,18 @@ void EmitA64::EmitFPSqrt64(EmitContext& ctx, IR::Inst* inst) {
 }
 
 void EmitA64::EmitFPSub32(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<32, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FSUB);
+    FPThreeOp<32, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FSUB);
 }
 
 void EmitA64::EmitFPSub64(EmitContext& ctx, IR::Inst* inst) {
-    FPThreeOp<64, void(Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FSUB);
+    FPThreeOp<64, void (Arm64Gen::ARM64FloatEmitter::*)(ARM64Reg, ARM64Reg, ARM64Reg)>(
+        code, ctx, inst, &Arm64Gen::ARM64FloatEmitter::FSUB);
 }
 
 static ARM64Reg SetFpscrNzcvFromFlags(BlockOfCode& code, EmitContext& ctx) {
     ARM64Reg nzcv = ctx.reg_alloc.ScratchGpr();
-    // Fpsr's nzcv is copied across integer nzcv 
+    // Fpsr's nzcv is copied across integer nzcv
     code.MRS(nzcv, FIELD_NZCV);
     return nzcv;
 }
@@ -257,7 +264,7 @@ void EmitA64::EmitFPDoubleToSingle(EmitContext& ctx, IR::Inst* inst) {
     ctx.reg_alloc.DefineValue(inst, result);
 }
 
-template<size_t fsize, bool unsigned_, size_t isize>
+template <size_t fsize, bool unsigned_, size_t isize>
 static void EmitFPToFixed(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
 
@@ -274,13 +281,11 @@ static void EmitFPToFixed(BlockOfCode& code, EmitContext& ctx, IR::Inst* inst) {
 
     if constexpr (unsigned_) {
         code.fp_emitter.FCVTU(result, src, round_imm);
-    }
-    else {
+    } else {
         code.fp_emitter.FCVTS(result, src, round_imm);
     }
 
     ctx.reg_alloc.DefineValue(inst, result);
-
 }
 
 void EmitA64::EmitFPDoubleToFixedS32(EmitContext& ctx, IR::Inst* inst) {
@@ -326,8 +331,7 @@ void EmitA64::EmitFPFixedS32ToSingle(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.SCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.SCVTF(result, from);
     }
 
@@ -336,7 +340,7 @@ void EmitA64::EmitFPFixedS32ToSingle(EmitContext& ctx, IR::Inst* inst) {
 
 void EmitA64::EmitFPFixedU32ToSingle(EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
-    
+
     const ARM64Reg from = DecodeReg(ctx.reg_alloc.UseGpr(args[0]));
     const ARM64Reg result = EncodeRegToSingle(ctx.reg_alloc.ScratchFpr());
     const size_t fbits = args[1].GetImmediateU8();
@@ -345,8 +349,7 @@ void EmitA64::EmitFPFixedU32ToSingle(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.UCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.UCVTF(result, from);
     }
 
@@ -364,8 +367,7 @@ void EmitA64::EmitFPFixedS32ToDouble(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.SCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.SCVTF(result, from);
     }
 
@@ -383,8 +385,7 @@ void EmitA64::EmitFPFixedS64ToDouble(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.SCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.SCVTF(result, from);
     }
 
@@ -402,8 +403,7 @@ void EmitA64::EmitFPFixedS64ToSingle(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.SCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.SCVTF(result, from);
     }
 
@@ -421,8 +421,7 @@ void EmitA64::EmitFPFixedU32ToDouble(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.UCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.UCVTF(result, from);
     }
 
@@ -432,7 +431,6 @@ void EmitA64::EmitFPFixedU32ToDouble(EmitContext& ctx, IR::Inst* inst) {
 void EmitA64::EmitFPFixedU64ToDouble(EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
 
-
     const ARM64Reg from = ctx.reg_alloc.UseGpr(args[0]);
     const ARM64Reg result = EncodeRegToDouble(ctx.reg_alloc.ScratchFpr());
     const size_t fbits = args[1].GetImmediateU8();
@@ -441,8 +439,7 @@ void EmitA64::EmitFPFixedU64ToDouble(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.UCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.UCVTF(result, from);
     }
 
@@ -452,7 +449,6 @@ void EmitA64::EmitFPFixedU64ToDouble(EmitContext& ctx, IR::Inst* inst) {
 void EmitA64::EmitFPFixedU64ToSingle(EmitContext& ctx, IR::Inst* inst) {
     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
 
-
     const ARM64Reg from = ctx.reg_alloc.UseGpr(args[0]);
     const ARM64Reg result = EncodeRegToSingle(ctx.reg_alloc.ScratchFpr());
     const size_t fbits = args[1].GetImmediateU8();
@@ -461,8 +457,7 @@ void EmitA64::EmitFPFixedU64ToSingle(EmitContext& ctx, IR::Inst* inst) {
 
     if (fbits != 0) {
         code.fp_emitter.UCVTF(result, from, fbits);
-    }
-    else {
+    } else {
         code.fp_emitter.UCVTF(result, from);
     }
 

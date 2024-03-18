@@ -13,14 +13,16 @@
 
 namespace Dynarmic::FP {
 
-template<typename FPT>
+template <typename FPT>
 std::tuple<FPType, bool, FPUnpacked> FPUnpackBase(FPT op, FPCR fpcr, [[maybe_unused]] FPSR& fpsr) {
     constexpr size_t sign_bit = FPInfo<FPT>::exponent_width + FPInfo<FPT>::explicit_mantissa_width;
-    constexpr size_t exponent_high_bit = FPInfo<FPT>::exponent_width + FPInfo<FPT>::explicit_mantissa_width - 1;
+    constexpr size_t exponent_high_bit =
+        FPInfo<FPT>::exponent_width + FPInfo<FPT>::explicit_mantissa_width - 1;
     constexpr size_t exponent_low_bit = FPInfo<FPT>::explicit_mantissa_width;
     constexpr size_t mantissa_high_bit = FPInfo<FPT>::explicit_mantissa_width - 1;
     constexpr size_t mantissa_low_bit = 0;
-    constexpr int denormal_exponent = FPInfo<FPT>::exponent_min - int(FPInfo<FPT>::explicit_mantissa_width);
+    constexpr int denormal_exponent =
+        FPInfo<FPT>::exponent_min - int(FPInfo<FPT>::explicit_mantissa_width);
 
     constexpr bool is_half_precision = std::is_same_v<FPT, u16>;
     const bool sign = Common::Bit<sign_bit>(op);
@@ -57,7 +59,8 @@ std::tuple<FPType, bool, FPUnpacked> FPUnpackBase(FPT op, FPCR fpcr, [[maybe_unu
     }
 
     const int exp = static_cast<int>(exp_raw) - FPInfo<FPT>::exponent_bias;
-    const u64 frac = static_cast<u64>(frac_raw | FPInfo<FPT>::implicit_leading_bit) << (normalized_point_position - FPInfo<FPT>::explicit_mantissa_width);
+    const u64 frac = static_cast<u64>(frac_raw | FPInfo<FPT>::implicit_leading_bit)
+                     << (normalized_point_position - FPInfo<FPT>::explicit_mantissa_width);
     return {FPType::Nonzero, sign, {sign, exp, frac}};
 }
 
@@ -65,7 +68,7 @@ template std::tuple<FPType, bool, FPUnpacked> FPUnpackBase<u16>(u16 op, FPCR fpc
 template std::tuple<FPType, bool, FPUnpacked> FPUnpackBase<u32>(u32 op, FPCR fpcr, FPSR& fpsr);
 template std::tuple<FPType, bool, FPUnpacked> FPUnpackBase<u64>(u64 op, FPCR fpcr, FPSR& fpsr);
 
-template<size_t F>
+template <size_t F>
 std::tuple<bool, int, u64, ResidualError> Normalize(FPUnpacked op, int extra_right_shift = 0) {
     const int highest_set_bit = Common::HighestSetBit(op.mantissa);
     const int shift_amount = highest_set_bit - static_cast<int>(F) + extra_right_shift;
@@ -75,7 +78,7 @@ std::tuple<bool, int, u64, ResidualError> Normalize(FPUnpacked op, int extra_rig
     return std::make_tuple(op.sign, exponent, mantissa, error);
 }
 
-template<typename FPT>
+template <typename FPT>
 FPT FPRoundBase(FPUnpacked op, FPCR fpcr, RoundingMode rounding, FPSR& fpsr) {
     ASSERT(op.mantissa != 0);
     ASSERT(rounding != RoundingMode::ToNearest_TieAwayFromZero);
@@ -104,7 +107,8 @@ FPT FPRoundBase(FPUnpacked op, FPCR fpcr, RoundingMode rounding, FPSR& fpsr) {
     bool round_up = false, overflow_to_inf = false;
     switch (rounding) {
     case RoundingMode::ToNearest_TieEven: {
-        round_up = (error > ResidualError::Half) || (error == ResidualError::Half && Common::Bit<0>(mantissa));
+        round_up = (error > ResidualError::Half) ||
+                   (error == ResidualError::Half && Common::Bit<0>(mantissa));
         overflow_to_inf = true;
         break;
     }
@@ -144,7 +148,7 @@ FPT FPRoundBase(FPUnpacked op, FPCR fpcr, RoundingMode rounding, FPSR& fpsr) {
     FPT result = 0;
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4127) // C4127: conditional expression is constant
+#pragma warning(disable : 4127) // C4127: conditional expression is constant
 #endif
     if (!isFP16 || !fpcr.AHP()) {
 #ifdef _MSC_VER

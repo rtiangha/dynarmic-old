@@ -7,8 +7,8 @@
 #pragma once
 
 #include <array>
-#include <memory>
 #include <functional>
+#include <memory>
 
 #include "backend/A64/a32_jitstate.h"
 #include "common/common_types.h"
@@ -31,6 +31,7 @@ public:
     void Register(BlockOfCode& code, std::function<void(CodePtr)> segv_callback = nullptr);
 
     bool SupportsFastmem() const;
+
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

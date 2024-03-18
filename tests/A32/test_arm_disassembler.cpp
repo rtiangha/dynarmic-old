@@ -314,7 +314,8 @@ TEST_CASE("Disassemble data processing instructions", "[arm][disassembler]") {
     REQUIRE(DisassembleArm(0xE1110372) == "tst r1, r2, ror r3");
 }
 
-TEST_CASE("Disassemble half-word multiply and multiply accumulate instructions", "[arm][disassembler]") {
+TEST_CASE("Disassemble half-word multiply and multiply accumulate instructions",
+          "[arm][disassembler]") {
     REQUIRE(DisassembleArm(0xE1003281) == "smlabb r0, r1, r2, r3");
     REQUIRE(DisassembleArm(0xE10032C1) == "smlabt r0, r1, r2, r3");
     REQUIRE(DisassembleArm(0xE10032A1) == "smlatb r0, r1, r2, r3");

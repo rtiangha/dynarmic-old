@@ -10,10 +10,10 @@
 
 namespace Dynarmic::FP {
 
-template<typename FPT>
+template <typename FPT>
 struct FPInfo {};
 
-template<>
+template <>
 struct FPInfo<u16> {
     static constexpr size_t total_width = 16;
     static constexpr size_t exponent_width = 5;
@@ -47,7 +47,7 @@ struct FPInfo<u16> {
     }
 };
 
-template<>
+template <>
 struct FPInfo<u32> {
     static constexpr size_t total_width = 32;
     static constexpr size_t exponent_width = 8;
@@ -81,7 +81,7 @@ struct FPInfo<u32> {
     }
 };
 
-template<>
+template <>
 struct FPInfo<u64> {
     static constexpr size_t total_width = 64;
     static constexpr size_t exponent_width = 11;
@@ -117,7 +117,7 @@ struct FPInfo<u64> {
 
 /// value = (sign ? -1 : +1) * 2^exponent * value
 /// @note We do not handle denormals. Denormals will static_assert.
-template<typename FPT, bool sign, int exponent, FPT value>
+template <typename FPT, bool sign, int exponent, FPT value>
 constexpr FPT FPValue() {
     if constexpr (value == 0) {
         return FPInfo<FPT>::Zero(sign);
@@ -128,11 +128,14 @@ constexpr FPT FPValue() {
     constexpr int offset = point_position - highest_bit;
     constexpr int normalized_exponent = exponent - offset + point_position;
     static_assert(offset >= 0);
-    static_assert(normalized_exponent >= FPInfo<FPT>::exponent_min && normalized_exponent <= FPInfo<FPT>::exponent_max);
+    static_assert(normalized_exponent >= FPInfo<FPT>::exponent_min &&
+                  normalized_exponent <= FPInfo<FPT>::exponent_max);
 
     constexpr FPT mantissa = (value << offset) & FPInfo<FPT>::mantissa_mask;
-    constexpr FPT biased_exponent = static_cast<FPT>(normalized_exponent + FPInfo<FPT>::exponent_bias);
-    return FPT(FPInfo<FPT>::Zero(sign) | mantissa | (biased_exponent << FPInfo<FPT>::explicit_mantissa_width));
+    constexpr FPT biased_exponent =
+        static_cast<FPT>(normalized_exponent + FPInfo<FPT>::exponent_bias);
+    return FPT(FPInfo<FPT>::Zero(sign) | mantissa |
+               (biased_exponent << FPInfo<FPT>::explicit_mantissa_width));
 }
 
 } // namespace Dynarmic::FP

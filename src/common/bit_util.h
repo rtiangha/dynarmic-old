@@ -16,7 +16,7 @@
 namespace Dynarmic::Common {
 
 /// The size of a type in terms of bits
-template<typename T>
+template <typename T>
 constexpr size_t BitSize() {
     return sizeof(T) * CHAR_BIT;
 }
@@ -30,10 +30,11 @@ constexpr T Ones(size_t count) {
 }
 
 /// Extract bits [begin_bit, end_bit] inclusive from value of type T.
-template<size_t begin_bit, size_t end_bit, typename T>
+template <size_t begin_bit, size_t end_bit, typename T>
 constexpr T Bits(const T value) {
-    static_assert(begin_bit <= end_bit,
-                  "invalid bit range (position of beginning bit cannot be greater than that of end bit)");
+    static_assert(
+        begin_bit <= end_bit,
+        "invalid bit range (position of beginning bit cannot be greater than that of end bit)");
     static_assert(begin_bit < BitSize<T>(), "begin_bit must be smaller than size of T");
     static_assert(end_bit < BitSize<T>(), "end_bit must be smaller than size of T");
 
@@ -41,10 +42,11 @@ constexpr T Bits(const T value) {
 }
 
 /// Create a mask of type T for bits [begin_bit, end_bit] inclusive.
-template<size_t begin_bit, size_t end_bit, typename T>
+template <size_t begin_bit, size_t end_bit, typename T>
 constexpr T Mask() {
-    static_assert(begin_bit <= end_bit,
-                  "invalid bit range (position of beginning bit cannot be greater than that of end bit)");
+    static_assert(
+        begin_bit <= end_bit,
+        "invalid bit range (position of beginning bit cannot be greater than that of end bit)");
     static_assert(begin_bit < BitSize<T>(), "begin_bit must be smaller than size of T");
     static_assert(end_bit < BitSize<T>(), "end_bit must be smaller than size of T");
 
@@ -52,23 +54,24 @@ constexpr T Mask() {
 }
 
 /// Clears bits [begin_bit, end_bit] inclusive of value of type T.
-template<size_t begin_bit, size_t end_bit, typename T>
+template <size_t begin_bit, size_t end_bit, typename T>
 constexpr T ClearBits(const T value) {
     return value & ~Mask<begin_bit, end_bit, T>();
 }
 
 /// Modifies bits [begin_bit, end_bit] inclusive of value of type T.
-template<size_t begin_bit, size_t end_bit, typename T>
+template <size_t begin_bit, size_t end_bit, typename T>
 constexpr T ModifyBits(const T value, const T new_bits) {
-    return ClearBits<begin_bit, end_bit, T>(value) | ((new_bits << begin_bit) & Mask<begin_bit, end_bit, T>());
+    return ClearBits<begin_bit, end_bit, T>(value) |
+           ((new_bits << begin_bit) & Mask<begin_bit, end_bit, T>());
 }
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4554)
+#pragma warning(disable : 4554)
 #endif
 /// Extracts a single bit at bit_position from value of type T.
-template<typename T>
+template <typename T>
 inline bool Bit(size_t bit_position, const T value) {
     ASSERT_MSG(bit_position < BitSize<T>(), "bit_position must be smaller than size of T");
 
@@ -76,7 +79,7 @@ inline bool Bit(size_t bit_position, const T value) {
 }
 
 /// Extracts a single bit at bit_position from value of type T.
-template<size_t bit_position, typename T>
+template <size_t bit_position, typename T>
 constexpr bool Bit(const T value) {
     static_assert(bit_position < BitSize<T>(), "bit_position must be smaller than size of T");
 
@@ -84,7 +87,7 @@ constexpr bool Bit(const T value) {
 }
 
 /// Clears a single bit at bit_position from value of type T.
-template<typename T>
+template <typename T>
 inline T ClearBit(size_t bit_position, const T value) {
     ASSERT_MSG(bit_position < BitSize<T>(), "bit_position must be smaller than size of T");
 
@@ -92,7 +95,7 @@ inline T ClearBit(size_t bit_position, const T value) {
 }
 
 /// Clears a single bit at bit_position from value of type T.
-template<size_t bit_position, typename T>
+template <size_t bit_position, typename T>
 constexpr T ClearBit(const T value) {
     static_assert(bit_position < BitSize<T>(), "bit_position must be smaller than size of T");
 
@@ -100,7 +103,7 @@ constexpr T ClearBit(const T value) {
 }
 
 /// Modifies a single bit at bit_position from value of type T.
-template<typename T>
+template <typename T>
 inline T ModifyBit(size_t bit_position, const T value, bool new_bit) {
     ASSERT_MSG(bit_position < BitSize<T>(), "bit_position must be smaller than size of T");
 
@@ -108,7 +111,7 @@ inline T ModifyBit(size_t bit_position, const T value, bool new_bit) {
 }
 
 /// Modifies a single bit at bit_position from value of type T.
-template<size_t bit_position, typename T>
+template <size_t bit_position, typename T>
 constexpr T ModifyBit(const T value, bool new_bit) {
     static_assert(bit_position < BitSize<T>(), "bit_position must be smaller than size of T");
 
@@ -119,7 +122,7 @@ constexpr T ModifyBit(const T value, bool new_bit) {
 #endif
 
 /// Sign-extends a value that has bit_count bits to the full bitwidth of type T.
-template<size_t bit_count, typename T>
+template <size_t bit_count, typename T>
 constexpr T SignExtend(const T value) {
     static_assert(bit_count <= BitSize<T>(), "bit_count larger than bitsize of T");
 
@@ -132,7 +135,7 @@ constexpr T SignExtend(const T value) {
 }
 
 /// Sign-extends a value that has bit_count bits to the full bitwidth of type T.
-template<typename T>
+template <typename T>
 inline T SignExtend(const size_t bit_count, const T value) {
     ASSERT_MSG(bit_count <= BitSize<T>(), "bit_count larger than bitsize of T");
 
@@ -215,21 +218,15 @@ constexpr u16 Swap16(u16 value) {
 }
 
 constexpr u32 Swap32(u32 value) {
-    return ((value & 0xFF000000U) >> 24) |
-           ((value & 0x00FF0000U) >>  8) |
-           ((value & 0x0000FF00U) <<  8) |
-           ((value & 0x000000FFU) << 24);
+    return ((value & 0xFF000000U) >> 24) | ((value & 0x00FF0000U) >> 8) |
+           ((value & 0x0000FF00U) << 8) | ((value & 0x000000FFU) << 24);
 }
 
 constexpr u64 Swap64(u64 value) {
-    return  ((value & 0xFF00000000000000ULL) >> 56) |
-            ((value & 0x00FF000000000000ULL) >> 40) |
-            ((value & 0x0000FF0000000000ULL) >> 24) |
-            ((value & 0x000000FF00000000ULL) >>  8) |
-            ((value & 0x00000000FF000000ULL) <<  8) |
-            ((value & 0x0000000000FF0000ULL) << 24) |
-            ((value & 0x000000000000FF00ULL) << 40) |
-            ((value & 0x00000000000000FFULL) << 56);
+    return ((value & 0xFF00000000000000ULL) >> 56) | ((value & 0x00FF000000000000ULL) >> 40) |
+           ((value & 0x0000FF0000000000ULL) >> 24) | ((value & 0x000000FF00000000ULL) >> 8) |
+           ((value & 0x00000000FF000000ULL) << 8) | ((value & 0x0000000000FF0000ULL) << 24) |
+           ((value & 0x000000000000FF00ULL) << 40) | ((value & 0x00000000000000FFULL) << 56);
 }
 
 } // namespace Dynarmic::Common

@@ -66,7 +66,6 @@ bool ArmTranslatorVisitor::arm_MUL(Cond cond, bool S, Reg d, Reg m, Reg n) {
     return true;
 }
 
-
 // SMLAL{S}<c> <RdLo>, <RdHi>, <Rn>, <Rm>
 bool ArmTranslatorVisitor::arm_SMLAL(Cond cond, bool S, Reg dHi, Reg dLo, Reg m, Reg n) {
     if (dLo == Reg::PC || dHi == Reg::PC || n == Reg::PC || m == Reg::PC) {
@@ -305,8 +304,10 @@ bool ArmTranslatorVisitor::arm_SMLAWy(Cond cond, Reg d, Reg a, Reg m, bool M, Re
     if (M) {
         m32 = ir.LogicalShiftRight(m32, ir.Imm8(16), ir.Imm1(0)).result;
     }
-    const IR::U64 m16 = ir.SignExtendWordToLong(ir.SignExtendHalfToWord(ir.LeastSignificantHalf(m32)));
-    const auto product = ir.LeastSignificantWord(ir.LogicalShiftRight(ir.Mul(n32, m16), ir.Imm8(16)));
+    const IR::U64 m16 =
+        ir.SignExtendWordToLong(ir.SignExtendHalfToWord(ir.LeastSignificantHalf(m32)));
+    const auto product =
+        ir.LeastSignificantWord(ir.LogicalShiftRight(ir.Mul(n32, m16), ir.Imm8(16)));
     const auto result_overflow = ir.AddWithCarry(product, ir.GetRegister(a), ir.Imm1(0));
 
     ir.SetRegister(d, result_overflow.result);
@@ -329,7 +330,8 @@ bool ArmTranslatorVisitor::arm_SMULWy(Cond cond, Reg d, Reg m, bool M, Reg n) {
     if (M) {
         m32 = ir.LogicalShiftRight(m32, ir.Imm8(16), ir.Imm1(0)).result;
     }
-    const IR::U64 m16 = ir.SignExtendWordToLong(ir.SignExtendHalfToWord(ir.LeastSignificantHalf(m32)));
+    const IR::U64 m16 =
+        ir.SignExtendWordToLong(ir.SignExtendHalfToWord(ir.LeastSignificantHalf(m32)));
     const auto result = ir.LogicalShiftRight(ir.Mul(n32, m16), ir.Imm8(16));
 
     ir.SetRegister(d, ir.LeastSignificantWord(result));

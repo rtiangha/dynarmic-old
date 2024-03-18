@@ -45,13 +45,15 @@ static_assert(bit_xor<lift_value<1>, lift_value<3>>::value == 2);
 
 static_assert(std::is_same_v<conjunction<std::true_type>, std::true_type>);
 static_assert(std::is_same_v<conjunction<std::true_type, lift_value<0>>, lift_value<0>>);
-static_assert(std::is_same_v<conjunction<std::true_type, lift_value<42>, std::true_type>, std::true_type>);
+static_assert(
+    std::is_same_v<conjunction<std::true_type, lift_value<42>, std::true_type>, std::true_type>);
 
 // disjunction
 
 static_assert(std::is_same_v<disjunction<std::true_type>, std::true_type>);
 static_assert(std::is_same_v<disjunction<std::false_type, lift_value<0>>, lift_value<0>>);
-static_assert(std::is_same_v<disjunction<std::false_type, lift_value<42>, std::true_type>, lift_value<42>>);
+static_assert(
+    std::is_same_v<disjunction<std::false_type, lift_value<42>, std::true_type>, lift_value<42>>);
 
 // lift_value
 
@@ -90,4 +92,5 @@ static_assert(std::is_same_v<value_cast<int, std::true_type>, std::integral_cons
 
 // value_equal
 
-static_assert(std::is_same_v<value_equal<std::true_type, std::integral_constant<int, 1>>, std::true_type>);
+static_assert(
+    std::is_same_v<value_equal<std::true_type, std::integral_constant<int, 1>>, std::true_type>);

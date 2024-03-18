@@ -19,7 +19,7 @@
 
 namespace Dynarmic::Common {
 
-template <typename Function, typename ...Values>
+template <typename Function, typename... Values>
 inline auto GenerateLookupTableFromList(Function f, mp::list<Values...>) {
 #ifdef _MSC_VER
     using PairT = std::invoke_result_t<Function, mp::head<mp::list<Values...>>>;

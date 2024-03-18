@@ -26,10 +26,12 @@ static bool CondCanContinue(ConditionalState cond_state, const A32::IREmitter& i
         return true;
 
     // TODO: This is more conservative than necessary.
-    return std::all_of(ir.block.begin(), ir.block.end(), [](const IR::Inst& inst) { return !inst.WritesToCPSR(); });
+    return std::all_of(ir.block.begin(), ir.block.end(),
+                       [](const IR::Inst& inst) { return !inst.WritesToCPSR(); });
 }
 
-IR::Block TranslateArm(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code, const TranslationOptions& options) {
+IR::Block TranslateArm(LocationDescriptor descriptor, MemoryReadCodeFuncType memory_read_code,
+                       const TranslationOptions& options) {
     const bool single_step = descriptor.SingleStepping();
 
     IR::Block block{descriptor};
@@ -58,7 +60,8 @@ IR::Block TranslateArm(LocationDescriptor descriptor, MemoryReadCodeFuncType mem
         block.CycleCount()++;
     } while (should_continue && CondCanContinue(visitor.cond_state, visitor.ir) && !single_step);
 
-    if (visitor.cond_state == ConditionalState::Translating || visitor.cond_state == ConditionalState::Trailing || single_step) {
+    if (visitor.cond_state == ConditionalState::Translating ||
+        visitor.cond_state == ConditionalState::Trailing || single_step) {
         if (should_continue) {
             if (single_step) {
                 visitor.ir.SetTerm(IR::Term::LinkBlock{visitor.ir.current_location});
@@ -75,7 +78,8 @@ IR::Block TranslateArm(LocationDescriptor descriptor, MemoryReadCodeFuncType mem
     return block;
 }
 
-bool TranslateSingleArmInstruction(IR::Block& block, LocationDescriptor descriptor, u32 arm_instruction) {
+bool TranslateSingleArmInstruction(IR::Block& block, LocationDescriptor descriptor,
+                                   u32 arm_instruction) {
     ArmTranslatorVisitor visitor{block, descriptor, {}};
 
     // TODO: Proper cond handling
@@ -190,7 +194,8 @@ IR::UAny ArmTranslatorVisitor::I(size_t bitsize, u64 value) {
     }
 }
 
-IR::ResultAndCarry<IR::U32> ArmTranslatorVisitor::EmitImmShift(IR::U32 value, ShiftType type, Imm<5> imm5, IR::U1 carry_in) {
+IR::ResultAndCarry<IR::U32> ArmTranslatorVisitor::EmitImmShift(IR::U32 value, ShiftType type,
+                                                               Imm<5> imm5, IR::U1 carry_in) {
     u8 imm5_value = imm5.ZeroExtend<u8>();
     switch (type) {
     case ShiftType::LSL:
@@ -211,7 +216,8 @@ IR::ResultAndCarry<IR::U32> ArmTranslatorVisitor::EmitImmShift(IR::U32 value, Sh
     UNREACHABLE();
 }
 
-IR::ResultAndCarry<IR::U32> ArmTranslatorVisitor::EmitRegShift(IR::U32 value, ShiftType type, IR::U8 amount, IR::U1 carry_in) {
+IR::ResultAndCarry<IR::U32> ArmTranslatorVisitor::EmitRegShift(IR::U32 value, ShiftType type,
+                                                               IR::U8 amount, IR::U1 carry_in) {
     switch (type) {
     case ShiftType::LSL:
         return ir.LogicalShiftLeft(value, amount, carry_in);

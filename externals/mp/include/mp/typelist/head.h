@@ -9,10 +9,10 @@ namespace mp {
 
 namespace detail {
 
-template<class L>
+template <class L>
 struct head_impl;
 
-template<template<class...> class LT, class E1, class... Es>
+template <template <class...> class LT, class E1, class... Es>
 struct head_impl<LT<E1, Es...>> {
     using type = E1;
 };
@@ -20,7 +20,7 @@ struct head_impl<LT<E1, Es...>> {
 } // namespace detail
 
 /// Gets the tail/cdr/all-but-the-first-element of list L
-template<class L>
+template <class L>
 using head = typename detail::head_impl<L>::type;
 
 } // namespace mp

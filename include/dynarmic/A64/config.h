@@ -23,17 +23,21 @@ enum class Exception {
     UnallocatedEncoding,
     /// An UndefinedFault occured due to executing instruction containing a reserved value
     ReservedValue,
-    /// An unpredictable instruction is to be executed. Implementation-defined behaviour should now happen.
+    /// An unpredictable instruction is to be executed. Implementation-defined behaviour should now
+    /// happen.
     /// This behaviour is up to the user of this library to define.
     /// Note: Constraints on unpredictable behaviour are specified in the ARMv8 ARM.
     UnpredictableInstruction,
     /// A WFI instruction was executed. You may now enter a low-power state. (Hint instruction.)
     WaitForInterrupt,
-    /// A WFE instruction was executed. You may now enter a low-power state if the event register is clear. (Hint instruction.)
+    /// A WFE instruction was executed. You may now enter a low-power state if the event register is
+    /// clear. (Hint instruction.)
     WaitForEvent,
-    /// A SEV instruction was executed. The event register of all PEs should be set. (Hint instruction.)
+    /// A SEV instruction was executed. The event register of all PEs should be set. (Hint
+    /// instruction.)
     SendEvent,
-    /// A SEVL instruction was executed. The event register of the current PE should be set. (Hint instruction.)
+    /// A SEVL instruction was executed. The event register of the current PE should be set. (Hint
+    /// instruction.)
     SendEventLocal,
     /// A YIELD instruction was executed. (Hint instruction.)
     Yield,
@@ -67,7 +71,9 @@ struct UserCallbacks {
 
     // All reads through this callback are 4-byte aligned.
     // Memory must be interpreted as little endian.
-    virtual std::uint32_t MemoryReadCode(VAddr vaddr) { return MemoryRead32(vaddr); }
+    virtual std::uint32_t MemoryReadCode(VAddr vaddr) {
+        return MemoryRead32(vaddr);
+    }
 
     // Reads through these callbacks may not be aligned.
     virtual std::uint8_t MemoryRead8(VAddr vaddr) = 0;
@@ -84,17 +90,33 @@ struct UserCallbacks {
     virtual void MemoryWrite128(VAddr vaddr, Vector value) = 0;
 
     // Writes through these callbacks may not be aligned.
-    virtual bool MemoryWriteExclusive8(VAddr /*vaddr*/, std::uint8_t /*value*/, std::uint8_t /*expected*/) { return false; }
-    virtual bool MemoryWriteExclusive16(VAddr /*vaddr*/, std::uint16_t /*value*/, std::uint16_t /*expected*/) { return false; }
-    virtual bool MemoryWriteExclusive32(VAddr /*vaddr*/, std::uint32_t /*value*/, std::uint32_t /*expected*/) { return false; }
-    virtual bool MemoryWriteExclusive64(VAddr /*vaddr*/, std::uint64_t /*value*/, std::uint64_t /*expected*/) { return false; }
-    virtual bool MemoryWriteExclusive128(VAddr /*vaddr*/, Vector /*value*/, Vector /*expected*/) { return false; }
+    virtual bool MemoryWriteExclusive8(VAddr /*vaddr*/, std::uint8_t /*value*/,
+                                       std::uint8_t /*expected*/) {
+        return false;
+    }
+    virtual bool MemoryWriteExclusive16(VAddr /*vaddr*/, std::uint16_t /*value*/,
+                                        std::uint16_t /*expected*/) {
+        return false;
+    }
+    virtual bool MemoryWriteExclusive32(VAddr /*vaddr*/, std::uint32_t /*value*/,
+                                        std::uint32_t /*expected*/) {
+        return false;
+    }
+    virtual bool MemoryWriteExclusive64(VAddr /*vaddr*/, std::uint64_t /*value*/,
+                                        std::uint64_t /*expected*/) {
+        return false;
+    }
+    virtual bool MemoryWriteExclusive128(VAddr /*vaddr*/, Vector /*value*/, Vector /*expected*/) {
+        return false;
+    }
 
     // If this callback returns true, the JIT will assume MemoryRead* callbacks will always
     // return the same value at any point in time for this vaddr. The JIT may use this information
     // in optimizations.
     // A conservative implementation that always returns false is safe.
-    virtual bool IsReadOnlyMemory(VAddr /*vaddr*/) { return false; }
+    virtual bool IsReadOnlyMemory(VAddr /*vaddr*/) {
+        return false;
+    }
 
     /// The interpreter must execute exactly num_instructions starting from PC.
     virtual void InterpreterFallback(VAddr pc, size_t num_instructions) = 0;
@@ -193,7 +215,6 @@ struct UserConfig {
     /// Determines if the above option only triggers when the misalignment straddles a
     /// page boundary.
     bool only_detect_misalignment_via_page_table_on_page_boundary = false;
-
 
     /// This option relates to translation. Generally when we run into an unpredictable
     /// instruction the ExceptionRaised callback is called. If this is true, we define

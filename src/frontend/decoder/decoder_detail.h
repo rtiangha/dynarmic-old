@@ -22,10 +22,10 @@ namespace detail {
  *
  * @tparam MatcherT The type of the Matcher to use.
  */
-template<class MatcherT>
+template <class MatcherT>
 struct detail {
 private:
-    using opcode_type  = typename MatcherT::opcode_type;
+    using opcode_type = typename MatcherT::opcode_type;
     using visitor_type = typename MatcherT::visitor_type;
 
     static constexpr size_t opcode_bitsize = Common::BitSize<opcode_type>();
@@ -61,7 +61,7 @@ private:
      * A '-' in a bitstring indicates that we don't care about that value.
      * An argument is specified by a continuous string of the same character.
      */
-    template<size_t N>
+    template <size_t N>
     static auto GetArgInfo(const char* const bitstring) {
         const auto one = static_cast<opcode_type>(1);
         std::array<opcode_type, N> masks = {};
@@ -91,7 +91,7 @@ private:
             }
         }
 
-        ASSERT(std::all_of(masks.begin(), masks.end(), [](auto m){ return m != 0; }));
+        ASSERT(std::all_of(masks.begin(), masks.end(), [](auto m) { return m != 0; }));
 
         return std::make_tuple(masks, shifts);
     }
@@ -101,43 +101,47 @@ private:
      * the provided arg_masks and arg_shifts. The Visitor member function to call is provided as a
      * template argument.
      */
-    template<typename FnT>
+    template <typename FnT>
     struct VisitorCaller;
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4800) // forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning(disable : 4800) // forcing value to bool 'true' or 'false' (performance warning)
 #endif
-    template<typename Visitor, typename ...Args, typename CallRetT>
-    struct VisitorCaller<CallRetT(Visitor::*)(Args...)> {
-        template<size_t ...iota>
+    template <typename Visitor, typename... Args, typename CallRetT>
+    struct VisitorCaller<CallRetT (Visitor::*)(Args...)> {
+        template <size_t... iota>
         static auto Make(std::integer_sequence<size_t, iota...>,
-                         CallRetT (Visitor::* const fn)(Args...),
+                         CallRetT (Visitor::*const fn)(Args...),
                          const std::array<opcode_type, sizeof...(iota)> arg_masks,
                          const std::array<size_t, sizeof...(iota)> arg_shifts) {
-            static_assert(std::is_same_v<visitor_type, Visitor>, "Member function is not from Matcher's Visitor");
+            static_assert(std::is_same_v<visitor_type, Visitor>,
+                          "Member function is not from Matcher's Visitor");
             return [fn, arg_masks, arg_shifts](Visitor& v, opcode_type instruction) {
                 (void)instruction;
                 (void)arg_masks;
                 (void)arg_shifts;
-                return (v.*fn)(static_cast<Args>((instruction & arg_masks[iota]) >> arg_shifts[iota])...);
+                return (v.*fn)(
+                    static_cast<Args>((instruction & arg_masks[iota]) >> arg_shifts[iota])...);
             };
         }
     };
 
-    template<typename Visitor, typename ...Args, typename CallRetT>
-    struct VisitorCaller<CallRetT(Visitor::*)(Args...) const> {
-        template<size_t ...iota>
+    template <typename Visitor, typename... Args, typename CallRetT>
+    struct VisitorCaller<CallRetT (Visitor::*)(Args...) const> {
+        template <size_t... iota>
         static auto Make(std::integer_sequence<size_t, iota...>,
-                         CallRetT (Visitor::* const fn)(Args...) const,
+                         CallRetT (Visitor::*const fn)(Args...) const,
                          const std::array<opcode_type, sizeof...(iota)> arg_masks,
                          const std::array<size_t, sizeof...(iota)> arg_shifts) {
-            static_assert(std::is_same_v<visitor_type, const Visitor>, "Member function is not from Matcher's Visitor");
+            static_assert(std::is_same_v<visitor_type, const Visitor>,
+                          "Member function is not from Matcher's Visitor");
             return [fn, arg_masks, arg_shifts](const Visitor& v, opcode_type instruction) {
                 (void)instruction;
                 (void)arg_masks;
                 (void)arg_shifts;
-                return (v.*fn)(static_cast<Args>((instruction & arg_masks[iota]) >> arg_shifts[iota])...);
+                return (v.*fn)(
+                    static_cast<Args>((instruction & arg_masks[iota]) >> arg_shifts[iota])...);
             };
         }
     };
@@ -150,7 +154,7 @@ public:
      * Creates a matcher that can match and parse instructions based on bitstring.
      * See also: GetMaskAndExpect and GetArgInfo for format of bitstring.
      */
-    template<typename FnT>
+    template <typename FnT>
     static auto GetMatcher(FnT fn, const char* const name, const char* const bitstring) {
         constexpr size_t args_count = mp::parameter_count_v<FnT>;
         using Iota = std::make_index_sequence<args_count>;

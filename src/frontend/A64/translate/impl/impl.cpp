@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: 0BSD
  */
 
-#include "frontend/A64/translate/impl/impl.h"
 #include "common/bit_util.h"
+#include "frontend/A64/translate/impl/impl.h"
 #include "frontend/ir/terminal.h"
 
 namespace Dynarmic::A64 {
@@ -37,7 +37,9 @@ bool TranslatorVisitor::RaiseException(Exception exception) {
     return false;
 }
 
-std::optional<TranslatorVisitor::BitMasks> TranslatorVisitor::DecodeBitMasks(bool immN, Imm<6> imms, Imm<6> immr, bool immediate) {
+std::optional<TranslatorVisitor::BitMasks> TranslatorVisitor::DecodeBitMasks(bool immN, Imm<6> imms,
+                                                                             Imm<6> immr,
+                                                                             bool immediate) {
     const int len = Common::HighestSetBit((immN ? 1 << 6 : 0) | (imms.ZeroExtend() ^ 0b111111));
     if (len < 1) {
         return std::nullopt;
@@ -233,7 +235,8 @@ IR::UAnyU128 TranslatorVisitor::Mem(IR::U64 address, size_t bytesize, IR::AccTyp
     }
 }
 
-void TranslatorVisitor::Mem(IR::U64 address, size_t bytesize, IR::AccType /*acc_type*/, IR::UAnyU128 value) {
+void TranslatorVisitor::Mem(IR::U64 address, size_t bytesize, IR::AccType /*acc_type*/,
+                            IR::UAnyU128 value) {
     switch (bytesize) {
     case 1:
         ir.WriteMemory8(address, value);
@@ -255,7 +258,8 @@ void TranslatorVisitor::Mem(IR::U64 address, size_t bytesize, IR::AccType /*acc_
     }
 }
 
-IR::UAnyU128 TranslatorVisitor::ExclusiveMem(IR::U64 address, size_t bytesize, IR::AccType /*acctype*/) {
+IR::UAnyU128 TranslatorVisitor::ExclusiveMem(IR::U64 address, size_t bytesize,
+                                             IR::AccType /*acctype*/) {
     switch (bytesize) {
     case 1:
         return ir.ExclusiveReadMemory8(address);
@@ -272,7 +276,8 @@ IR::UAnyU128 TranslatorVisitor::ExclusiveMem(IR::U64 address, size_t bytesize, I
     }
 }
 
-IR::U32 TranslatorVisitor::ExclusiveMem(IR::U64 address, size_t bytesize, IR::AccType /*acctype*/, IR::UAnyU128 value) {
+IR::U32 TranslatorVisitor::ExclusiveMem(IR::U64 address, size_t bytesize, IR::AccType /*acctype*/,
+                                        IR::UAnyU128 value) {
     switch (bytesize) {
     case 1:
         return ir.ExclusiveWriteMemory8(address, value);

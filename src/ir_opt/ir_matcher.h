@@ -97,7 +97,9 @@ public:
 
 private:
     template <size_t I>
-    static auto MatchArgs(const IR::Inst& inst) -> std::optional<mp::apply<mp::concat, mp::prepend<mp::drop<I, mp::list<typename Args::ReturnType...>>, std::tuple<>>>> {
+    static auto MatchArgs(const IR::Inst& inst) -> std::optional<
+        mp::apply<mp::concat,
+                  mp::prepend<mp::drop<I, mp::list<typename Args::ReturnType...>>, std::tuple<>>>> {
         if constexpr (I >= sizeof...(Args)) {
             return std::tuple();
         } else {

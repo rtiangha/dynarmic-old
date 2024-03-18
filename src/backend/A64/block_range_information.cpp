@@ -15,7 +15,8 @@
 namespace Dynarmic::BackendA64 {
 
 template <typename ProgramCounterType>
-void BlockRangeInformation<ProgramCounterType>::AddRange(boost::icl::discrete_interval<ProgramCounterType> range, IR::LocationDescriptor location) {
+void BlockRangeInformation<ProgramCounterType>::AddRange(
+    boost::icl::discrete_interval<ProgramCounterType> range, IR::LocationDescriptor location) {
     block_ranges.add(std::make_pair(range, std::set<IR::LocationDescriptor>{location}));
 }
 
@@ -25,12 +26,14 @@ void BlockRangeInformation<ProgramCounterType>::ClearCache() {
 }
 
 template <typename ProgramCounterType>
-std::unordered_set<IR::LocationDescriptor> BlockRangeInformation<ProgramCounterType>::InvalidateRanges(const boost::icl::interval_set<ProgramCounterType>& ranges) {
+std::unordered_set<IR::LocationDescriptor>
+BlockRangeInformation<ProgramCounterType>::InvalidateRanges(
+    const boost::icl::interval_set<ProgramCounterType>& ranges) {
     std::unordered_set<IR::LocationDescriptor> erase_locations;
     for (auto invalidate_interval : ranges) {
         auto pair = block_ranges.equal_range(invalidate_interval);
         for (auto it = pair.first; it != pair.second; ++it) {
-            for (const auto &descriptor : it->second) {
+            for (const auto& descriptor : it->second) {
                 erase_locations.insert(descriptor);
             }
         }

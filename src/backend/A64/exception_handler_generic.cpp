@@ -8,8 +8,7 @@
 
 namespace Dynarmic::BackendA64 {
 
-struct ExceptionHandler::Impl final {
-};
+struct ExceptionHandler::Impl final {};
 
 ExceptionHandler::ExceptionHandler() = default;
 ExceptionHandler::~ExceptionHandler() = default;

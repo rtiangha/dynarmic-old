@@ -88,9 +88,9 @@ protected:
     const void* write_memory_32;
     const void* write_memory_64;
     void GenMemoryAccessors();
-    template<typename T>
+    template <typename T>
     void ReadMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr callback_fn);
-    template<typename T>
+    template <typename T>
     void WriteMemory(A32EmitContext& ctx, IR::Inst* inst, const CodePtr callback_fn);
 
     const void* terminal_handler_pop_rsb_hint;
@@ -117,21 +117,33 @@ protected:
     std::unordered_map<CodePtr, FastmemPatchInfo> fastmem_patch_info;
 
     // Terminal instruction emitters
-    void EmitSetUpperLocationDescriptor(IR::LocationDescriptor new_location, IR::LocationDescriptor old_location);
-    void EmitTerminalImpl(IR::Term::Interpret terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::ReturnToDispatch terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::PopRSBHint terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::FastDispatchHint terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::CheckBit terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
-    void EmitTerminalImpl(IR::Term::CheckHalt terminal, IR::LocationDescriptor initial_location, bool is_single_step) override;
+    void EmitSetUpperLocationDescriptor(IR::LocationDescriptor new_location,
+                                        IR::LocationDescriptor old_location);
+    void EmitTerminalImpl(IR::Term::Interpret terminal, IR::LocationDescriptor initial_location,
+                          bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::ReturnToDispatch terminal,
+                          IR::LocationDescriptor initial_location, bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::LinkBlock terminal, IR::LocationDescriptor initial_location,
+                          bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::LinkBlockFast terminal, IR::LocationDescriptor initial_location,
+                          bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::PopRSBHint terminal, IR::LocationDescriptor initial_location,
+                          bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::FastDispatchHint terminal,
+                          IR::LocationDescriptor initial_location, bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::If terminal, IR::LocationDescriptor initial_location,
+                          bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::CheckBit terminal, IR::LocationDescriptor initial_location,
+                          bool is_single_step) override;
+    void EmitTerminalImpl(IR::Term::CheckHalt terminal, IR::LocationDescriptor initial_location,
+                          bool is_single_step) override;
 
     // Patching
     void Unpatch(const IR::LocationDescriptor& target_desc) override;
-    void EmitPatchJg(const IR::LocationDescriptor& target_desc, CodePtr target_code_ptr = nullptr) override;
-    void EmitPatchJmp(const IR::LocationDescriptor& target_desc, CodePtr target_code_ptr = nullptr) override;
+    void EmitPatchJg(const IR::LocationDescriptor& target_desc,
+                     CodePtr target_code_ptr = nullptr) override;
+    void EmitPatchJmp(const IR::LocationDescriptor& target_desc,
+                      CodePtr target_code_ptr = nullptr) override;
     void EmitPatchMovX0(CodePtr target_code_ptr = nullptr) override;
 };
 

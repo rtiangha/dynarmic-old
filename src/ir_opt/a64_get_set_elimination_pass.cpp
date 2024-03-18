@@ -18,9 +18,14 @@ void A64GetSetElimination(IR::Block& block) {
     using Iterator = IR::Block::iterator;
 
     enum class TrackingType {
-        W, X,
-        S, D, Q,
-        SP, NZCV, NZCVRaw,
+        W,
+        X,
+        S,
+        D,
+        Q,
+        SP,
+        NZCV,
+        NZCVRaw,
     };
     struct RegisterInfo {
         IR::Value register_value;
@@ -33,7 +38,8 @@ void A64GetSetElimination(IR::Block& block) {
     RegisterInfo sp_info;
     RegisterInfo nzcv_info;
 
-    const auto do_set = [&block](RegisterInfo& info, IR::Value value, Iterator set_inst, TrackingType tracking_type) {
+    const auto do_set = [&block](RegisterInfo& info, IR::Value value, Iterator set_inst,
+                                 TrackingType tracking_type) {
         if (info.set_instruction_present) {
             info.last_set_instruction->Invalidate();
             block.Instructions().erase(info.last_set_instruction);

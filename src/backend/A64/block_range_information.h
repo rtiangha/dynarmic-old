@@ -18,9 +18,11 @@ namespace Dynarmic::BackendA64 {
 template <typename ProgramCounterType>
 class BlockRangeInformation {
 public:
-    void AddRange(boost::icl::discrete_interval<ProgramCounterType> range, IR::LocationDescriptor location);
+    void AddRange(boost::icl::discrete_interval<ProgramCounterType> range,
+                  IR::LocationDescriptor location);
     void ClearCache();
-    std::unordered_set<IR::LocationDescriptor> InvalidateRanges(const boost::icl::interval_set<ProgramCounterType>& ranges);
+    std::unordered_set<IR::LocationDescriptor> InvalidateRanges(
+        const boost::icl::interval_set<ProgramCounterType>& ranges);
 
 private:
     boost::icl::interval_map<ProgramCounterType, std::set<IR::LocationDescriptor>> block_ranges;
